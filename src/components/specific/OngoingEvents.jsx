@@ -8,7 +8,7 @@ function OngoingEvents() {
   const { events, loading, getAllEvents } = useContext(EventContext);
 
   useEffect(() => {
-    getAllEvents(); // Fetch events when the component mounts
+    getAllEvents();
   }, [getAllEvents]);
 
   const handleCardClick = (id) => {
@@ -29,7 +29,7 @@ function OngoingEvents() {
       <h2 className="text-white  text-3xl font-bold text-center mb-8">
         Ongoing Events
       </h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 p-4 gap-6">
         {events.map((event, index) => (
           <div
             key={index}
@@ -41,7 +41,7 @@ function OngoingEvents() {
             <img
               src={event.img}
               alt={event.title}
-              className="w-full p-2 rounded-3xl h-36  md:h-44 lg:h-48 object-cover"
+              className="w-full p-2 rounded-3xl h-40 md:h-44 lg:h-48 object-cover"
             />
             <div className="flex flex-col pl-4 pr-4 flex-grow">
               <h3 className="text-sm md:text-[16px] font-semibold">

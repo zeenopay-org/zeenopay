@@ -9,7 +9,7 @@ function FeatureEvents() {
   const { events, loading, getAllEvents } = useContext(EventContext);
 
   useEffect(() => {
-    getAllEvents(); // Fetch events when the component mounts
+    getAllEvents();
   }, [getAllEvents]);
 
   const handleCardClick = (id) => {
@@ -22,6 +22,11 @@ function FeatureEvents() {
       top: 0,
       behavior: "smooth",
     });
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
   };
 
   const settings = {
@@ -66,7 +71,7 @@ function FeatureEvents() {
                 {event.org}
               </p>
               <div className="flex justify-between items-center mt-auto">
-                <p className="flex items-center text-xs md:text-xsm text-gray-100">
+                <p className="flex items-center text-xs md:text-xs text-gray-100">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
@@ -81,9 +86,9 @@ function FeatureEvents() {
                       d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                     />
                   </svg>
-                  {event.finaldate}
+                  {formatDate(event.finaldate)}
                 </p>
-                <button className="bg-blue-600 hover:bg-blue-500 text-white text-sm md:text-sm px-3 py-[6px] my-4 rounded-full">
+                <button className="bg-blue-600 hover:bg-blue-500 text-white text-xs  md:text-xm px-3 py-[6px] my-4 rounded-full">
                   Get Started
                 </button>
               </div>

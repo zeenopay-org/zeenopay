@@ -1,31 +1,85 @@
 import React, { useContext, useEffect, useState } from "react";
 import ProfileCard from "./ProfileCard";
-import { GiMoneyStack } from "react-icons/gi";
 import { FaRupeeSign } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 import { EventContext } from "../../EventProvider";
 
 export default function VotingComponent() {
-  const [amount, setAmount] = useState(0);
-  const [totalVotes, setTotalVotes] = useState(0);
-  const [contestant, setContestant] = useState(null);
   const { id } = useParams();
-  const { event, getContestant } = useContext(EventContext);
+  const {
+    event,
+    getContestant,
+    initiatePayment,
+    generateIntentId,
+    paymentUrl,
+    redirectToPaymentPage,
+  } = useContext(EventContext);
 
-  useEffect(() => {
-    async function fetchContestant() {
-      const data = await getContestant(id);
-      setContestant(data);
-    }
-    fetchContestant();
-  }, [getContestant, id]);
+  const [formData, setFormData] = useState({
+    intentId: 0,
+    name: "",
+    phone: "",
+    email: "",
+    votes: 0,
+    amount: 0,
+  });
 
-  const [votes, setVotes] = useState(0);
   const votePrice = 10;
   const voteOptions = [25, 50, 100, 500, 1000, 2500];
 
+  // Generate Intent ID once on component mount
+  useEffect(() => {
+    setFormData((prevData) => ({
+      ...prevData,
+      intentId: generateIntentId(),
+    }));
+  }, [generateIntentId]);
+
+  // Fetch contestant data
+  useEffect(() => {
+    const fetchContestant = async () => {
+      await getContestant(id);
+    };
+    fetchContestant();
+  }, [getContestant, id]);
+
+  // Handle vote change
   const handleVoteChange = (value) => {
-    setVotes(Math.max(10, Math.min(15000, value))); // Min 10, Max 15000
+    const updatedVotes = Math.max(10, Math.min(15000, value)); // Min 10, Max 15000
+    const calculatedAmount = updatedVotes * votePrice;
+
+    setFormData((prevData) => ({
+      ...prevData,
+      votes: updatedVotes,
+      amount: calculatedAmount,
+    }));
+  };
+
+  // Handle input field change
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
+  // Handle form submission to initiate payment
+  const handleProceedToPay = async (e) => {
+    e.preventDefault();
+
+    const { name, phone, email, amount } = formData;
+    if (!name || !phone || !email || !amount) {
+      alert("Name, Phone, Amount, and Email are required.");
+      return;
+    }
+
+    console.log("form", formData);
+    await initiatePayment(formData.intentId, amount, name, email, phone);
+
+    if (paymentUrl) {
+      redirectToPaymentPage(paymentUrl);
+    }
   };
 
   return (
@@ -41,7 +95,7 @@ export default function VotingComponent() {
         </div>
       </div>
       <div className="mt-60 flex flex-col items-center justify-center">
-        <h1 className="text-xl  md:text-2xl font-semibold">{event.title}</h1>
+        <h1 className="text-xl md:text-2xl font-semibold">{event.title}</h1>
         <p className="text-gray-400 mt-1">Voting Closed!</p>
 
         {/* Voting Options */}
@@ -64,10 +118,11 @@ export default function VotingComponent() {
         <p className="mt-2 text-gray-400">
           Min 10 votes & Max 15000 votes. One vote = Rs 10.0
         </p>
+
         {/* Custom Vote Input */}
         <div className="mt-6 w-full max-w-md bg-[#121c3d] border border-gray-600 p-4 rounded-lg flex items-center justify-between">
           <button
-            onClick={() => handleVoteChange(votes - 1)}
+            onClick={() => handleVoteChange(formData.votes - 1)}
             className="text-2xl text-gray-300 px-4"
           >
             -
@@ -75,13 +130,13 @@ export default function VotingComponent() {
           <input
             type="number"
             className="bg-transparent text-center text-white text-lg outline-none w-full"
-            value={votes}
+            value={formData.votes}
             onChange={(e) => handleVoteChange(Number(e.target.value))}
             min="10"
             max="15000"
           />
           <button
-            onClick={() => handleVoteChange(votes + 1)}
+            onClick={() => handleVoteChange(formData.votes + 1)}
             className="text-2xl text-gray-300 px-4"
           >
             +
@@ -92,21 +147,35 @@ export default function VotingComponent() {
         <p className="mt-4 text-lg">
           Total amount:{" "}
           <span className="text-blue-400 font-semibold">
-            Rs {votes * votePrice}
+            Rs {formData.amount}
           </span>
         </p>
 
-        {/* Name & Phone Input */}
+        {/* Name, Phone & Email Input */}
         <div className="mt-6 w-full max-w-md flex flex-col gap-4">
           <input
             type="text"
+            name="name"
             placeholder="Name (Voter)"
-            className="p-3 bg-[#121c3d] rounded-lg border border-gray-600  text-white w-full outline-none"
+            className="p-3 bg-[#121c3d] rounded-lg border border-gray-600 text-white w-full outline-none"
+            value={formData.name}
+            onChange={handleInputChange}
           />
           <input
             type="tel"
+            name="phone"
             placeholder="Phone (Voter)"
-            className="p-3 bg-[#121c3d] rounded-lg border border-gray-600  text-white w-full outline-none"
+            className="p-3 bg-[#121c3d] rounded-lg border border-gray-600 text-white w-full outline-none"
+            value={formData.phone}
+            onChange={handleInputChange}
+          />
+          <input
+            type="email"
+            name="email"
+            placeholder="Email (Voter)"
+            className="p-3 bg-[#121c3d] rounded-lg border border-gray-600 text-white w-full outline-none"
+            value={formData.email}
+            onChange={handleInputChange}
           />
         </div>
 
@@ -114,14 +183,17 @@ export default function VotingComponent() {
         <div className="mt-4 flex items-center gap-2 text-gray-400 text-xs">
           <input type="checkbox" id="terms" className="w-4 h-4 text-blue-600" />
           <label htmlFor="terms">
-            Noted:I hereby accept the{" "}
+            Noted: I hereby accept the{" "}
             <span className="text-blue-400">Terms of Service</span> and accept
             that payments done for voting are non-refundable.
           </label>
         </div>
 
         {/* Proceed to Pay */}
-        <button className="mt-6 bg-gray-600 hover:bg-gray-300 text-sm text-white px-6 py-3 rounded-2xl w-[30%] max-w-md">
+        <button
+          className="mt-6 bg-gray-600 hover:bg-gray-300 text-sm text-white px-6 py-3 rounded-2xl w-[30%] max-w-md"
+          onClick={handleProceedToPay}
+        >
           Proceed to Pay
         </button>
       </div>
