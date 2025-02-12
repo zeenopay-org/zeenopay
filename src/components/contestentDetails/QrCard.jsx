@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useMemo, useState } from "react";
-import { FaRupeeSign } from "react-icons/fa";
+import { FaCoins, FaRupeeSign } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 import { EventContext } from "../../EventProvider";
 
@@ -13,6 +13,7 @@ export default function QrCode({ handleX }) {
     generateDynamicQr,
     generateIntentId,
     paymentUrl,
+    qrLoading,
   } = useContext(EventContext);
 
   const [formData, setFormData] = useState({
@@ -87,7 +88,7 @@ export default function QrCode({ handleX }) {
           className="bg-customSky hover:bg-[#0081C6] text-white px-6 py-3 rounded-lg flex items-center justify-center gap-2"
           onClick={() => handleVoteChange(option)}
         >
-          <FaRupeeSign />
+          <FaCoins />
           {option}
         </button>
       )),
@@ -109,7 +110,7 @@ export default function QrCode({ handleX }) {
   }, [paymentCurrency]);
 
   return (
-    <div className="absolute z-40 top-[85px] bg-black bg-opacity-50">
+    <div className="absolute z-40 top-[85px] ">
       <div className="relative min-h-screen flex flex-col items-center justify-center md:w-[130%] max-w-[130%] bg-[#01245c] text-white p-4">
         <button
           onClick={handleX}
@@ -142,7 +143,7 @@ export default function QrCode({ handleX }) {
 
             <input
               type="number"
-              className="flex-grow h-12 bg-transparent text-center text-white text-lg outline-none border border-gray-400 rounded-lg px-4"
+              className=" [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none flex-grow h-12 bg-transparent text-center text-white text-lg outline-none border border-gray-400 rounded-lg px-4"
               value={formData.votes}
               onChange={(e) => handleVoteChange(Number(e.target.value))}
               min="10"
@@ -203,7 +204,7 @@ export default function QrCode({ handleX }) {
           className="mt-6 bg-white hover:bg-gray-300 text-sm text-purple-800 px-6 py-3 rounded-2xl"
           onClick={handleQR}
         >
-          Get QR
+          {qrLoading ? "Loading.." : "Get QR"}
         </button>
 
         {showQRModal && (

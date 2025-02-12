@@ -268,7 +268,7 @@ export default function EventRegistrationForm() {
 
                 <div>
                   <input
-                    type="text"
+                    type="number"
                     name="contactNumber"
                     value={formData.contactNumber}
                     onChange={handleInputChange}
@@ -284,7 +284,7 @@ export default function EventRegistrationForm() {
 
                 <div>
                   <input
-                    type="text"
+                    type="number"
                     name="optionalNumber"
                     value={formData.optionalNumber}
                     onChange={handleInputChange}

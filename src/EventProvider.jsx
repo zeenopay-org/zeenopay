@@ -10,6 +10,7 @@ const EventProvider = ({ children }) => {
   const [form, setForm] = useState([]);
   const [onGoingEvents, setOnGoingEvents] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [qrLoading, setqRLoading] = useState(false);
   const [contestants, setContestants] = useState([]);
   const [contestant, setContestant] = useState([]);
   const [paymentParnter, setPaymentPartner] = useState([]);
@@ -18,7 +19,7 @@ const EventProvider = ({ children }) => {
   const [transactionStatus, setTransactionStatus] = useState("");
 
   // backend URL
-  const BACKEND_URL = "https://auth.zeenopay.com";
+  const BACKEND_URL = "https://api.zeenopay.com";
 
   // to get all the events
   const getAllEvents = useCallback(async () => {
@@ -36,7 +37,7 @@ const EventProvider = ({ children }) => {
   const getAllForms = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${BACKEND_URL}/events/forms/`);
+      const response = await axios.get(`${BACKEND_URL}/forms/all`);
       setForms(response.data);
       setLoading(false);
     } catch (error) {
@@ -142,7 +143,7 @@ const EventProvider = ({ children }) => {
       try {
         setLoading(true);
         const response = await axios.get(
-          `${BACKEND_URL}/payments/${partner}/pay?intent_id=${intentId}&amount=${Number(amount)}&name=${name}&email=${email}&phone_no=${phone}&intent=vote`
+          `${BACKEND_URL}/${partner}/pay?intent_id=${intentId}&amount=${Number(amount)}&name=${name}&email=${email}&phone_no=${phone}&intent=vote`
         );
         setPaymentUrl(response.data.goto);
         setLoading(false);
@@ -176,6 +177,7 @@ const EventProvider = ({ children }) => {
   const generateDynamicQr = useCallback(
     async (intentId, amount, name, email, phone) => {
       intentId = 123456;
+      setqRLoading(true);
       try {
         setLoading(true);
         const response = await axios.get(
@@ -183,8 +185,10 @@ const EventProvider = ({ children }) => {
         );
         setPaymentUrl(response.data.goto);
         setLoading(false);
+        setqRLoading(false);
       } catch (error) {
         console.log(error);
+        setqRLoading(false);
         setLoading(false);
       }
     },
@@ -278,6 +282,7 @@ const EventProvider = ({ children }) => {
         checkPartnerPaymentStatus,
         generateDynamicQr,
         redirectToQrPage,
+        qrLoading,
       }}
     >
       {children}

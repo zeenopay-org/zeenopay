@@ -66,7 +66,9 @@ function EventDetails() {
     <div className="bg-customBlue max-w-full py-8 px-4 flex flex-col items-center pb-20">
       {pop && <QrCard handleX={handleX} />}
       <>
-        <div className="flex justify-center items-center w-full">
+        <div
+          className={`w-full ${pop ? "blur-md pointer-events-none" : ""} flex justify-center items-center w-full`}
+        >
           {loading ? (
             <div className="w-full max-w-[90%] h-auto md:h-[500px] bg-gray-300 animate-pulse rounded-2xl mb-6"></div>
           ) : (
@@ -92,7 +94,9 @@ function EventDetails() {
           )}
         </p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-10 w-full max-w-[90%]">
+        <div
+          className={` w-full ${pop ? "blur-md pointer-events-none" : ""} grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-10 w-full max-w-[90%]`}
+        >
           {loading
             ? Array(6)
                 .fill()
@@ -115,10 +119,11 @@ function EventDetails() {
                   className="relative bg-customDarkBlue rounded-2xl shadow-lg p-3 flex flex-col items-center text-center"
                 >
                   {/* Added Miscellaneous Data Display */}
-                  <div className="absolute top-2 left-3 transform -translate-x-[20%] -translate-y-[12.5%] bg-[#009BE2] text-white h-16 w-12 md:h-24 md:w-20 text-[28px] md:text-[36px] px-3 py-1 sm:px-4 sm:py-2 rounded-br-full rounded-tl-2xl ">
-                    {contestant.misc_kv}
-                  </div>
-
+                  {contestant?.misc_kv && (
+                    <div className="absolute top-2 left-3 transform -translate-x-[20%] -translate-y-[12.5%] bg-[#009BE2] text-white h-16 w-12 md:h-24 md:w-20 text-[28px] md:text-[36px] px-3 py-1 sm:px-4 sm:py-2 rounded-br-full rounded-tl-2xl ">
+                      {contestant.misc_kv}
+                    </div>
+                  )}
                   <img
                     src={contestant.avatar}
                     alt={contestant.name}
@@ -129,7 +134,7 @@ function EventDetails() {
                     {contestant.name}
                   </h2>
 
-                  {paymentCurrency?.cc?.toLowerCase() === "in" ? (
+                  {paymentCurrency?.cc?.toLowerCase() === "np" ? (
                     <div className="flex justify-between w-full gap-6">
                       <button
                         className="bg-[#003A75]  w-[55%] text-white px-4 py-2 rounded-3xl font-medium hover:bg-gray-600"
