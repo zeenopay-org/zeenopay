@@ -13,7 +13,8 @@ import EventsDetails from "./pages/EventsDetails.jsx";
 import Events from "./pages/Events.jsx";
 import Registration from "./components/registration/Registration.jsx";
 import RegistrationDetails from "./pages/RegistrationDetails.jsx";
-import ContestantDetails from "./pages/ContestantDetails.jsx"
+import ContestantDetails from "./pages/ContestantDetails.jsx";
+import RegistrationConfirmation from "./components/registration/RegistrationConfirmation.jsx";
 
 const router = createBrowserRouter([
   {
@@ -53,12 +54,16 @@ const router = createBrowserRouter([
         element: <Registration />,
       },
       {
-        path: "registration-details/:slug",
+        path: "registration-details/:id",
         element: <RegistrationDetails />,
       },
       {
         path: "contestant-details/:id",
         element: <ContestantDetails />,
+      },
+      {
+        path: "registration/confirmation",
+        element: <RegistrationConfirmation />,
       },
     ],
   },

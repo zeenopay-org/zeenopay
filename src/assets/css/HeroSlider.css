@@ -1,124 +1,147 @@
-.slider-container {
-    height: 460px;
+/* .slider-container {
+  height: 460px;
+  margin-top: -20px;
 }
 .slick-dots li {
-    margin: 0 0px; /* Adjust value as needed */
+  margin: 0px 0px; 
 }
 
 .slick-dots li button:before {
-    color: rgb(255, 255, 255) !important;
-    font-size: 10px;
-    margin-top: -50px;
-    
+  color: rgb(255, 255, 255) !important;
+  font-size: 10px;
+  margin-top: -30px;
 }
 
 .slick-dots li.slick-active button:before {
-    color: rgb(255, 255, 255) !important;
-    opacity: 2;
-    font-size: 16px
+  color: rgb(255, 255, 255) !important;
+  opacity: 2;
+  font-size: 16px;
 }
 
 .slick-center .relative {
-    transform: scale(1.1);
-    transition: transform 0.5s ease-in-out;
+  transform: scale(1.1);
+  transition: transform 0.5s ease-in-out;
 }
 .slick-slide img {
-    transition: transform 4s ease-in-out !important;
-    will-change: transform;
+  transition: transform 4s ease-in-out !important;
+  will-change: transform;
 }
 
 .slick-slide {
-    opacity: 0.9;
-    transition: opacity 0.3s ease;
+  opacity: 0.9;
+  transition: opacity 0.3s ease;
 }
 
 .slick-center .slick-slide {
-    opacity: 1;
-    transition: transform 0.8s ease-in-out, opacity 0.8s ease-in-out !important;
+  opacity: 1;
+  transition:
+    transform 0.8s ease-in-out,
+    opacity 0.8s ease-in-out !important;
 }
+@media (max-width: 1080px) {
+  .slider-container {
+    height: 360px;
+    margin-top: -20px;
+  }
 
-/* Adjustments for screens <= 720px */
+  .slick-dots li button {
+    margin-top: 30px;
+  }
+}
 @media (max-width: 720px) {
-    .slider-container {
-        height: 360px;
-    }
+  .slider-container {
+    height: 360px;
+  }
 
-    .slick-center .relative {
-        transform: scale(1.1);
-    }
+  .slick-center .relative {
+    transform: scale(1.1);
+  }
 
-    .slick-slide {
-        opacity: 1 !important;
-    }
+  .slick-slide {
+    opacity: 1 !important;
+  }
 
-    .slick-center .slick-slide {
-        opacity: 1 !important;
-    }
+  .slick-center .slick-slide {
+    opacity: 1 !important;
+  }
 
-    .slick-center h2 {
-        font-size: 1.5rem;
-    }
+  .slick-center h2 {
+    font-size: 1.5rem;
+  }
 
-    .slick-dots {
-        margin-top: 15px !important;
-    }
+  .slick-dots {
+    margin-top: 15px !important;
+  }
 
-    .slick-dots li button {
-        padding: 8px;
-    }
+  .slick-dots li button {
+    margin-top: 10px;
+  }
 }
-
-/* Adjustments for screens <= 640px */
 @media (max-width: 640px) {
-    .slider-container {
-        height: 320px;
-    }
+  .slider-container {
+    height: 320px;
+  }
 
-    .slick-center .relative {
-        transform: scale(1.08);
-    }
+  .slick-center .relative {
+    transform: scale(1.08);
+  }
 
-    .slick-slide {
-        opacity: 1 !important;
-    }
+  .slick-slide {
+    opacity: 1 !important;
+  }
 
-    .slick-center .slick-slide {
-        opacity: 1 !important;
-    }
+  .slick-center .slick-slide {
+    opacity: 1 !important;
+  }
 
-    .slick-center h2 {
-        font-size: 1.4rem;
-    }
+  .slick-center h2 {
+    font-size: 1.4rem;
+  }
 
-    .slick-dots {
-        margin-top: 20px !important;
-    }
-
-    .slick-dots li button {
-        padding: 6px;
-    }
+  .slick-dots {
+    margin-top: 20px !important;
+  }
+  .slick-dots li {
+    margin: 15px 0px !important;
+  }
+  .slick-dots li button:before {
+    font-size: 8px !important; 
+  }
 }
 
-/* Adjustments for screens <= 420px */
-@media (max-width: 320px) {
-    .slider-container {
-        height: 180px;
-    }
-
-    .slick-center .relative {
-        transform: scale(1.05);
-    }
-
-    .slick-center h2 {
-        font-size: 1.1rem;
-    }
-
-    .slick-dots {
-        margin-top: 20px !important;
-    }
-
-    .slick-dots li button {
-        padding: 4px;
-    }
+@media (max-width: 550px) {
+  .slider-container {
+    height: 280px;
+    margin-top: -40px;
+  }
+  .slick-dots li {
+    margin: 20px 0px !important;
+  }
 }
 
+
+@media (max-width: 420px) {
+  .slider-container {
+    height: 280px;
+    margin-top: -50px;
+  }
+
+  .slick-center .relative {
+    transform: scale(1.05);
+  }
+
+  .slick-center h2 {
+    font-size: 1.1rem;
+  }
+
+  .slick-dots {
+    margin-top: 20px !important;
+  }
+  .slick-dots li {
+    font-size: 100px;
+  }
+
+  .slick-dots li button {
+    padding: 4px;
+  }
+} */

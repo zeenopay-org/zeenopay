@@ -1,4 +1,4 @@
-/* Customize the dot styles */
+Customize the dot styles
 .slick-dots li button:before {
   color: white !important; 
   font-size: 12px; 
@@ -7,17 +7,16 @@
 .slick-dots li.slick-active button:before {
   color: white !important; 
   opacity: 1;
-  font-size: 14px; /* Increase the size of the active dot */
+  font-size: 14px; 
 }
 
-/* Scale and zoom effect for the center slide */
 .slick-center .relative {
   transform: scale(1.2); 
   transition: transform 0.5s ease; 
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.5); /* Add shadow to the zoomed slide */
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.5); 
 }
 
-/* Make previous and next slides visible */
+
 .slick-slide {
   opacity: 0.9;
   transition: opacity 0.3s ease;
@@ -28,20 +27,17 @@
   transition: opacity 0.3s ease;
 }
 
-/* Customize the arrows */
 .slick-prev, .slick-next {
   z-index: 10; 
-  /* Optional: You can style the arrows if needed */
 }
 
-/* Background customization */
+
 .bg-customBlue {
-  background-color: #0b1f4a; /* Custom blue background */
+  background-color: #0b1f4a;
 }
 
-/* General responsive styles */
 @media (max-width: 768px) {
   .slick-center .relative {
-      transform: scale(1.2); /* Slightly smaller zoom for mobile */
+      transform: scale(1.2); 
   }
 }

@@ -1,14 +1,14 @@
-import React from 'react'
-import RegisterBanner from '../components/register/RegisterBanner.jsx'
-import RegistrationForm from '../components/register/RegistrationForm.jsx'
+import React from "react";
+import RegisterBanner from "../components/register/RegisterBanner.jsx";
+import EventRegistrationForm from "../components/register/RegistrationForm.jsx";
 
 const RegistrationDetails = () => {
   return (
     <>
-      <RegisterBanner/>
-      <RegistrationForm/>
+      <RegisterBanner />
+      <EventRegistrationForm />
     </>
-  )
-}
+  );
+};
 
-export default RegistrationDetails
+export default RegistrationDetails;
