@@ -56,7 +56,7 @@ function EventList() {
               <img
                 src={event.img}
                 alt={event.org}
-                className="w-full p-2 rounded-3xl h-60 lg:h-60 md:h-68 object-fill"
+                className="w-full p-2 rounded-3xl h-60 lg:h-60 md:h-68 object-cover"
               />
               <div className="pl-4 pr-4 flex flex-col flex-grow">
                 <h3 className="text-lg md:text-lg font-semibold">

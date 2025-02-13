@@ -14,7 +14,7 @@ function ProfileCard({ handleQrClick }) {
   }, [paymentCurrency, getPaymentCurrency]);
 
   const renderSkeletonLoader = () => (
-    <div className="w-36 h-44 sm:w-[252px] sm:h-[322px] bg-gray-300 rounded-[24px] mx-auto animate-pulse">
+    <div className="md:w-[270px] w-[100px] h-[80px] md:h-[342px] bg-gray-300 rounded-[24px] mx-auto animate-pulse">
       <div className="flex flex-col gap-4 justify-center items-center p-4">
         <div className="w-[56px] h-[56px] sm:w-[128px] sm:h-[132px] bg-gray-500 rounded-full"></div>
         <div className="flex gap-2 flex-col items-center">
@@ -36,14 +36,14 @@ function ProfileCard({ handleQrClick }) {
       {loading ? (
         renderSkeletonLoader()
       ) : (
-        <div className="md:w-[262px] w-[200px] h-[280px] md:h-[342px] bg-[#01245c] rounded-[16px] mx-auto border border-white">
+        <div className="md:w-[270px] w-[240px] h-[280px] md:h-[342px] bg-[#01245c] rounded-[16px] mx-auto border border-white">
           {contestant?.misc_kv && (
             <div className="absolute top-2 left-3  transform -translate-x-[20%] -translate-y-[12.5%] bg-[#009BE2] text-white h-16 w-12 md:h-24 md:w-20 text-[28px] md:text-[36px]  px-3 py-1 sm:px-4 sm:py-2 rounded-br-full rounded-tl-2xl">
               {contestant.misc_kv}
             </div>
           )}
 
-          <div className="flex flex-col gap-4 justify-center items-center">
+          <div className="flex flex-col gap-4 justify-center items-center ">
             <div className="flex flex-col gap-4 justify-center items-center pt-4 md:pt-8">
               <div className="md:w-[178px] w-[158px] md:h-[168px] h-[158px] ">
                 <img
@@ -72,9 +72,16 @@ function ProfileCard({ handleQrClick }) {
             </div>
             <div className=" w-[80%] md:w-[220px] md:mt-2 -mt-2 h-[1px] bg-white"></div>
           </div>
-          {paymentCurrency.cc === "np" && (
+          {paymentCurrency.cc === "np" || "in" && (
             <button
-              onClick={handleQrClick}
+            onClick={() => {
+            
+              window.scrollTo({
+                top: 0,
+                behavior: "smooth",
+              });
+              handleQrClick();
+            }}
               className="w-full bg-[#01245c] border-white border-[1px] md:mt-8 mt-[18px]  p-2 rounded-[15px]"
             >
               Generate Qr to Vote

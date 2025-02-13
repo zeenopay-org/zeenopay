@@ -15,11 +15,13 @@ import Registration from "./components/registration/Registration.jsx";
 import RegistrationDetails from "./pages/RegistrationDetails.jsx";
 import ContestantDetails from "./pages/ContestantDetails.jsx";
 import RegistrationConfirmation from "./components/registration/RegistrationConfirmation.jsx";
+import ErrorPage from "./pages/ErrorPage.jsx";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <App />,
+    errorElement: <ErrorPage/>,
     children: [
       {
         path: "",

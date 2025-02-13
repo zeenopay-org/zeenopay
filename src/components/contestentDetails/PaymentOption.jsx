@@ -3,6 +3,7 @@ import { EventContext } from "../../EventProvider";
 
 function PaymentOption({ formData }) {
   const [payment, setPayment] = useState({ method: "" });
+  const [loading, setLoading] = useState(false);
   const { getPaymentPartner, paymentParnter } = useContext(EventContext);
 
   const state = formData;
@@ -21,7 +22,6 @@ function PaymentOption({ formData }) {
     paymentParnter.partner.push("payu");
   }
 
-  // Handle form submission to initiate payment
   const handlePayment = async (e) => {
     e.preventDefault();
     const { name, phone, email, amount } = state;
@@ -29,6 +29,7 @@ function PaymentOption({ formData }) {
       alert("Name, Phone, Amount, and Email are required.");
       return;
     }
+    setLoading(true);
     const intentID = generateIntentId();
     const partner = payment.method;
     await initiatePartnerPayment(intentID, amount, name, email, phone, partner);
@@ -36,6 +37,7 @@ function PaymentOption({ formData }) {
     if (paymentUrl) {
       redirectToPaymentPage(paymentUrl);
     }
+    setLoading(false);
   };
 
   const handlePaymentChange = (e) => {
@@ -43,13 +45,12 @@ function PaymentOption({ formData }) {
   };
 
   return (
-    <div className=" w-full bg-customBlue ">
+    <div className="w-full bg-customBlue">
       <div className="flex justify-center items-center pb-6 px-6">
         <div className="bg-customDarkBlue w-[900px] flex flex-col gap-3 text-gray-400 p-12">
           <div className="flex justify-center items-center">
             <h1 className="text-2xl font-semibold mb-6">Payment Options:</h1>
           </div>
-          {/* Payment Options */}
           <div className="flex flex-col gap-3">
             {paymentParnter?.partner?.map((option, index) => (
               <label
@@ -88,9 +89,10 @@ function PaymentOption({ formData }) {
       <div className="flex justify-center items-center pb-11 px-6">
         <button
           onClick={handlePayment}
-          className="bg-customSky w-[900px] flex justify-center items-center gap-3  text-white py-[12px] rounded-[24px]"
+          disabled={loading}
+          className="bg-customSky w-[900px] flex justify-center items-center gap-3 text-white py-[12px] rounded-[24px] relative"
         >
-          Continue
+          {loading ? <div className="w-5 h-5 border-2 border-customDarkBlue border-t-transparent rounded-full animate-spin"></div> : "Continue"}
         </button>
       </div>
     </div>

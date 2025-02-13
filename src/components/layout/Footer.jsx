@@ -8,7 +8,7 @@ function Footer() {
         <p className="text-center md:text-left">
           Copyright&copy; 2024 zeenoPay.
         </p>
-        <p className="text-[#333] text-[10px] md:text-[12px] text-center md:text-left">
+        <p className="text-gray-600 text-[10px] md:text-[12px] text-center md:text-left">
           All rights reserved
         </p>
       </div>

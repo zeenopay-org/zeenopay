@@ -62,10 +62,16 @@ const EventProvider = ({ children }) => {
     try {
       setLoading(true);
       const response = await axios.get(`${BACKEND_URL}/events/${id}`);
-      setEvent(response.data);
+      const eventData = response.data;
+
+      // Save the event data to localStorage
+      localStorage.setItem("event", JSON.stringify(eventData));
+
+      setEvent(eventData);
       setLoading(false);
     } catch (error) {
       console.log(error);
+      setLoading(false);
     }
   }, []);
 
@@ -118,6 +124,8 @@ const EventProvider = ({ children }) => {
       setLoading(true);
       const response = await axios.get(`${BACKEND_URL}/payments/currency`);
       setPaymentCurrency(response.data);
+      // Save to localStorage
+      localStorage.setItem("paymentCurrency", JSON.stringify(response.data));
       setLoading(false);
     } catch (error) {
       console.log(error);
@@ -143,7 +151,7 @@ const EventProvider = ({ children }) => {
       try {
         setLoading(true);
         const response = await axios.get(
-          `${BACKEND_URL}/${partner}/pay?intent_id=${intentId}&amount=${Number(amount)}&name=${name}&email=${email}&phone_no=${phone}&intent=vote`
+          `${BACKEND_URL}/payments/${partner}/pay?intent_id=${intentId}&amount=${Number(amount)}&name=${name}&email=${email}&phone_no=${phone}&intent=vote`
         );
         setPaymentUrl(response.data.goto);
         setLoading(false);

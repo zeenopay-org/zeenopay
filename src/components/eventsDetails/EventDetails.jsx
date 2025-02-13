@@ -11,7 +11,7 @@ function EventDetails() {
 
   useEffect(() => {
     setPassingId(id);
-  }, [id]); // Runs only when id changes
+  }, [id]);
 
   const {
     getAllContestants,
@@ -36,12 +36,15 @@ function EventDetails() {
     getEvent(id);
   }, [getEvent, id]);
 
+  const eventFinalDate = new Date(event.finaldate);
+  const currentDate = new Date();
+
   if (!contestants) {
     return <p className="text-center text-red-500">Event not found!</p>;
   }
 
   const handleClick = (id, passingId) => {
-    console.log("Scrolling to top..."); // Debugging line
+    console.log("Scrolling to top...");
     window.scrollTo({
       top: 0,
       behavior: "smooth",
@@ -50,7 +53,6 @@ function EventDetails() {
   };
 
   const handleQR = () => {
-    console.log("Scrolling to top for QR..."); // Debugging line
     window.scrollTo({
       top: 0,
       behavior: "smooth",
@@ -64,8 +66,8 @@ function EventDetails() {
 
   return (
     <div className="bg-customBlue max-w-full py-8 px-4 flex flex-col items-center pb-20">
-      {pop && <QrCard handleX={handleX} />}
       <>
+        {pop && <QrCard handleX={handleX} />}
         <div
           className={`w-full ${pop ? "blur-md pointer-events-none" : ""} flex justify-center items-center w-full`}
         >
@@ -89,8 +91,10 @@ function EventDetails() {
         <p className="text-white mt-2 text-center text-sm md:text-lg">
           {loading ? (
             <div className="h-4 w-1/4 bg-gray-300 animate-pulse"></div>
-          ) : (
+          ) : currentDate > eventFinalDate ? (
             "Voting close!"
+          ) : (
+            "Voting  open."
           )}
         </p>
 
@@ -127,6 +131,7 @@ function EventDetails() {
                   <img
                     src={contestant.avatar}
                     alt={contestant.name}
+                    onClick={() => handleClick(contestant.id)}
                     className="w-full h-60 lg:h-[300px] md:h-60 object-cover rounded-2xl mb-4"
                   />
 
@@ -134,7 +139,7 @@ function EventDetails() {
                     {contestant.name}
                   </h2>
 
-                  {paymentCurrency?.cc?.toLowerCase() === "np" ? (
+                  {paymentCurrency?.cc?.toLowerCase() === "np" || "in" ? (
                     <div className="flex justify-between w-full gap-6">
                       <button
                         className="bg-[#003A75]  w-[55%] text-white px-4 py-2 rounded-3xl font-medium hover:bg-gray-600"
