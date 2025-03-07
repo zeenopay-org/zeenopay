@@ -23,7 +23,6 @@ function EventDetails() {
     getPaymentCurrency,
   } = useContext(EventContext);
 
-  // Fetching currentCurrency
   useEffect(() => {
     getPaymentCurrency();
   }, [getPaymentCurrency]);
@@ -35,6 +34,11 @@ function EventDetails() {
   useEffect(() => {
     getEvent(id);
   }, [getEvent, id]);
+  useEffect(() => {
+    console.log("Updated pop state:", pop);  // This will run after pop changes
+  }, [pop]);  // Dependency array ensures it runs when pop changes
+  
+
 
   const eventFinalDate = new Date(event.finaldate);
   const currentDate = new Date();
@@ -61,9 +65,12 @@ function EventDetails() {
   };
 
   const handleX = () => {
-    setPop(false);
+    console.log("handleX clicked");
+  
+    setPop(false);  // Set the state to false
   };
-
+  
+  
   return (
     <div className="bg-customBlue max-w-full py-8 px-4 flex flex-col items-center pb-20">
       <>
@@ -110,7 +117,6 @@ function EventDetails() {
                     className="relative bg-customDarkBlue rounded-2xl shadow-lg p-3 flex flex-col items-center text-center"
                   >
                     <div className="absolute top-1 left-1 transform -translate-x-[20%] -translate-y-[12.5%] bg-[#000B44] text-white h-16 w-12 md:h-24 md:w-20 text-[28px] md:text-[36px] px-3 py-1 sm:px-4 sm:py-2 rounded-br-full rounded-tl-2xl shadow-lg shadow-blue-300">
-                      {/* Placeholder for loading */}
                     </div>
                     <div className="w-full h-60 lg:h-[300px] md:h-60 bg-gray-700 animate-pulse rounded-2xl mb-4"></div>
                     <div className="h-6 w-3/4 bg-gray-500 animate-pulse mb-4 rounded-3xl"></div>
@@ -122,7 +128,6 @@ function EventDetails() {
                   key={contestant.id}
                   className="relative bg-customDarkBlue rounded-2xl shadow-lg p-3 flex flex-col items-center text-center"
                 >
-                  {/* Added Miscellaneous Data Display */}
                   {contestant?.misc_kv && (
                     <div className="absolute top-2 left-3 transform -translate-x-[20%] -translate-y-[12.5%] bg-[#009BE2] text-white h-16 w-12 md:h-24 md:w-20 text-[28px] md:text-[36px] px-3 py-1 sm:px-4 sm:py-2 rounded-br-full rounded-tl-2xl ">
                       {contestant.misc_kv}
@@ -139,7 +144,7 @@ function EventDetails() {
                     {contestant.name}
                   </h2>
 
-                  {paymentCurrency?.cc?.toLowerCase() === "np" || "in" ? (
+                  {paymentCurrency?.cc?.toLowerCase() === "np" ? (
                     <div className="flex justify-between w-full gap-6">
                       <button
                         className="bg-[#003A75]  w-[55%] text-white px-4 py-2 rounded-3xl font-medium hover:bg-gray-600"

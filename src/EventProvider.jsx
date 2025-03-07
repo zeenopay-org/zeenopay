@@ -1,5 +1,6 @@
-import { createContext, useCallback, useState } from "react";
+import { createContext, useCallback, useEffect, useState } from "react";
 import axios from "axios";
+import { io } from "socket.io-client"; // Import WebSocket client
 
 const EventContext = createContext();
 
@@ -10,16 +11,134 @@ const EventProvider = ({ children }) => {
   const [form, setForm] = useState([]);
   const [onGoingEvents, setOnGoingEvents] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [qrLoading, setqRLoading] = useState(false);
+  const [qrLoading, setQrLoading] = useState(false);
   const [contestants, setContestants] = useState([]);
   const [contestant, setContestant] = useState([]);
   const [paymentParnter, setPaymentPartner] = useState([]);
   const [paymentCurrency, setPaymentCurrency] = useState([]);
   const [paymentUrl, setPaymentUrl] = useState("");
   const [transactionStatus, setTransactionStatus] = useState("");
+  const [paymentIframeUrl, setPaymentIframeUrl] = useState(null);
+  const [formData, setFormData] = useState({
+    intentId: 0,
+    name: "",
+    phone: "",
+    email: "",
+    votes: "",
+    amount: 0,
+    currency: "",
+  });
+
+  const [paymentStatus, setPaymentStatus] = useState("Waiting for payment...");
+  const [transactionId, setTransactionId] = useState(null);
 
   // backend URL
   const BACKEND_URL = "https://api.zeenopay.com";
+  const generateDynamicQr = useCallback(
+    async (intentId, amount, name, email, phone) => {
+      setQrLoading(true);
+      try {
+        const response = await axios.get(
+          `${BACKEND_URL}/payments/qr/dynamic?intent_id=${intentId}&amount=${amount}&name=${name}&email=${email}&phone_no=${phone}&intent=vote&cc=NP`
+        );
+        const qrUrl = response.data.goto;
+        const txid = qrUrl.split("/")[4].split("_")[1].split(".")[0];
+        setTransactionId(txid);
+
+        setQrLoading(false);
+        return qrUrl;
+      } catch (error) {
+        console.error("Error generating QR:", error);
+        setQrLoading(false);
+      }
+    },
+    []
+  );
+
+  const checkPaymentStatus = (txid) => {
+    const socket = io("wss://api.zeenopay.com", {
+      transports: ["websocket"], 
+    });
+
+    socket.on("connect", () => {
+      console.log("✅ Connected to WebSocket for payment status.");
+      socket.emit("check", txid);
+    });
+
+    socket.on("status", (data) => {
+      console.log("🔄 Payment status update:", data);
+
+      if (!data) return;
+
+      const [state, transactionId] = data.split(":");
+
+      if (transactionId === txid) {
+        if (state.toUpperCase() === "SUCCESS") {
+          setPaymentStatus(`✅ Payment Successful!`);
+        } else if (state.toUpperCase() === "CANCELED") {
+          setPaymentStatus(`❌ Payment Canceled`);
+        } else if (state.toUpperCase() === "SCANNED") {
+          setPaymentStatus(`📲 QR Code Scanned`);
+        } else {
+          setPaymentStatus(`⏳ Payment Pending...`);
+        }
+
+        // Disconnect WebSocket after final state
+        if (["SUCCESS", "CANCELED"].includes(state.toUpperCase())) {
+          socket.disconnect();
+        }
+      }
+    });
+
+    socket.on("connect_error", (error) => {
+      console.error("❌ WebSocket connection error:", error);
+    });
+
+    socket.on("error", (error) => {
+      console.error("❌ WebSocket error:", error);
+    });
+
+    // Cleanup function to disconnect WebSocket on unmount
+    return () => socket.disconnect();
+  };
+
+  // ✅ Automatically check payment status when txid changes
+  useEffect(() => {
+    if (!transactionId) return; // Wait for txid to be set
+
+    const socket = io("wss://api.zeenopay.com", { transports: ["websocket"] });
+
+    socket.on("connect", () => {
+      console.log("✅ Connected to WebSocket for payment status.");
+      socket.emit("check", transactionId);
+    });
+
+    socket.on("status", (data) => {
+      console.log("🔄 Payment status update:", data);
+
+      if (!data) return;
+
+      const [state, txid] = data.split(":");
+
+      if (txid === transactionId) {
+        setPaymentStatus(state.toUpperCase()); // Update state
+      }
+
+      if (["SUCCESS", "CANCELED"].includes(state.toUpperCase())) {
+        socket.disconnect(); // Stop listening if payment is complete
+      }
+    });
+
+    socket.on("connect_error", (error) => {
+      console.error("❌ WebSocket connection error:", error);
+    });
+
+    socket.on("error", (error) => {
+      console.error("❌ WebSocket error:", error);
+    });
+
+    return () => socket.disconnect(); // Cleanup on unmount
+  }, [transactionId]); // Run effect when txid changes
 
   // to get all the events
   const getAllEvents = useCallback(async () => {
@@ -45,11 +164,13 @@ const EventProvider = ({ children }) => {
     }
   }, []);
 
-  //get form by id
+  // get form by id
   const getForm = useCallback(async (id) => {
     try {
       setLoading(true);
       const response = await axios.get(`${BACKEND_URL}/forms/${id}`);
+      // console.log("form_id:",id);
+      
       setForm(response.data);
       setLoading(false);
     } catch (error) {
@@ -63,8 +184,6 @@ const EventProvider = ({ children }) => {
       setLoading(true);
       const response = await axios.get(`${BACKEND_URL}/events/${id}`);
       const eventData = response.data;
-
-      // Save the event data to localStorage
       localStorage.setItem("event", JSON.stringify(eventData));
 
       setEvent(eventData);
@@ -123,10 +242,13 @@ const EventProvider = ({ children }) => {
     try {
       setLoading(true);
       const response = await axios.get(`${BACKEND_URL}/payments/currency`);
-      setPaymentCurrency(response.data);
+      const url1 = response.data;
+      setPaymentCurrency(url1);
       // Save to localStorage
+
       localStorage.setItem("paymentCurrency", JSON.stringify(response.data));
       setLoading(false);
+      return url1;
     } catch (error) {
       console.log(error);
       setLoading(false);
@@ -145,59 +267,29 @@ const EventProvider = ({ children }) => {
     }
   }, []);
 
-  //Payment logic for By Payment Partner
   const initiatePartnerPayment = useCallback(
-    async (intentId, amount, name, email, phone, partner) => {
+    async (intentId, amount, name, email, phone, partner, currency) => {
       try {
         setLoading(true);
-        const response = await axios.get(
-          `${BACKEND_URL}/payments/${partner}/pay?intent_id=${intentId}&amount=${Number(amount)}&name=${name}&email=${email}&phone_no=${phone}&intent=vote`
-        );
-        setPaymentUrl(response.data.goto);
-        setLoading(false);
-      } catch (error) {
-        console.log(error);
-        setLoading(false);
-      }
-    },
-    []
-  );
 
-  //Checking payment status
-  const checkPartnerPaymentStatus = useCallback(
-    async (partner, transactionUuid) => {
-      try {
-        setLoading(true);
-        const response = await axios.get(
-          `${BACKEND_URL}/payments/${partner}/pay/${transactionUuid}`
-        );
-        setTransactionStatus(response.data.status);
-        setLoading(false);
-      } catch (error) {
-        console.log(error);
-        setLoading(false);
-      }
-    },
-    []
-  );
+        // Construct query parameters dynamically
+        let queryParams = `intent_id=${intentId}&amount=${Number(amount)}&name=${name}&email=${email}&phone_no=${phone}&intent=vote`;
+        if (currency) {
+          queryParams += `&currency=${currency}`;
+        }
+        console.log(queryParams);
 
-  // generating the dynamic QR
-  const generateDynamicQr = useCallback(
-    async (intentId, amount, name, email, phone) => {
-      intentId = 123456;
-      setqRLoading(true);
-      try {
-        setLoading(true);
         const response = await axios.get(
-          `${BACKEND_URL}/payments/qr/dynamic?intent_id=${intentId}&amount=${amount}&name=${name}&email=${email}&phone_no=${phone}&intent=vote&cc=NP`
+          `${BACKEND_URL}/payments/${partner}/pay?${queryParams}`
         );
-        setPaymentUrl(response.data.goto);
+        const url = response.data.goto;
+        setPaymentUrl(url);
         setLoading(false);
-        setqRLoading(false);
+        return url;
       } catch (error) {
-        console.log(error);
-        setqRLoading(false);
+        console.error("Payment initiation failed:", error);
         setLoading(false);
+        return null;
       }
     },
     []
@@ -209,48 +301,17 @@ const EventProvider = ({ children }) => {
       window.location.href = `${url}`;
     }
   };
-
-  // Payment-related logic for PayU
-  // Step 1: Call the API to initiate the payment
-  const initiatePayment = useCallback(
-    async (intentId, amount, name, email, phone) => {
-      intentId = 123456;
-      try {
-        setLoading(true);
-        const response = await axios.get(
-          `${BACKEND_URL}/payments/payu/pay?intent_id=${intentId}&amount=${Number(amount)}&name=${name}&email=${email}&phone_no=${phone}&intent=vote`
-        );
-        setPaymentUrl(response.data.goto);
-        setLoading(false);
-      } catch (error) {
-        console.log(error);
-        setLoading(false);
-      }
-    },
-    []
-  );
-
-  // Step 2: Redirect for payu the user to the PayU payment page
-  const redirectToPaymentPage = (url) => {
-    if (url) {
+  const redirectToFoneAndPrabhuPay=(url)=>{
+    if(url){
       window.location.href = `${BACKEND_URL}${url}`;
     }
-  };
+  }
 
-  // Step 3: Check payment status for payu
-  const checkPaymentStatus = useCallback(async (transactionUuid) => {
-    try {
-      setLoading(true);
-      const response = await axios.get(
-        `${BACKEND_URL}/payments/payu/pay/${transactionUuid}`
-      );
-      setTransactionStatus(response.data.status);
-      setLoading(false);
-    } catch (error) {
-      console.log(error);
-      setLoading(false);
+  const redirectToPaymentPage = (url) => {
+    if (url) {
+      setPaymentIframeUrl(`${BACKEND_URL}${url}`);
     }
-  }, []);
+  };
 
   // Step 4: Redirect to success page after successful payment
   const redirectToSuccessPage = () => {
@@ -271,11 +332,13 @@ const EventProvider = ({ children }) => {
         event,
         getContestant,
         contestant,
-        initiatePayment,
         redirectToPaymentPage,
+        redirectToFoneAndPrabhuPay,
         checkPaymentStatus,
         transactionStatus,
         redirectToSuccessPage,
+        paymentIframeUrl,
+        setPaymentIframeUrl,
         paymentUrl,
         generateIntentId,
         getAllForms,
@@ -287,10 +350,14 @@ const EventProvider = ({ children }) => {
         getPaymentPartner,
         paymentParnter,
         initiatePartnerPayment,
-        checkPartnerPaymentStatus,
         generateDynamicQr,
         redirectToQrPage,
         qrLoading,
+        paymentStatus,
+        setTransactionId,
+        transactionId,
+        formData,
+        setFormData,
       }}
     >
       {children}

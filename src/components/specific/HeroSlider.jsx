@@ -60,7 +60,7 @@ function HeroSlider() {
 
   return (
     <div
-      className="slider-container  bg-customBlue h-[250px] md:h-[500px] flex justify-center items-center px-4 sm:px-8 relative"
+      className="slider-container bg-customBlue h-[250px] md:h-[500px] flex justify-center items-center px-4 sm:px-8 relative"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
@@ -99,7 +99,7 @@ function HeroSlider() {
                   <img
                     src={slide.icon}
                     alt={`Slider ${slide.id}`}
-                    className="w-full h-full max-w-[800px] rounded-3xl object-fit shadow-lg"
+                    className="w-full h-full max-w-[800px] lg:rounded-xl rounded-md object-fit shadow-lg"
                   />
                 </div>
               );

@@ -55,19 +55,98 @@
 
 /* Custom Scrollbar */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 2px; /* Width of the scrollbar */
+  width: 4px; 
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: #3f3f3f; /* Light blue track */
+  background: #3f3f3f; 
   border-radius: 10px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #00000099; /* Blue scrollbar */
+  background: #a8a8a899; 
   border-radius: 10px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #000b44; /* Darker blue on hover */
+  background: #000b44; 
 }
+
+
+@layer utilities {
+  .ios-scrollbar {
+    padding-right: 6px; /* Space for fake scrollbar */
+    position: relative;
+  }
+
+  .ios-scrollbar::after {
+    content: "";
+    position: absolute;
+    right: 2px;
+    top: 0;
+    width: 4px;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 10px;
+  }
+}
+
+
+
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 20px;
+  /* border-radius: 10px; */
+  max-width: 200%;
+  max-height: 200%;
+  /* overflow: auto; */
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.75);
+}
+
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.preloader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  /* background: white; Change to match your theme */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  transition: opacity 0.5s ease-out;
+}
+
+.logo-loader {
+  width: 120px;
+  height: auto;
+  animation: fadeIn 1s ease-in-out infinite alternate;
+}
+
+@keyframes fadeIn {
+  0% { opacity: 1; transform: scale(0.9); }
+  100% { opacity: 3; transform: scale(1.2); }
+}
+

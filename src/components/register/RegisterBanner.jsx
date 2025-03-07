@@ -1,45 +1,13 @@
 import React, { useState, useEffect, useContext } from "react";
 import { Calendar, Clock, MapPin, DollarSign } from "lucide-react";
-import { useParams } from "react-router-dom";
 import { EventContext } from "../../EventProvider";
 
-const events = [
-  {
-    id: 1,
-    title: "Live Photography Webinar",
-    img: "/assets/regi1.png",
-    time: "18, January 2025",
-    location: "4517 Washington Ave, Manchester",
-    price: "$240",
-    eventTime: "06:15 PM Onwards",
-  },
-];
-
-function Register() {
-  const { id } = useParams();
+function Register({ fields }) {
   const [loading, setLoading] = useState(true);
-  const { form, getForm } = useContext(EventContext);
-  const [fields, setFields] = useState([]);
+  const { form } = useContext(EventContext);
 
-  useEffect(() => {
-    const fetchForm = async () => {
-      try {
-        await getForm(id);
+  // console.log("form:", form);
 
-        if (form?.fields) {
-          // Ensure form.field exists
-          const field = JSON.parse(form.fields);
-          setFields(field);
-          console.log(form);
-          console.log("fields" + field);
-        }
-      } catch (error) {
-        console.error("Error parsing form data:", error);
-      }
-    };
-
-    fetchForm();
-  }, [getForm, id, form]);
   useEffect(() => {
     setTimeout(() => {
       setLoading(false); // Stop loading after 2 seconds

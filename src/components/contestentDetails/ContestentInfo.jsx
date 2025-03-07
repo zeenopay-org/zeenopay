@@ -1,14 +1,20 @@
 import React, { useContext, useEffect, useState } from "react";
 import ProfileCard from "./ProfileCard";
-import { FaCaretDown } from "react-icons/fa";
 import { useLocation, useParams } from "react-router-dom";
 import { EventContext } from "../../EventProvider";
 import PaymentOption from "./PaymentOption";
 import QrCard from "./QrCard.jsx";
-import { FiSearch } from "react-icons/fi";
 import countryCodes from "./countryCodes";
+import nepalPartner from "./nepalPartner";
 import { useRef } from "react";
-
+import { motion } from "framer-motion";
+import { parsePhoneNumberFromString } from "libphonenumber-js";
+import CustomDropdown from "../ReusableInputField/CustomDropdown.jsx";
+import InternationalVotingComponents from "./InternationalVotingComponent.jsx";
+import LocalVotingComponent from "./LocalVotingComponent.jsx";
+import PhoneInputWithCountrySelector from "../ReusableInputField/PhoneInputWithCountrySelector.jsx";
+import CloudMessage from "./CloudMessage.jsx";
+import ConfirmCancelPopup from "../confirmCanclePupup/ConfirmCancelPopup.jsx";
 const SkeletonLoader = () => (
   <div className="min-h-screen flex flex-col items-center justify-center bg-customBlue text-white p-4">
     <div className="flex justify-center items-center w-full relative animate-pulse">
@@ -46,32 +52,36 @@ export default function VotingComponent() {
     getEvent,
     getContestant,
     loading,
-
+    paymentIframeUrl,
     paymentCurrency,
     getPaymentCurrency,
+    generateIntentId,
+    initiatePartnerPayment,
+    redirectToPaymentPage,
+    redirectToFoneAndPrabhuPay,
+    getPaymentPartner,
+    paymentParnter,
+    formData,
+    setFormData,
   } = useContext(EventContext);
-
+  const [inputFocused, setInputFocused] = useState(false);
   const [pop, setpop] = useState(false);
-  const [drop, setDrop] = useState(false);
   const [generateQR, setGenerateQr] = useState(false);
   const [errors, setErrors] = useState({});
   const [selectedCountry, setSelectedCountry] = useState(null);
-
+  const [selectedPartner, setSelectedPartner] = useState("");
+  const [showConfirm, setShowConfirm] = useState(false);
   const location = useLocation();
   const { passingId } = location.state || {};
-  const [searchTerm, setSearchTerm] = useState("");
-  const inputRef = useRef(null);
-
-  const [formData, setFormData] = useState({
-    intentId: 0,
-    name: "",
-    phone: "",
-    email: "",
-    votes: "",
-    amount: 100,
-  });
-
   const [temp, setTemp] = useState(null);
+  useEffect(() => {
+    console.log("Updated formData:", formData);
+  }, [formData]);
+
+  useEffect(() => {
+    getPaymentPartner();
+  }, []);
+
   useEffect(() => {
     const savedEvent = localStorage.getItem("event");
     if (event) {
@@ -81,27 +91,28 @@ export default function VotingComponent() {
     }
   }, []);
 
-  const handleButtonClick = () => {
-    inputRef.current.focus();
-  };
+  // const handleButtonClick = () => {
+  //   inputRef.current.focus();
+  // };
 
-  const handleDrop = () => {
-    setDrop(() => !drop);
-  };
+  // const handleDrop = () => {
+  //   setDrop(() => !drop);
+  // };
 
-  const votePrice = 10;
-  const voteOptions = [25, 50, 100, 500, 1000, 2500];
+  // const votePrice = 10;
 
   useEffect(() => {
     const savedCurrency = localStorage.getItem("paymentCurrency");
     if (savedCurrency) {
-      setSelectedCountry(JSON.parse(savedCurrency));
+      const parsedCurrency = JSON.parse(savedCurrency);
+      setSelectedCountry(parsedCurrency);
+      console.log("pC: " + parsedCurrency?.cc); // Log here after setting state
     } else {
       getPaymentCurrency();
     }
-  }, []);
+  }, [getPaymentCurrency]);
 
-  const [hasValue, setHasValue] = useState(!!formData.votes);
+  // const [hasValue, setHasValue] = useState(!!formData.votes);
 
   useEffect(() => {
     const fetchContestant = async () => {
@@ -111,25 +122,39 @@ export default function VotingComponent() {
   }, [getContestant, id]);
 
   // Handle vote change
-  const handleVoteChange = (value) => {
-    handleButtonClick();
-    const updatedVotes = Math.max(10, Math.min(15000, value));
-    const calculatedAmount = updatedVotes * votePrice;
+  // const handleVoteChange = (value) => {
+  //   handleButtonClick();
+  //   const updatedVotes = Math.max(10, Math.min(15000, value));
+  //   const calculatedAmount = updatedVotes * votePrice;
 
-    setFormData((prevData) => ({
-      ...prevData,
-      votes: updatedVotes,
-      amount: calculatedAmount,
-    }));
-  };
-  const handleChange = (e) => {
-    const value = e.target.value;
-    setHasValue(value.trim() !== "");
-    setFormData((prevData) => ({
-      ...prevData,
-      votes: value,
-    }));
-  };
+  //   setFormData((prevData) => ({
+  //     ...prevData,
+  //     votes: updatedVotes,
+  //     amount: calculatedAmount,
+  //   }));
+  // };
+
+  // const handleChange = (e) => {
+  //   let value = e.target.value;
+  //   if (parseInt(value, 10) > 15000) {
+  //     value = "15000";
+  //   }
+
+  //   const updatedVotes = Math.max(10, Math.min(15000, value));
+  //   const calculatedAmount = updatedVotes * votePrice;
+
+  //   setFormData((prevData) => ({
+  //     ...prevData,
+  //     votes: updatedVotes,
+  //     amount: calculatedAmount,
+  //   }));
+
+  //   setHasValue(value.trim() !== "");
+  //   setFormData((prevData) => ({
+  //     ...prevData,
+  //     votes: value,
+  //   }));
+  // };
 
   // Handle input field change
   const handleInputChange = (e) => {
@@ -146,7 +171,39 @@ export default function VotingComponent() {
       top: 0,
       behavior: "smooth",
     });
-    if (validateForm()) setpop(true);
+    if (validateForm()) {
+    }
+    const { name, phone, email, amount, currency } = formData;
+    const isNepal = paymentParnter?.cc === "np";
+    const isIndia = paymentParnter?.cc === "in";
+
+    if (!name || !phone || !amount || (!(isNepal || isIndia) && !email)) {
+      alert("Name, Phone, and Amount are required. Email is required.");
+      return;
+    }
+    const method = currency === "INR" ? "payu" : "stripe";
+    try {
+      const intentID = generateIntentId();
+      const paymentUrl = await initiatePartnerPayment(
+        intentID,
+        amount,
+        name,
+        isNepal || isIndia ? "" : email,
+        phone,
+        method,
+        currency
+      );
+
+      if (paymentUrl) {
+        console.log("Redirecting to payment:", paymentUrl);
+        redirectToPaymentPage(paymentUrl);
+      } else {
+        console.log("Payment URL is not available");
+      }
+    } catch (error) {
+      console.error("Payment initiation failed:", error);
+    } finally {
+    }
   };
 
   if (loading && !pop && !generateQR) {
@@ -159,19 +216,143 @@ export default function VotingComponent() {
     });
   };
 
-  //validate form
+  const handlePartnerChange = (value) => {
+    setSelectedPartner(value);
+    console.log("selected parnter" + setSelectedPartner);
+    // console.log("Selected Partner:", event.target.value);
+  };
+
   const validateForm = () => {
     let newErrors = {};
-    if (!formData.name.trim()) newErrors.name = "Name is required.";
-    if (!formData.phone.trim() || !/^\d{10}$/.test(formData.phone))
-      newErrors.phone = "Enter a valid 10-digit phone number.";
+    // console.log(formData); // Logs current state whenever component renders
+
+    if (!formData.name?.trim()) newErrors.name = "Name is required.";
+
+    const countryCode = selectedCountry?.cc
+      ? selectedCountry.cc.toUpperCase()
+      : null;
+
+    if (formData.phone?.trim() && countryCode) {
+      const phoneNumber = parsePhoneNumberFromString(
+        formData.phone,
+        countryCode
+      );
+
+      if (!phoneNumber || !phoneNumber.isValid()) {
+        newErrors.phone = "Enter a valid phone number for your country.";
+      } else if (phoneNumber.metadata?.country?.[countryCode]) {
+        // Ensure metadata exists before accessing properties
+        const nationalNumber = phoneNumber.nationalNumber;
+        const minLength =
+          phoneNumber.metadata.country[countryCode]?.minLength || 0;
+        const maxLength =
+          phoneNumber.metadata.country[countryCode]?.maxLength || 15;
+
+        if (
+          nationalNumber.length < minLength ||
+          nationalNumber.length > maxLength
+        ) {
+          newErrors.phone = `Phone number must be between ${minLength} and ${maxLength} digits.`;
+        }
+      }
+    } else {
+      newErrors.phone = "Phone number is required.";
+    }
+
+    // Validate Email only if paymentCurrency is not Nepal (NP) or India (IN)
+    if (countryCode !== "NP" && countryCode !== "IN") {
+      if (!formData.email?.trim()) {
+        newErrors.email = "Email is required.";
+      } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+        newErrors.email = "Please enter a valid email address.";
+      }
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
+  const handlePayment = async (e) => {
+    e.preventDefault();
+
+    const isValid = validateForm();
+    if (!isValid) {
+      console.log("Form validation failed. Payment not initiated.");
+      return;
+    }
+
+    const { name, phone, email, amount, currency } = formData;
+    const isIndia = paymentCurrency?.cc === "in";
+    console.log(currency + "curr");
+    try {
+      const partner = "phonepe";
+      const intentID = generateIntentId();
+      const paymentUrl = await initiatePartnerPayment(
+        intentID,
+        amount,
+        name,
+        isIndia ? "" : email,
+        phone,
+        partner,
+        currency
+      );
+
+      if (paymentUrl) {
+        console.log("Redirecting to payment:", paymentUrl);
+        redirectToPaymentPage(paymentUrl);
+      } else {
+        console.log("Payment URL is not available");
+      }
+    } catch (error) {
+      console.error("Payment initiation failed:", error);
+    }
+  };
+
+  const handleNepalPayment = async (e) => {
+    e.preventDefault();
+    console.log("This is the selected payment partner: " + selectedPartner);
+
+    // Ensure form is valid before proceeding
+    const isValid = validateForm();
+    if (!isValid) {
+      console.log("Form validation failed. Payment not initiated.");
+      return; // Stop execution if form is invalid
+    }
+
+    const { name, phone, email, amount } = formData;
+    const isNepal = paymentCurrency?.cc === "np";
+
+    try {
+      const intentID = generateIntentId();
+      const paymentUrl = await initiatePartnerPayment(
+        intentID,
+        amount,
+        name,
+        isNepal ? "" : email,
+        phone,
+        selectedPartner
+      );
+
+      if (paymentUrl) {
+
+        if (selectedPartner === "fonepay" || selectedPartner === "prabupay") {
+          redirectToFoneAndPrabhuPay(paymentUrl);
+        } else {
+          redirectToPaymentPage(paymentUrl);
+        }
+      } else {
+        console.log("Payment URL is not available");
+      }
+    } catch (error) {
+      console.error("Payment initiation failed:", error);
+    }
+  };
+
+  const eventFinalDate = new Date(event.finaldate);
+  const currentDate = new Date();
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-customBlue text-white p-4 pt-[46px] pb-[66px]">
+    <div className="  min-h-screen flex flex-col items-center justify-center bg-customBlue text-white p-4 pt-[46px] pb-[66px]">
       {generateQR && <QrCard handleX={handleQrClick} />}
       <div
         className={`w-full ${generateQR ? "blur-md pointer-events-none" : ""}`}
@@ -180,251 +361,152 @@ export default function VotingComponent() {
           <PaymentOption formData={formData} />
         ) : (
           <>
+            {/* *****************************profile Card**************** */}
             <div>
-              <div className="relative flex justify-center items-center w-full">
+              <div className="relative flex flex-col justify-center items-center w-full">
                 <img
                   src={temp?.img}
-                  className="md:w-[1300px] h-[300px] md:h-[500px] rounded-2xl mb-6 object-cover"
+                  className="md:w-[1300px] h-[250px] md:h-[400px] rounded-2xl mb-6"
                   alt="Event Banner"
                 />
-                <div
-                  className="absolute bottom-[-130px] left-1/2 transform -translate-x-1/2
-            md:bottom-[-100px] md:left-20 md:translate-x-0
-            lg:bottom-[-150px] lg:left-20 lg:translate-x-0"
-                >
-                  <ProfileCard handleQrClick={handleQrClick} />
+                {/* <div className="absolute bottom-[90px] left-[240px]">
+                      <CloudMessage />
+                    </div> */}
+                <div>
+                  <div
+                    className="absolute bottom-[-130px] left-1/2 transform -translate-x-1/2
+  md:bottom-[-100px] md:left-20 md:translate-x-0
+  lg:bottom-[-150px] lg:left-20 lg:translate-x-0"
+                  >
+                    <div className="relative top-16 md:top-20 left-14 md:left-20 z-50">
+                      <CloudMessage />
+                    </div>
+                    <ProfileCard handleQrClick={handleQrClick} />
+                  </div>
                 </div>
               </div>
             </div>
 
             <div className="mt-52 md:mt-32 flex flex-col items-center justify-center">
               <h1 className="text-xl md:text-2xl font-normal">{event.title}</h1>
-              <p className="text-gray-200 mt-1">Voting Closed!</p>
-
+              <p className="text-white mt-2 text-center text-sm md:text-lg">
+                {loading ? (
+                  <div className="h-4 w-1/4 bg-gray-300 animate-pulse"></div>
+                ) : currentDate > eventFinalDate ? (
+                  "Voting close!"
+                ) : (
+                  "Voting  open."
+                )}
+              </p>
               {/* Voting Options */}
               <div className="mt-6 text-center">
                 <h2 className="text-lg font-normal">Select Voting Options</h2>
-                <div className="grid grid-cols-3 md:grid-cols-3 gap-4 mt-4">
-                  {voteOptions.map((option) => (
-                    <button
-                      key={option}
-                      className="bg-customSky hover:bg-[#0081C6] text-white px-6 py-3 rounded-lg flex items-center justify-center gap-2"
-                      onClick={() => handleVoteChange(option)}
-                    >
-                      <img className="h-8 w-8" src="/assets/vote.png" alt="" />
-
-                      {option}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <button
-                onClick={handleButtonClick}
-                className="w-12 h-12 mt-4 flex items-center justify-center text-2xl text-white border border-gray-400 rounded-2xl"
-              >
-                +
-              </button>
-
-              <p className="mt-2 mb-2 text-sm text-gray-400">
-                Min 10 votes & Max 15000 votes. One vote = Rs 10.0
-              </p>
-              <div className="flex max-w-[700px] flex-col items-center">
-                {/* Custom Vote Input */}
-                <div className="relative flex items-center w-full gap-2">
-                  {/* Decrement Button */}
-                  <button
-                    onClick={() => {
-                      handleVoteChange(formData.votes - 1);
-                      setHasValue(formData.votes - 1 > 0);
-                    }}
-                    className="w-12 h-12 flex items-center justify-center text-2xl text-white border border-gray-400 rounded-2xl hover:bg-gray-700 transition"
-                  >
-                    -
-                  </button>
-
-                  {/* Input Wrapper */}
-                  <div className="relative flex-grow">
-                    <input
-                      type="number"
-                      ref={inputRef}
-                      className={`peer w-full h-12 bg-transparent text-white text-lg outline-none border border-gray-400 rounded-lg px-4 pt-5 pb-1 text-center
-      [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none
-      focus:border-blue-500 transition-all duration-300`}
-                      value={formData.votes}
-                      onChange={handleChange}
-                      onFocus={() => setHasValue(true)}
-                      onBlur={() => setHasValue(!!formData.votes)}
-                      min="10"
-                      max="15000"
-                      placeholder=" " 
-                    />
-                    {/* Floating Label */}
-                    <label
-                      className={`absolute left-4 text-gray-400 text-lg pointer-events-none transition-all duration-300 
-      ${
-        hasValue || document.activeElement === inputRef.current
-          ? "top-2 left-4 text-sm text-blue-500"
-          : "top-1/2 -translate-y-1/2 text-lg text-gray-400"
-      }`}
-                    >
-                      Enter your vote
-                    </label>
-                  </div>
-
-                  <button
-                    onClick={() => {
-                      handleVoteChange(formData.votes + 10);
-                      setHasValue(true);
-                    }}
-                    className="w-12 h-12 flex items-center justify-center text-2xl text-white border border-gray-400 rounded-2xl hover:bg-gray-700 transition"
-                  >
-                    +
-                  </button>
-                </div>
-
-                {/* Amount Section */}
-                <p className="mt-4 text-normal text-gray-400">
-                  Total amount:{" "}
-                  <span className="text-blue-400 font-semibold border-gray-600">
-                    Rs {formData.amount}
-                  </span>
-                </p>
+                {selectedCountry?.cc === "in" ||
+                selectedCountry?.cc === "np" ? (
+                  <LocalVotingComponent
+                    formData={formData}
+                    setFormData={setFormData}
+                  />
+                ) : (
+                  <InternationalVotingComponents />
+                )}
 
                 {/* Name, Phone & Email Input */}
                 <div className="mt-6 w-full flex flex-col gap-6">
-                  <div>
+                  {/* ************************************ Input Name *********************************** */}
+                  <div className="relative w-full">
                     <input
                       type="text"
                       name="name"
+                      id="name"
+                      className="peer p-3 bg-transparent border border-gray-600 rounded-lg text-white w-full outline-none placeholder-transparent focus:border-blue-500 transition-all duration-300"
                       placeholder="Name (Voter)"
-                      className="p-3 bg-transparent border border-gray-400 rounded-lg text-white w-full outline-none placeholder-gray-400"
                       value={formData.name}
                       onChange={handleInputChange}
+                      onFocus={() => setInputFocused(true)}
+                      onBlur={() => setInputFocused(false)}
                     />
+                    {/* Floating Label */}
+                    <label
+                      htmlFor="name"
+                      className={`absolute left-3 bg-customBlue px-2 text-gray-400 text-base pointer-events-none transform transition-all duration-300 ease-in-out
+        ${
+          formData.name || inputFocused
+            ? "top-0 -translate-y-1/2 scale-90 text-blue-500 px-2"
+            : "top-1/2 -translate-y-1/2 scale-100"
+        }`}
+                    >
+                      Name (Voter)
+                    </label>
                     {errors.name && (
                       <p className="text-red-400 text-sm">{errors.name}</p>
                     )}
                   </div>
+                  {/* ********************************* Input Phone Number Search ************************************** */}
 
-                  <div>
-                    <div className="relative flex items-center border  rounded-lg p-3">
-                      {/* Country Selector */}
-                      <div className="relative">
-                        <button
-                          onClick={handleDrop}
-                          className="flex items-center  rounded-lg px-3 py-2 "
-                        >
-                          <div className="bold px-2">
-                            <FaCaretDown />
-                          </div>
-                          {selectedCountry?.cc && (
-                            <img
-                              src={`https://flagcdn.com/w40/${selectedCountry.cc.toLowerCase()}.png`}
-                              alt={`${selectedCountry.name} flag`}
-                              width="24"
-                              className="mr-2 "
-                            />
-                          )}
-                          {selectedCountry?.mc}
-                        </button>
+                  <PhoneInputWithCountrySelector
+                    countryCodes={countryCodes}
+                    formData={formData}
+                    setFormData={setFormData}
+                    errors={errors}
+                    placeholder="Phone"
+                    fieldName="phone"
+                  />
 
-                        {drop && (
-                          <div className="absolute mt-1 w-[300%] bg-customBlue border border-gray-300 rounded-md shadow-md">
-                            {/* Search Input with Icon */}
-                            <div className="relative">
-                              <FiSearch
-                                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                                size={18}
-                              />
-                              <input
-                                type="text"
-                                placeholder="Search country..."
-                                className="w-full pl-10 pr-3 py-2 border-b border-gray-300 text-white bg-customBlue focus:outline-none"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                              />
-                            </div>
-
-                            {/* Country List */}
-                            <ul className="max-h-60 overflow-y-auto custom-scrollbar">
-                              {countryCodes
-                                ?.filter((country) => {
-                                  if (!country || !country.name || !country.mc)
-                                    return false;
-                                  return (
-                                    country.name
-                                      .toLowerCase()
-                                      .includes(
-                                        searchTerm.toLowerCase().trim()
-                                      ) ||
-                                    country.mc
-                                      .toLowerCase()
-                                      .includes(searchTerm.toLowerCase().trim())
-                                  );
-                                })
-                                .map((country) => (
-                                  <li
-                                    key={country.cc}
-                                    className="flex items-center px-3 py-2 hover:bg-customDarkBlue cursor-pointer"
-                                    onClick={() => {
-                                      setSelectedCountry(country);
-                                      setDrop(false);
-                                    }}
-                                  >
-                                    <img
-                                      src={`https://flagcdn.com/w40/${country.cc?.toLowerCase()}.png`}
-                                      alt={`${country.name} flag`}
-                                      width="24"
-                                      className="mr-2"
-                                    />
-                                    {country.name} ({country.mc})
-                                  </li>
-                                ))}
-                            </ul>
-                          </div>
+                  {selectedCountry?.cc !== "np" &&
+                    selectedCountry?.cc !== "in" && (
+                      <div>
+                        <input
+                          type="email"
+                          name="email"
+                          placeholder="Email (Voter)"
+                          className="p-3 bg-transparent border border-gray-600 rounded-lg text-white w-full outline-none placeholder-gray-400"
+                          value={formData.email}
+                          onChange={handleInputChange}
+                        />
+                        {errors.email && (
+                          <p className="text-red-400 text-sm">{errors.email}</p>
                         )}
                       </div>
-
-                      {/* Phone Input */}
-                      <input
-                        type="number"
-                        name="phone"
-                        placeholder="Phone (Voter)"
-                        className="bg-transparent flex-grow  outline-none text-white placeholder-gray-400
-                                     [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                        value={formData.phone}
-                        onChange={(e) =>
-                          setFormData((prevData) => ({
-                            ...prevData,
-                            phone: e.target.value,
-                          }))
-                        }
-                      />
-                    </div>
-                    {errors.phone && (
-                      <p className="text-red-400 text-sm">{errors.phone}</p>
                     )}
-                  </div>
 
-                  {paymentCurrency.cc !== "np" && (
-                    <div>
-                      <input
-                        type="email"
-                        name="email"
-                        placeholder="Email (Voter)"
-                        className="p-3 bg-transparent border border-gray-400 rounded-lg text-white w-full outline-none placeholder-gray-400"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                      />
-                      {errors.email && (
-                        <p className="text-red-400 text-sm">{errors.email}</p>
-                      )}
-                    </div>
+                  {/* ******for Nepal Payment Selector********* */}
+
+                  {selectedCountry?.cc === "np" && (
+                    <>
+                      {/* Partner Dropdown */}
+                      <div className=" w-full max-w-[600px]">
+                        <CustomDropdown
+                          options={
+                            nepalPartner?.[0]?.partner?.map((partner) => ({
+                              value: partner.name,
+                              label: (
+                                <div className="flex items-center justify-center">
+                                  <img
+                                    src={partner.image}
+                                    alt={`${partner.name}`}
+                                    width="96"
+                                    className="mr-2"
+                                  />
+                                </div>
+                              ),
+                            })) || []
+                          }
+                          formData={{ source: selectedPartner }}
+                          handleOnChangeDropDown={handlePartnerChange}
+                          placeholder="Select Payment Partner"
+                          labelBgColor="bg-customBlue"
+                          optionBgColor="bg-customBlue"
+                          inputBgColor="bg-customBlue"
+                          grid="grid-cols-2"
+                        />
+                      </div>
+                    </>
                   )}
                 </div>
 
-                {/* Terms & Conditions */}
-                <div className="mt-4 flex items-center gap-2 text-gray-400 text-xs my-2">
+                {/* ************************** Terms & Conditions ************************** */}
+                <div className="mt-4 bg-customDarkBlue p-2 rounded-lg flex items-center gap-2 text-gray-400 text-xs my-2">
                   <input
                     type="checkbox"
                     id="terms"
@@ -439,16 +521,85 @@ export default function VotingComponent() {
                 </div>
               </div>
 
-              <button
-                className="mt-6 bg-white hover:bg-gray-300 text-sm text-purple-800 px-6 py-3 rounded-2xl"
-                onClick={handleProceedToPay}
-              >
-                Proceed to Pay
-              </button>
+              {/* ********** Custom Proceed to pay Button ************** */}
+              <div>
+                {selectedCountry?.cc === "in" ? (
+                  <button
+                    className="mt-6 bg-white hover:bg-gray-300 text-sm text-purple-800 px-6 py-3 rounded-2xl"
+                    onClick={handlePayment}
+                  >
+                    Proceed to Pay in
+                  </button>
+                ) : selectedCountry?.cc === "np" ? (
+                  <button
+                    className="mt-6 bg-white hover:bg-gray-300 text-sm text-purple-800 px-6 py-3 rounded-2xl"
+                    onClick={handleNepalPayment}
+                  >
+                    Proceed to Pay
+                  </button>
+                ) : (
+                  <button
+                    className="mt-6 bg-white hover:bg-gray-300 text-sm text-purple-800 px-6 py-3 rounded-2xl"
+                    onClick={handleProceedToPay}
+                  >
+                    Proceed to Pay
+                  </button>
+                )}
+              </div>
             </div>
           </>
         )}
       </div>
+      {paymentIframeUrl && (
+  <motion.div
+    className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-[9999]"
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
+  >
+    <motion.div
+      className="w-[80%] md:w-[60%] lg:w-[40%] h-[70%] bg-customBlue rounded-2xl overflow-hidden relative flex flex-col"
+      initial={{ scale: 0.8, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      exit={{ scale: 0.8, opacity: 0 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+    >
+      {/* Header with Close Button */}
+      <div className="bg-customBlue p-4 flex justify-between items-center">
+        <h2 className="text-white text-lg font-semibold">Payment</h2>
+        <button
+          onClick={() => setShowConfirm(true)}
+          className="text-white text-xl hover:text-gray-300 transition"
+        >
+          ✕
+        </button>
+      </div>
+
+      {/* Iframe */}
+      <iframe
+        src={paymentIframeUrl}
+        className="w-full flex-grow"
+        allow="fullscreen"
+        allowFullScreen
+        style={{
+          WebkitOverflowScrolling: "touch",
+          overflowY: "auto",
+          touchAction: "manipulation",
+        }}
+      ></iframe>
+    </motion.div>
+
+    {/* Confirmation Popup */}
+    {showConfirm && (
+      <ConfirmCancelPopup
+        onClose={() => setShowConfirm(false)}
+        onConfirm={() => window.location.reload()}
+      />
+    )}
+  </motion.div>
+)}
+
+
     </div>
   );
 }

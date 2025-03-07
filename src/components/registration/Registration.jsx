@@ -2,23 +2,11 @@ import { useNavigate } from "react-router-dom";
 import { useState, useEffect, useContext } from "react";
 import { EventContext } from "../../EventProvider";
 
-// Simulate a list of events
-const events = [
-  {
-    id: 1,
-    title: "Live Photography Webinar",
-    img: "/assets/regi1.png",
-    time: "18, January 2025",
-    description: "Join us for a live webinar on photography techniques.",
-  },
-];
-
 function Registration() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const { forms, getAllForms } = useContext(EventContext);
 
-  // Fetch contestant data
   useEffect(() => {
     getAllForms();
   }, [getAllForms]);
@@ -51,7 +39,7 @@ function Registration() {
     if (!isoString) return "N/A"; // Check if the date is empty or undefined
     const date = new Date(isoString);
     return isNaN(date.getTime())
-      ? "N/A" // Handle invalid dates
+      ? "N/A" 
       : date.toLocaleDateString("en-GB", {
           day: "2-digit",
           month: "long",
@@ -82,19 +70,18 @@ function Registration() {
                   className="bg-customDarkBlue text-white rounded-3xl shadow-md overflow-hidden flex flex-col flex-shrink-0"
                 >
                   <img
-                    src={fields.formImg} // Use fields.formImg
+                    src={fields.formImg}
                     alt={feature.title}
-                    className="w-full p-2 lg:h-[340px] md:h-[320px] h-[280px] rounded-3xl"
+                    className="w-full p-2 h-60 lg:h-60 md:h-68 rounded-3xl object-cover"
                   />
-                  <div className="flex flex-col pl-4 pr-4 flex-grow">
-                    <h3 className="text-lg md:text-[16px] font-semibold">
+
+                  <div className="pl-4 pr-4 flex flex-col flex-grow">
+                    <h3 className="text-lg md:text-lg font-semibold">
                       {feature.title}
                     </h3>
-                    {/* <p className="text-xs md:text-[10px] text-gray-300 mt-1 flex-grow">
-                      {feature.description}
-                    </p> */}
+                     
                     <div className="flex justify-between items-center mt-auto">
-                      <p className="flex items-center text-xs md:text-xsm text-gray-100">
+                      <p className="flex items-center text-xs md:text-sm text-gray-100">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           fill="none"

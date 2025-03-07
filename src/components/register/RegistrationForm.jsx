@@ -1,10 +1,17 @@
 import { useState, useEffect } from "react";
-import { Pencil, User } from "lucide-react";
+import { Pencil} from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 
-export default function EventRegistrationForm() {
+import countryCodes from "../contestentDetails/countryCodes.jsx";
+import PhoneInputWithCountrySelector from "../ReusableInputField/PhoneInputWithCountrySelector.jsx";
+import CustomDropdown from "../ReusableInputField/CustomDropdown.jsx";
+
+export default function EventRegistrationForm({ fields }) {
   const navigate = useNavigate();
   const [errors, setErrors] = useState({});
+  const [inputFocused, setInputFocused] = useState({}); // Track focus state for each field
+
   const [formData, setFormData] = useState({
     name: "",
     gender: "",
@@ -23,7 +30,7 @@ export default function EventRegistrationForm() {
 
   useEffect(() => {
     setTimeout(() => {
-      setLoading(false); // Stop loading after 2 seconds for demo purposes
+      setLoading(false);
     }, 2000);
   }, []);
 
@@ -33,6 +40,14 @@ export default function EventRegistrationForm() {
       ...formData,
       [name]: value,
     });
+  };
+
+  const handleFocus = (fieldName) => {
+    setInputFocused((prev) => ({ ...prev, [fieldName]: true }));
+  };
+
+  const handleBlur = (fieldName) => {
+    setInputFocused((prev) => ({ ...prev, [fieldName]: false }));
   };
 
   const handleImageChange = (event) => {
@@ -48,37 +63,61 @@ export default function EventRegistrationForm() {
 
   const validateForm = () => {
     let errors = {};
+    if (fields.female_only) {
+      if (!formData.age) errors.age = "This field is required";
+      if (!formData.height) errors.height = "This field is required";
+    }
     if (!formData.name.trim()) errors.name = "This field is required";
-    if (!formData.gender) errors.gender = "This field is required";
+
+    if (!formData.gender && !fields.female_only)
+      errors.gender = "This field is required";
     if (!formData.guardianName.trim())
       errors.guardianName = "This field is required";
     if (!formData.permanentAddress.trim())
       errors.permanentAddress = "This field is required";
 
-    if (!formData.contactNumber.trim())
+    // Validate Contact Number
+    if (!formData.contactNumber.trim()) {
       errors.contactNumber = "This field is required";
-    else if (!/^\+?\d{10,15}$/.test(formData.contactNumber))
+    } else if (!/^\+?\d{10,15}$/.test(formData.contactNumber)) {
       errors.contactNumber = "Invalid contact number";
+    }
 
-    if (!formData.optionalNumber.trim())
-      errors.optionalNumber = "This field is required";
+    // Validate Optional Number (Only if it's filled)
     if (
-      formData.optionalNumber &&
+      formData.optionalNumber.trim() &&
       !/^\+?\d{10,15}$/.test(formData.optionalNumber)
-    )
+    ) {
       errors.optionalNumber = "Invalid contact number";
-    if (!formData.email.trim()) errors.email = "This field is required";
-    else if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(formData.email))
+    }
+
+    // Validate Email
+    if (!formData.email.trim()) {
+      errors.email = "This field is required";
+    } else if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(formData.email)) {
       errors.email = "Invalid email format";
+    }
 
     setErrors(errors);
+
+    // Return true if no errors, false otherwise
     return Object.keys(errors).length === 0;
   };
+
+  const genderOptions = [
+    { value: "male", label: "Male" },
+    { value: "female", label: "Female" },
+    { value: "prefer-not", label: "Prefer not to say" },
+  ];
 
   const handleSave = () => {
     if (validateForm()) {
       navigate("/registration/confirmation", { state: formData });
     }
+  };
+
+  const handleDropdownChange = (value) => {
+    setFormData((prev) => ({ ...prev, source: value }));
   };
 
   const SkeletonLoader = () => (
@@ -122,7 +161,7 @@ export default function EventRegistrationForm() {
       <div className="pb-10 pt-20">
         <h1 className="font-semibold text-4xl text-white">Registration</h1>
       </div>
-      <div className="flex bg-customBlue justify-center items-center p-4  md:min-h-screen">
+      <div className="flex bg-customBlue justify-center items-center p-4 md:min-h-screen">
         <div className="bg-customDarkBlue w-full max-w-6xl p-8 rounded-lg shadow-2xl">
           {loading ? (
             <SkeletonLoader />
@@ -134,7 +173,7 @@ export default function EventRegistrationForm() {
                     Image
                   </span>
                   <div className="relative">
-                    <div className="w-24 h-24 rounded-full border-4 border-white overflow-hidden flex items-center justify-center bg-gray-700">
+                    <div className="w-24 h-24 rounded-full border-4 border-none overflow-hidden flex items-center justify-center bg-gray-700">
                       {image ? (
                         <img
                           src={image}
@@ -142,7 +181,15 @@ export default function EventRegistrationForm() {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <User size={48} color="white" />
+                        <img
+                          src={
+                            fields.female_only
+                              ? "https://cdn-icons-png.flaticon.com/512/4140/4140036.png" // Female avatar 👩
+                              : "https://cdn-icons-png.flaticon.com/512/4140/4140037.png" // Male avatar 👨
+                          }
+                          alt="User Icon"
+                          className="w-16 h-16 object-contain"
+                        />
                       )}
                     </div>
 
@@ -160,78 +207,146 @@ export default function EventRegistrationForm() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
+                {/* Name Field */}
+                <div className="relative">
                   <input
                     type="text"
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
+                    onFocus={() => handleFocus("name")}
+                    onBlur={() => handleBlur("name")}
+                    className="mt-1 p-3 w-full bg-customDarkBlue border border-gray-600 rounded-md text-white placeholder-transparent focus:outline-none focus:border-blue-500 peer"
                     placeholder="Name"
-                    className="mt-1 p-3 w-full bg-customDarkBlue border border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 text-white placeholder-gray-400 transition-all duration-300 hover:border-blue-500"
                   />
+                  <label
+                    htmlFor="name"
+                    className={`absolute left-3 bg-customDarkBlue px-2 text-gray-400 text-base transition-all
+                      ${
+                        formData.name || inputFocused.name
+                          ? "top-0 -translate-y-1/2 text-blue-500 text-sm"
+                          : "top-1/2 -translate-y-1/2"
+                      }`}
+                  >
+                    Name
+                  </label>
                   {errors.name && (
                     <span className="text-red-500 text-sm">{errors.name}</span>
                   )}
                 </div>
 
-                <div className="flex flex-col">
-                  <div className="flex flex-col md:flex-row md:space-x-4 space-y-2 md:space-y-0">
-                    <div className="flex  items-center space-x-2">
-                      <input
-                        type="radio"
-                        name="gender"
-                        value="male"
-                        checked={formData.gender === "male"}
-                        onChange={handleInputChange}
-                        className="w-4 h-4 text-blue-600 focus:ring-blue-500"
-                      />
-                      <span className="text-sm md:text-base text-white">
-                        Male
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="radio"
-                        name="gender"
-                        value="female"
-                        checked={formData.gender === "female"}
-                        onChange={handleInputChange}
-                        className="w-4 h-4 text-blue-600 focus:ring-blue-500"
-                      />
-                      <span className="text-sm md:text-base text-white">
-                        Female
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="radio"
-                        name="gender"
-                        value="prefer-not"
-                        checked={formData.gender === "prefer-not"}
-                        onChange={handleInputChange}
-                        className="w-4 h-4 text-blue-600 focus:ring-blue-500"
-                      />
-                      <span className="text-sm md:text-base text-white">
-                        Prefer not to say
-                      </span>
-                    </div>
-                  </div>
-                  {errors.gender && (
-                    <span className="text-red-500 text-sm">
-                      {errors.gender}
-                    </span>
-                  )}
-                </div>
+                {/* Gender Field (No Floating Label) */}
+                {!fields.female_only && (
+                  <motion.div
+                    className="flex flex-col"
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <div className="flex flex-row space-x-2 items-start md:items-center">
+                      {genderOptions.map((option) => (
+                        <motion.label
+                          key={option.value}
+                          className="flex items-center md:space-x-3 space-x-1 cursor-pointer p-2 rounded-lg transition-all"
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          <motion.span
+                            className="w-4 h-4 md:w-5 md:h-5 border-2 border-white rounded-full flex items-center justify-center"
+                            whileHover={{ scale: 1.1 }}
+                          >
+                            {formData.gender === option.value && (
+                              <motion.span
+                                className="w-2.5 h-2.5 bg-white rounded-full"
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                transition={{ duration: 0.2 }}
+                              />
+                            )}
+                          </motion.span>
 
-                <div>
+                          <span className="text-sm md:text-base text-white">
+                            {option.label}
+                          </span>
+
+                          <input
+                            type="radio"
+                            name="gender"
+                            value={option.value}
+                            checked={formData.gender === option.value}
+                            onChange={handleInputChange}
+                            className="hidden"
+                          />
+                        </motion.label>
+                      ))}
+                    </div>
+
+                    {errors.gender && (
+                      <span className="text-red-500 text-sm">
+                        {errors.gender}
+                      </span>
+                    )}
+                  </motion.div>
+                )}
+
+                {/* for female only Height */}
+                {fields.female_only && (
+                  <>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        name="height"
+                        value={formData.height}
+                        onChange={handleInputChange}
+                        onFocus={() => handleFocus("height")}
+                        onBlur={() => handleBlur("height")}
+                        className="mt-1 p-3 w-full bg-customDarkBlue border border-gray-600 rounded-md text-white placeholder-transparent focus:outline-none focus:border-blue-500 peer"
+                        placeholder="Height"
+                      />
+                      <label
+                        htmlFor="height"
+                        className={`absolute left-3 bg-customDarkBlue px-2 text-gray-400 text-base transition-all
+                      ${
+                        formData.height || inputFocused.height
+                          ? "top-0 -translate-y-1/2 text-blue-500 text-sm"
+                          : "top-1/2 -translate-y-1/2"
+                      }`}
+                      >
+                        Height
+                      </label>
+                      {errors.height && (
+                        <span className="text-red-500 text-sm">
+                          {errors.height}
+                        </span>
+                      )}
+                    </div>
+                  </>
+                )}
+
+                {/* Permanent Address Field */}
+                <div className="relative">
                   <input
                     type="text"
                     name="permanentAddress"
                     value={formData.permanentAddress}
                     onChange={handleInputChange}
+                    onFocus={() => handleFocus("permanentAddress")}
+                    onBlur={() => handleBlur("permanentAddress")}
+                    className="mt-1 p-3 w-full bg-customDarkBlue border border-gray-600 rounded-md text-white placeholder-transparent focus:outline-none focus:border-blue-500 peer"
                     placeholder="Permanent Address"
-                    className="mt-1 p-3 w-full bg-customDarkBlue border border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 text-white placeholder-gray-400 transition-all duration-300 hover:border-blue-500"
                   />
+                  <label
+                    htmlFor="permanentAddress"
+                    className={`absolute left-3 bg-customDarkBlue px-2 text-gray-400 text-base transition-all
+                      ${
+                        formData.permanentAddress ||
+                        inputFocused.permanentAddress
+                          ? "top-0 -translate-y-1/2 text-blue-500 text-sm"
+                          : "top-1/2 -translate-y-1/2"
+                      }`}
+                  >
+                    Permanent Address
+                  </label>
                   {errors.permanentAddress && (
                     <span className="text-red-500 text-sm">
                       {errors.permanentAddress}
@@ -239,26 +354,89 @@ export default function EventRegistrationForm() {
                   )}
                 </div>
 
-                <div>
+                {/* for female only */}
+                {fields.female_only && (
+                  <>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        name="age"
+                        value={formData.age}
+                        onChange={handleInputChange}
+                        onFocus={() => handleFocus("age")}
+                        onBlur={() => handleBlur("age")}
+                        className=" [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none mt-1 p-3 w-full bg-customDarkBlue border border-gray-600 rounded-md text-white placeholder-transparent focus:outline-none focus:border-blue-500 peer"
+                        placeholder="age"
+                      />
+                      <label
+                        htmlFor="age"
+                        className={`absolute left-3 bg-customDarkBlue px-2 text-gray-400 text-base transition-all
+                      ${
+                        formData.age || inputFocused.age
+                          ? "top-0 -translate-y-1/2 text-blue-500 text-sm"
+                          : "top-1/2 -translate-y-1/2"
+                      }`}
+                      >
+                        Age
+                      </label>
+                      {errors.age && (
+                        <span className="text-red-500 text-sm">
+                          {errors.age}
+                        </span>
+                      )}
+                    </div>
+                  </>
+                )}
+
+                {/* Temporary Address Field */}
+                <div className="relative">
                   <input
                     type="text"
                     name="temporaryAddress"
                     value={formData.temporaryAddress}
                     onChange={handleInputChange}
+                    onFocus={() => handleFocus("temporaryAddress")}
+                    onBlur={() => handleBlur("temporaryAddress")}
+                    className="mt-1 p-3 w-full bg-customDarkBlue border border-gray-600 rounded-md text-white placeholder-transparent focus:outline-none focus:border-blue-500 peer"
                     placeholder="Temporary Address"
-                    className="mt-1 p-3 w-full bg-customDarkBlue border border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 text-white placeholder-gray-400 transition-all duration-300 hover:border-blue-500"
                   />
+                  <label
+                    htmlFor="temporaryAddress"
+                    className={`absolute left-3 bg-customDarkBlue px-2 text-gray-400 text-base transition-all
+                      ${
+                        formData.temporaryAddress ||
+                        inputFocused.temporaryAddress
+                          ? "top-0 -translate-y-1/2 text-blue-500 text-sm"
+                          : "top-1/2 -translate-y-1/2"
+                      }`}
+                  >
+                    Temporary Address
+                  </label>
                 </div>
 
-                <div>
+                {/* Guardian's Name Field */}
+                <div className="relative">
                   <input
                     type="text"
                     name="guardianName"
                     value={formData.guardianName}
                     onChange={handleInputChange}
+                    onFocus={() => handleFocus("guardianName")}
+                    onBlur={() => handleBlur("guardianName")}
+                    className="mt-1 p-3 w-full bg-customDarkBlue border border-gray-600 rounded-md text-white placeholder-transparent focus:outline-none focus:border-blue-500 peer"
                     placeholder="Guardian's Name"
-                    className="mt-1 p-3 w-full bg-customDarkBlue border border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 text-white placeholder-gray-400 transition-all duration-300 hover:border-blue-500"
                   />
+                  <label
+                    htmlFor="guardianName"
+                    className={`absolute left-3 bg-customDarkBlue px-2 text-gray-400 text-base transition-all
+                      ${
+                        formData.guardianName || inputFocused.guardianName
+                          ? "top-0 -translate-y-1/2 text-blue-500 text-sm"
+                          : "top-1/2 -translate-y-1/2"
+                      }`}
+                  >
+                    Guardian's Name
+                  </label>
                   {errors.guardianName && (
                     <span className="text-red-500 text-sm">
                       {errors.guardianName}
@@ -266,92 +444,106 @@ export default function EventRegistrationForm() {
                   )}
                 </div>
 
-                <div>
-                  <input
-                    type="number"
-                    name="contactNumber"
-                    value={formData.contactNumber}
-                    onChange={handleInputChange}
-                    placeholder="+91 Contact Number"
-                    className="mt-1 p-3 w-full bg-customDarkBlue border border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 text-white placeholder-gray-400 transition-all duration-300 hover:border-blue-500"
-                  />
-                  {errors.contactNumber && (
-                    <span className="text-red-500 text-sm">
-                      {errors.contactNumber}
-                    </span>
-                  )}
-                </div>
+                {/* Contact Number Field */}
+                <PhoneInputWithCountrySelector
+                  countryCodes={countryCodes}
+                  formData={formData}
+                  setFormData={setFormData}
+                  errors={errors}
+                  placeholder="Contact Number"
+                  fieldName="contactNumber"
+                />
 
-                <div>
-                  <input
-                    type="number"
-                    name="optionalNumber"
-                    value={formData.optionalNumber}
-                    onChange={handleInputChange}
-                    placeholder="+91 Optional Contact Number"
-                    className="mt-1 p-3 w-full bg-customDarkBlue border border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 text-white placeholder-gray-400 transition-all duration-300 hover:border-blue-500"
-                  />
-                  {errors.optionalNumber && (
-                    <span className="text-red-500 text-sm">
-                      {errors.optionalNumber}
-                    </span>
-                  )}
-                </div>
+                {/* Optional Contact Number Field */}
+                <PhoneInputWithCountrySelector
+                  countryCodes={countryCodes}
+                  formData={formData}
+                  setFormData={setFormData}
+                  errors={errors}
+                  placeholder="Optional Contact Number"
+                  fieldName="optionalNumber"
+                />
 
-                <div>
+                {/* Email Field */}
+                <div className="relative">
                   <input
                     type="email"
                     name="email"
                     value={formData.email}
                     onChange={handleInputChange}
+                    onFocus={() => handleFocus("email")}
+                    onBlur={() => handleBlur("email")}
+                    className="mt-1 p-3 w-full bg-customDarkBlue border border-gray-600 rounded-md text-white placeholder-transparent focus:outline-none focus:border-blue-500 peer"
                     placeholder="Email"
-                    className="mt-1 p-3 w-full bg-customDarkBlue border border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 text-white placeholder-gray-400 transition-all duration-300 hover:border-blue-500"
                   />
+                  <label
+                    htmlFor="email"
+                    className={`absolute left-3 bg-customDarkBlue px-2 text-gray-400 text-base transition-all
+                      ${
+                        formData.email || inputFocused.email
+                          ? "top-0 -translate-y-1/2 text-blue-500 text-sm"
+                          : "top-[26px] -translate-y-1/2"
+                      }`}
+                  >
+                    Email
+                  </label>
                   {errors.email && (
                     <span className="text-red-500 text-sm">{errors.email}</span>
                   )}
                 </div>
 
-                <div>
+                {/* Reason Field */}
+                <div className="relative">
                   <textarea
                     name="reason"
                     value={formData.reason}
                     onChange={handleInputChange}
+                    onFocus={() => handleFocus("reason")}
+                    onBlur={() => handleBlur("reason")}
+                    className="mt-1 p-3 w-full bg-customDarkBlue border border-gray-600 rounded-md text-white placeholder-transparent focus:outline-none focus:border-blue-500 peer"
                     placeholder="Why do you want to participate in this Event?"
-                    className="mt-1 p-3 w-full bg-customDarkBlue border border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 text-white placeholder-gray-400 transition-all duration-300 hover:border-blue-500"
                     rows="4"
                   />
+                  <label
+                    htmlFor="reason"
+                    className={`absolute left-3 bg-customDarkBlue px-2 text-gray-400 text-base transition-all
+                      ${
+                        formData.reason || inputFocused.reason
+                          ? "top-0 -translate-y-1/2 text-blue-500 text-xs"
+                          : "top-1/2 -translate-y-1/2 text-sm md:text-base"
+                      }`}
+                  >
+                    Why do you want to participate in this Event?
+                  </label>
                 </div>
 
-                {/* Custom Dropdown */}
-                <div>
-                  <div className="relative">
-                    <select
-                      name="source"
-                      value={formData.source}
-                      onChange={handleInputChange}
-                      className="mt-1 p-3 w-full bg-customDarkBlue text-white border border-gray-600 rounded-md shadow-lg focus:ring-2 focus:ring-blue-500 transition-all duration-300 hover:border-blue-500"
-                    >
-                      <option value="" disabled>
-                        Select an option
-                      </option>
-                      <option value="facebook/instagram">
-                        Facebook/Instagram
-                      </option>
-                      <option value="linked/x/twitter">
-                        LinkedIn/X/Twitter
-                      </option>
-                      <option value="tiktok/youtube">TikTok/YouTube</option>
-                      <option value="news/advertizement">
-                        News/Advertisement
-                      </option>
-                      <option value="family/friends/relative">
-                        Family/Friends/Relative
-                      </option>
-                      <option value="family/friends/relative">Others</option>
-                    </select>
-                  </div>
-                </div>
+                {/* Source Field */}
+                <CustomDropdown
+                  options={[
+                    {
+                      value: "facebook/instagram",
+                      label: "Facebook/Instagram",
+                    },
+                    { value: "linked/x/twitter", label: "LinkedIn/X/Twitter" },
+                    { value: "tiktok/youtube", label: "TikTok/YouTube" },
+                    {
+                      value: "news/advertizement",
+                      label: "News/Advertisement",
+                    },
+                    {
+                      value: "family/friends/relative",
+                      label: "Family/Friends/Relative",
+                    },
+                    { value: "others", label: "Others" },
+                  ]}
+                  formData={formData}
+                  setFormData={setFormData}
+                  placeholder="How did you know about this Event/Program?"
+                  handleOnChangeDropDown={handleDropdownChange}
+                  labelBgColor="bg-customDarkBlue"
+                  optionBgColor="bg-customDarkBlue"
+                  inputBgColor="bg-customDarkBlue"
+                />
               </div>
 
               <div className="mt-8 flex justify-center">
