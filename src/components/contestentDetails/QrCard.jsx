@@ -35,8 +35,8 @@ export default function QrCode({ handleX, qrid }) {
     phone: "",
     email: "",
     votes: "",
-    amount: 100,
-    qrType: "", // Add qrType to the initial state
+    amount: "",
+    // qrType: "", // Add qrType to the initial state
   });
 
   const [hasValue, setHasValue] = useState(!!formData.votes);
@@ -86,7 +86,7 @@ export default function QrCode({ handleX, qrid }) {
 
   const validateForm = () => {
     let newErrors = {};
-    if (!formData.qrType) newErrors.qrType = "Please select a QR type.";
+    // if (!formData.qrType) newErrors.qrType = "Please select a QR type.";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -134,25 +134,28 @@ export default function QrCode({ handleX, qrid }) {
   const handleQR = async (e) => {
     if (validateForm()) {
       e.preventDefault();
-      const { votes, qrType } = formData;
-      console.log(qrType, ":qrtype");
+      const { votes} = formData;
+      console.log(votes, ":qrtype");
 
       if (votes < 10) {
         alert("All fields are required, and votes should be at least 10.");
         return;
       }
-      if (!qrType) {
-        alert("Please select a QR type.");
-        return;
-      }
+      // if (!qrType) {
+      //   alert("Please select a QR type.");
+      //   return;
+      // }
 
       setShowSpinner(true); // Show the spinner
 
       const intentID = qrid;
+      console.log("intend_id:," ,intentID);
+      console.log("Qr_id:," ,qrid);
+      
       let paymentUrl;
 
       // 1️⃣ Generate the QR Code URL based on the selected QR type
-      if (qrType === "One Time Use QR") {
+      // if (qrType === "One Time Use QR") {
         paymentUrl = await generateDynamicQr(intentID, calculatedAmount);
         console.log("Generated Dynamic QR Payment URL:", paymentUrl);
 
@@ -165,19 +168,19 @@ export default function QrCode({ handleX, qrid }) {
         } else {
           console.log("QR Code URL is not available.");
         }
-      } else if (qrType === "Multiple Time Use QR") {
+      // } else if (qrType === "Multiple Time Use QR") {
 
-        paymentUrl = await generateStaticQr(intentID, calculatedAmount);
-        if (paymentUrl) {
+      //   paymentUrl = await generateStaticQr(intentID, calculatedAmount);
+      //   if (paymentUrl) {
 
-          setQrString(paymentUrl);
-          // console.log("QrString: ", qrString);
-          setShowQRModal(true);
-          console.log("Generated Static QR String:", paymentUrl);
-        } else {
-          console.log("Failed to generate Static QR.");
-        }
-      }
+      //     setQrString(paymentUrl);
+      //     // console.log("QrString: ", qrString);
+      //     setShowQRModal(true);
+      //     console.log("Generated Static QR String:", paymentUrl);
+      //   } else {
+      //     console.log("Failed to generate Static QR.");
+      //   }
+      // }
 
       setShowSpinner(false); // Hide the spinner
     }
@@ -203,16 +206,16 @@ export default function QrCode({ handleX, qrid }) {
     [voteOptions]
   );
 
-  const options = [
-    {
-      label: "One Time Use QR",
-      description: "Supports eSewa, Banking Apps & all other major wallets",
-    },
-    {
-      label: "Multiple Time Use QR",
-      description: "Supports Banking Apps only but can be used multiple times",
-    },
-  ];
+  // const options = [
+  //   {
+  //     label: "One Time Use QR",
+  //     description: "Supports eSewa, Banking Apps & all other major wallets",
+  //   },
+  //   {
+  //     label: "Multiple Time Use QR",
+  //     description: "Supports Banking Apps only but can be used multiple times",
+  //   },
+  // ];
 
   return (
     <div className="absolute top-[450px] md:w-auto w-[96%] md:top-1/2 lg:top-[350px] mt-28 bg-customDarkBlue shadow-lg shadow-cyan-500/50   left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-none z-20 flex items-center justify-center text-white rounded-2xl overflow-hidden p-6">
@@ -313,7 +316,7 @@ export default function QrCode({ handleX, qrid }) {
                 </span>
               </p>
 
-              <div className="space-y-4 bg-customDarkBlue p-4 rounded-lg">
+              {/* <div className="space-y-4 bg-customDarkBlue p-4 rounded-lg">
                 {options.map((option, index) => (
                   <motion.button
                     key={index}
@@ -362,7 +365,7 @@ export default function QrCode({ handleX, qrid }) {
                 {errors?.qrType && (
                   <p className="text-red-400 text-sm">{errors.qrType}</p>
                 )}
-              </div>
+              </div> */}
             </div>
 
             <div className="flex item-center justify-center pb-16 ">
