@@ -13,10 +13,9 @@ const CustomDropdown = ({
   grid = "grid-cols-1", // Default to 1 column
 }) => {
   const { formData, setFormData } = useContext(EventContext);
-  // console.log(options);
   const [drop, setDrop] = useState(false);
   const [inputFocused, setInputFocused] = useState(false);
-  const [selectedOption, setSelectedOption] = useState(formData.source || "");
+  const [selectedOption, setSelectedOption] = useState(formData.currency || "");
   const dropdownRef = useRef(null);
 
   useEffect(() => {
@@ -30,15 +29,14 @@ const CustomDropdown = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [selectedOption]);
 
-  const handleSelect = (value) => {
+  const [id, setID] = useState("");
+  const handleSelect = (value, id) => {
+    console.log("Selected Value:", value); // Debugging
+    console.log("Selected ID:", id); // Debugging
     handleOnChangeDropDown(value);
     setSelectedOption(value);
-
-    setFormData((prevData) => {
-      const updatedData = { ...prevData, currency: value };
-      return updatedData;
-    });
-
+    setID(id);
+    setFormData((prevData) => ({ ...prevData, currency: value }));
     setDrop(false);
   };
 
@@ -78,7 +76,9 @@ const CustomDropdown = ({
           <span className="text-transparent">Select an option</span>
         )}
 
-        <FaCaretDown className={`ml-2 transition-transform ${drop ? "rotate-180" : ""}`} />
+        <FaCaretDown
+          className={`ml-2 transition-transform ${drop ? "rotate-180" : ""}`}
+        />
       </button>
       <AnimatePresence>
         {drop && (
@@ -92,16 +92,16 @@ const CustomDropdown = ({
             {options.map((option) => (
               <motion.li
                 key={option.value}
-                whileHover={{ scale: 1.05 }}
+                whileHover={{ scale: 1.02 }}
                 className={`p-4 bg-customBlue text-white cursor-pointer transition-all rounded-md shadow-md border border-gray-600 ${grid === "grid-cols-1" ? "flex items-start" : "flex flex-col items-center justify-center"}`}
-                onClick={() => handleSelect(option.value)}
+                onClick={() => handleSelect(option.value, option.id)}
               >
                 {option?.cc && (
                   <img
                     src={`https://flagcdn.com/w40/${option?.cc?.toLowerCase()}.png`}
                     alt={`${option.cc} flag`}
                     width="32"
-                    className="mb-2"
+                    className="mb-2 mr-2"
                   />
                 )}
                 <span className="text-sm font-semibold">{option.label}</span>

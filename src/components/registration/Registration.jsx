@@ -18,6 +18,10 @@ function Registration() {
   }, []);
 
   const handleCardClick = (feature) => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
     navigate(`/registration-details/${feature.id}`);
   };
 
@@ -70,7 +74,7 @@ function Registration() {
                   className="bg-customDarkBlue text-white rounded-3xl shadow-md overflow-hidden flex flex-col flex-shrink-0"
                 >
                   <img
-                    src={fields.formImg}
+                    src={feature.img}
                     alt={feature.title}
                     className="w-full p-2 h-60 lg:h-60 md:h-68 rounded-3xl object-cover"
                   />

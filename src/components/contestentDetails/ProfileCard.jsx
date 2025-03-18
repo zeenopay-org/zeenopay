@@ -1,5 +1,7 @@
 import { Crown } from "lucide-react";
 import { useContext, useEffect, useState } from "react";
+import { EventContext } from "../../EventProvider";
+import { motion } from "framer-motion";
 import {
   FaFacebook,
   FaFacebookMessenger,
@@ -8,28 +10,31 @@ import {
   FaWhatsapp,
   FaCopy,
 } from "react-icons/fa";
-import { EventContext } from "../../EventProvider";
-import { motion } from "framer-motion";
+
+
 
 function ProfileCard({ handleQrClick }) {
-  const { contestant, loading, paymentCurrency, getPaymentCurrency } =
-    useContext(EventContext);
+  const { contestant, loading, paymentCurrency, getPaymentCurrency } = useContext(EventContext);
   const [isIframeVisible, setIsIframeVisible] = useState(false);
   const [player, setPlayer] = useState(null);
-
+  
+  const videoUrl =
+    contestant?.shareable_link
+    ||
+    "https://www.youtube.com/shorts/KN9Dn1hOicg ";
   useEffect(() => {
     if (!paymentCurrency) {
       getPaymentCurrency();
     }
   }, [paymentCurrency, getPaymentCurrency]);
-
+  
   useEffect(() => {
     const loadYouTubeAPI = () => {
       if (!window.YT) {
         const tag = document.createElement("script");
         tag.src = "https://www.youtube.com/iframe_api";
         document.body.appendChild(tag);
-
+  
         window.onYouTubeIframeAPIReady = () => {
           createPlayer();
         };
@@ -37,7 +42,7 @@ function ProfileCard({ handleQrClick }) {
         createPlayer();
       }
     };
-
+  
     const createPlayer = () => {
       const newPlayer = new window.YT.Player("youtube-player", {
         events: {
@@ -50,17 +55,20 @@ function ProfileCard({ handleQrClick }) {
       });
       setPlayer(newPlayer);
     };
-
-    if (isIframeVisible) {
+  
+    if (isIframeVisible && videoUrl) { // Only load the iframe if videoUrl is not empty
       loadYouTubeAPI();
+    } else {
+      setIsIframeVisible(false); // If videoUrl is empty, hide the iframe
     }
-
+  
     return () => {
       if (player) {
         player.destroy();
       }
     };
-  }, [isIframeVisible]);
+  }, [isIframeVisible, videoUrl]); // Depend on videoUrl as well
+  
 
   const copyToClipboard = async () => {
     try {
@@ -87,9 +95,6 @@ function ProfileCard({ handleQrClick }) {
 
   const currentUrl = encodeURIComponent(window.location.href);
   const shareText = encodeURIComponent("Check this out!");
-  const videoUrl =
-    contestant?.video_url ||
-    "https://youtube.com/shorts/-U1r5f1Pje0?si=LGnQ1Yj1GrQAx0qj";
   const embedUrl = getEmbedUrl(videoUrl);
   const autoplayEmbedUrl = embedUrl ? `${embedUrl}&autoplay=1` : null;
 
@@ -121,13 +126,13 @@ function ProfileCard({ handleQrClick }) {
                     />
                     {contestant?.misc_kv && (
                     <div
-                      className="absolute top-28 left-32 md:left-36 md:top-28 transform -translate-x-[20%] -translate-y-[12.5%] 
-    bg-customDarkBlue text-white h-10 w-10 md:h-10 md:w-10 
-    text-8 md:text-14 flex items-center justify-center 
-    rounded-full"
-                    >
+                    className="absolute top-28 left-32 md:left-36 transform -translate-x-[20%] -translate-y-[12.5%] 
+                    bg-customDarkBlue text-white h-10 w-10 
+                    text-sm md:text-base flex items-center justify-center 
+                    rounded-full border border-transparent bg-gradient-to-r from-indigo-700 via-purple-500 to-indigo-900 
+                    transition duration-300 ease-in-out animate-pulse"
+                 >
                       {contestant.misc_kv}
-                      100
                     </div>
 
                     )} 

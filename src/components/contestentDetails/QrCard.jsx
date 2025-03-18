@@ -4,9 +4,15 @@ import { EventContext } from "../../EventProvider";
 import countryCodes from "./countryCodes";
 import PhoneInputWithCountrySelector from "../ReusableInputField/PhoneInputWithCountrySelector";
 import ConfirmCancelPopup from "../confirmCanclePupup/ConfirmCancelPopup";
+import { motion } from "framer-motion";
+import ElegantSpinner from "../confirmCanclePupup/ElegantSpinner.jsx";
+import { QRCodeCanvas } from "qrcode.react";
 
-export default function QrCode({ handleX }) {
-  const { id } = useParams();
+export default function QrCode({ handleX, qrid }) {
+  console.log("ididididi    Qr  jnsnj:", qrid);
+
+  const { id: paramId } = useParams();
+  const id = qrid ? qrid : paramId;
   const inputRef = useRef(null);
 
   const {
@@ -15,6 +21,7 @@ export default function QrCode({ handleX }) {
     contestant,
     getPaymentCurrency,
     generateDynamicQr,
+    generateStaticQr,
     generateIntentId,
     qrLoading,
     paymentStatus,
@@ -29,6 +36,7 @@ export default function QrCode({ handleX }) {
     email: "",
     votes: "",
     amount: 100,
+    qrType: "", // Add qrType to the initial state
   });
 
   const [hasValue, setHasValue] = useState(!!formData.votes);
@@ -39,6 +47,8 @@ export default function QrCode({ handleX }) {
   const [drop, setDrop] = useState(false);
   const [errors, setErrors] = useState({});
   const [showConfirm, setShowConfirm] = useState(false);
+  const [showSpinner, setShowSpinner] = useState(false); // State to control spinner visibility
+  const [qrString, setQrString] = useState("");
 
   const handleButtonClick = () => {
     inputRef.current.focus();
@@ -55,14 +65,19 @@ export default function QrCode({ handleX }) {
     }
   }, []);
 
+  const handleQrTypeChange = (option) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      qrType: option,
+    }));
+  };
+
   useEffect(() => {
     const { name } = formData;
     const storedPaymentStatus = localStorage.getItem("paymentStatus");
 
     if (paymentStatus === "SUCCESS" || storedPaymentStatus === "SUCCESS") {
       navigate("/success", { state: { transactionId, contestant, name } });
-
-      // Remove paymentStatus right after navigation is triggered
       requestAnimationFrame(() => {
         localStorage.removeItem("paymentStatus");
       });
@@ -71,16 +86,10 @@ export default function QrCode({ handleX }) {
 
   const validateForm = () => {
     let newErrors = {};
-    if (!formData.name.trim()) newErrors.name = "Name is required.";
-    if (!formData.phone.trim() || !/^\d{10}$/.test(formData.phone))
-      newErrors.phone = "Enter a valid 10-digit phone number.";
+    if (!formData.qrType) newErrors.qrType = "Please select a QR type.";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
-
-  const handleDrop = () => {
-    setDrop(() => !drop);
   };
 
   const votePrice = 10;
@@ -111,13 +120,6 @@ export default function QrCode({ handleX }) {
     }));
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
   const scrolltotop = (e) => {
     window.scrollTo({
       top: 0,
@@ -132,33 +134,52 @@ export default function QrCode({ handleX }) {
   const handleQR = async (e) => {
     if (validateForm()) {
       e.preventDefault();
-      const { name, phone, email, votes } = formData;
+      const { votes, qrType } = formData;
+      console.log(qrType, ":qrtype");
 
-      if (!name || !phone || votes < 10) {
+      if (votes < 10) {
         alert("All fields are required, and votes should be at least 10.");
         return;
       }
-
-      const intentID = generateIntentId();
-
-      // 1️⃣ Generate the QR Code URL
-      const paymentUrl = await generateDynamicQr(
-        intentID,
-        calculatedAmount,
-        name,
-        email,
-        phone
-      );
-
-      if (paymentUrl) {
-        setQrCodeUrl(paymentUrl);
-        setShowQRModal(true);
-        const txid = paymentUrl.split("/")[4].split("_")[1].split(".")[0];
-        console.log("Extracted txid:", txid);
-        setTransactionId(txid); 
-      } else {
-        console.log("QR Code URL is not available.");
+      if (!qrType) {
+        alert("Please select a QR type.");
+        return;
       }
+
+      setShowSpinner(true); // Show the spinner
+
+      const intentID = qrid;
+      let paymentUrl;
+
+      // 1️⃣ Generate the QR Code URL based on the selected QR type
+      if (qrType === "One Time Use QR") {
+        paymentUrl = await generateDynamicQr(intentID, calculatedAmount);
+        console.log("Generated Dynamic QR Payment URL:", paymentUrl);
+
+        if (paymentUrl) {
+          setQrCodeUrl(paymentUrl);
+          setShowQRModal(true);
+          const txid = paymentUrl.split("/")[4].split("_")[1].split(".")[0];
+          console.log("Extracted txid:", txid);
+          setTransactionId(txid);
+        } else {
+          console.log("QR Code URL is not available.");
+        }
+      } else if (qrType === "Multiple Time Use QR") {
+
+        paymentUrl = await generateStaticQr(intentID, calculatedAmount);
+        if (paymentUrl) {
+
+          setQrString(paymentUrl);
+          // console.log("QrString: ", qrString);
+          setShowQRModal(true);
+          console.log("Generated Static QR String:", paymentUrl);
+        } else {
+          console.log("Failed to generate Static QR.");
+        }
+      }
+
+      setShowSpinner(false); // Hide the spinner
     }
   };
 
@@ -182,10 +203,21 @@ export default function QrCode({ handleX }) {
     [voteOptions]
   );
 
+  const options = [
+    {
+      label: "One Time Use QR",
+      description: "Supports eSewa, Banking Apps & all other major wallets",
+    },
+    {
+      label: "Multiple Time Use QR",
+      description: "Supports Banking Apps only but can be used multiple times",
+    },
+  ];
+
   return (
-    <div className="absolute top-[450px] md:top-1/2 lg:top-[350px] left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-none z-20 flex items-center justify-center text-white rounded-2xl overflow-hidden p-6">
-      <div className="relative flex items-center justify-center mt-28">
-        <div className="p-4 bg-customDarkBlue shadow-lg shadow-cyan-500/50 text-white rounded-2xl overflow-y-auto max-h-[90vh] ios-srollbar">
+    <div className="absolute top-[450px] md:w-auto w-[96%] md:top-1/2 lg:top-[350px] mt-28 bg-customDarkBlue shadow-lg shadow-cyan-500/50   left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-none z-20 flex items-center justify-center text-white rounded-2xl overflow-hidden p-6">
+      <div className="relative flex items-center justify-center ">
+        <div className="p-4 bg-customDarkBlue text-white rounded-2xl overflow-y-auto max-h-[95vh]">
           <div className="relative">
             <button
               onClick={handleX}
@@ -215,15 +247,12 @@ export default function QrCode({ handleX }) {
               </button>
             </div>
 
-            <p className="mt-2 text-gray-400 text-center">
+            <p className="mt-2 text-gray-400  text-xs md:text-sm text-center">
               Min 10 votes & Max 15000 votes. One vote = Rs 10.0
             </p>
 
             <div className="flex flex-col items-center mt-6">
-              {/* <div className="w-full flex items-center gap-4"> */}
-
               <div className="relative flex items-center w-full gap-2">
-                {/* Decrement Button */}
                 <button
                   onClick={() => {
                     handleVoteChange(formData.votes - 1);
@@ -250,7 +279,7 @@ export default function QrCode({ handleX }) {
                     onBlur={() => setHasValue(!!formData.votes)}
                     min="10"
                     max="15000"
-                    placeholder=" " /* Keeps label behavior intact */
+                    placeholder=" "
                   />
                   {/* Floating Label */}
                   <label
@@ -277,8 +306,6 @@ export default function QrCode({ handleX }) {
                 </button>
               </div>
 
-              {/* </div> */}
-
               <p className="mt-4 text-normal text-gray-400">
                 Total amount:{" "}
                 <span className="text-blue-400 font-semibold">
@@ -286,44 +313,55 @@ export default function QrCode({ handleX }) {
                 </span>
               </p>
 
-              <div className="mt-6 w-full flex flex-col gap-6">
-                <div className="relative w-full">
-                  <input
-                    type="text"
-                    name="name"
-                    id="name"
-                    className="peer p-3 bg-transparent border border-gray-600 hover:border-blue-500 rounded-lg text-white w-full outline-none placeholder-transparent focus:border-blue-500 transition-all duration-300"
-                    placeholder="Name (Voter)"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    onFocus={() => setInputFocused(true)}
-                    onBlur={() => setInputFocused(false)}
-                  />
-                  {/* Floating Label */}
-                  <label
-                    htmlFor="name"
-                    className={`absolute left-3 bg-customDarkBlue px-2 text-gray-400 text-base pointer-events-none transform transition-all duration-300 ease-in-out
-        ${
-          formData.name || inputFocused
-            ? "top-0 -translate-y-1/2 scale-90 text-blue-500 px-2"
-            : "top-1/2 -translate-y-1/2 scale-100"
-        }`}
+              <div className="space-y-4 bg-customDarkBlue p-4 rounded-lg">
+                {options.map((option, index) => (
+                  <motion.button
+                    key={index}
+                    className={`w-full flex flex-col items-start p-4 rounded-lg transition-all   text-lef"}
+          `}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => {
+                      setFormData((prevData) => ({
+                        ...prevData, // Spread the previous state
+                        qrType: option.label, // Update only qrType
+                      }));
+                      handleQrTypeChange(option.label);
+                    }}
                   >
-                    Name (Voter)
-                  </label>
-                  {errors.name && (
-                    <p className="text-red-400 text-sm">{errors.name}</p>
-                  )}
-                </div>
-
-                <PhoneInputWithCountrySelector
-                  countryCodes={countryCodes}
-                  formData={formData}
-                  setFormData={setFormData}
-                  errors={errors}
-                  placeholder="Phone"
-                  fieldName="phone"
-                />
+                    <div className="flex items-center space-x-3">
+                      <motion.span
+                        className={`w-4 h-4 border-2 flex items-center justify-center rounded-full
+              `}
+                        whileHover={{ scale: 1.1 }}
+                      >
+                        {formData.qrType === option.label && (
+                          <motion.span
+                            className="w-3 h-3 bg-white rounded-full"
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ duration: 0.2 }}
+                          />
+                        )}
+                      </motion.span>
+                      <span
+                        className={`text-sm md:text-md font-semibold ${
+                          formData.qrType === option.label
+                            ? "text-white"
+                            : "text-gray-300"
+                        }`}
+                      >
+                        {option.label}
+                      </span>
+                    </div>
+                    <p className="text-xs md:text-sm text-gray-400 mt-1">
+                      {option.description}
+                    </p>
+                  </motion.button>
+                ))}
+                {errors?.qrType && (
+                  <p className="text-red-400 text-sm">{errors.qrType}</p>
+                )}
               </div>
             </div>
 
@@ -331,10 +369,19 @@ export default function QrCode({ handleX }) {
               <button
                 className="mt-6 bg-white hover:bg-gray-300 text-sm text-purple-800 px-6 py-3 rounded-2xl w-28 flex justify-center items-center"
                 onClick={scrolltotop}
-                disabled={qrLoading}
+                disabled={qrLoading || showSpinner} // Disable button when spinner is shown
               >
-                {qrLoading ? (
-                  <div className="w-5 h-5 border-2 border-customDarkBlue border-t-transparent rounded-full animate-spin"></div>
+                {qrLoading || showSpinner ? (
+                  <motion.div
+                    className="w-6 h-6 border-4 border-customDarkBlue border-t-transparent rounded-full animate-spin"
+                    initial={{ rotate: 0 }}
+                    animate={{ rotate: 360 }}
+                    transition={{
+                      duration: 1,
+                      repeat: Infinity,
+                      ease: "linear",
+                    }}
+                  />
                 ) : (
                   "Get QR"
                 )}
@@ -343,44 +390,92 @@ export default function QrCode({ handleX }) {
           </div>
         </div>
 
+        {/* Show the ElegantSpinner when showSpinner is true */}
+        {showSpinner && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
+            <ElegantSpinner />
+          </div>
+        )}
+
         {showQRModal && (
           <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
-            <div className="bg-customBlue p-6 rounded-lg mt-20 text-center w-[26rem] border border-gray-700 relative">
+            <div className="bg-customBlue p-6 rounded-lg -mt-12 md:mt-5 text-center w-[26rem] border border-gray-700 relative">
               {/* Header with Close Button */}
-              <div className="flex justify-between items-center bg-customBlue p-3 rounded-t-lg">
-                <h2 className="text-lg font-semibold text-white">
-                  Scan & Pay via Banking Apps, Esewa, Khalti and all major
-                  wallets
-                </h2>
-                <button
-                  onClick={() => setShowConfirm(true)}
-                  className="text-white text-xl pl-2 hover:text-red-500 transition"
-                >
-                  ✕
-                </button>
-              </div>
+              {qrString ? (
+                <>
+                  <div className="flex justify-between items-center bg-customBlue p-2 rounded-t-lg">
+                    <h2 className="text-xs text-white">
+                      <span className="font-semibold">Multiple Votes are accepted!  <br />
+                      </span>You can use this QR code to
+                      vote multiple times until voting ends. Screenshot and
+                      share with your audiences! <br /><span className="text-[9px]">(Mobile Banking Apps only)</span>
+                    </h2>
+                    <button
+                      onClick={() => setShowConfirm(true)}
+                      className="text-white text-xl pl-4 hover:text-red-500 transition"
+                    >
+                      ✕
+                    </button>
+                  </div>
 
-              {/* QR Code Container */}
-              <div className="bg-customDarkBlue p-4 rounded-lg">
-                <img
-                  src={qrCodeUrl}
-                  alt="QR Code"
-                  className="mx-auto rounded-lg border border-gray-500"
-                  style={{ width: "300px", height: "300px" }}
-                />
-                <div className="flex items-center justify-center mt-2 space-x-2">
-                  <p className="text-red-500 ml-4 font-semibold">Powered by</p>
+                  <div className="bg-customDarkBlue p-4 rounded-lg">
+                    {/* Static QR: Generate QR Image from qr_string */}
+                    <div className="bg-customDarkBlue p-4 rounded-lg flex flex-col items-center">
+                      {/* Log the qrString */}
+                      
+                      {console.log("QR String:", qrString)}
+                      <QRCodeCanvas value={decodeURIComponent(qrString)} size={250} />
+
+                      <div className="flex items-center justify-center mt-2 space-x-2">
+                        <p className="text-red-500 ml-4 font-semibold">
+                           Powered by
+                        </p>
+                        <img
+                          src="/assets/nepalpay.png"
+                          className="w-24 h-10"
+                          alt="FonePay Logo"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                // Dynamic QR: Show the dynamic QR Code Image
+                <div className="bg-customDarkBlue p-4 rounded-lg">
+                  <div className="flex justify-between items-center bg-customBlue p-3 rounded-t-lg">
+                    <h2 className="text-sm font-semibold text-white">
+                      Scan & Pay via Banking Apps, Esewa, Khalti, and all major
+                      wallets
+                    </h2>
+                    <button
+                      onClick={() => setShowConfirm(true)}
+                      className="text-white text-xl pl-4 hover:text-red-500 transition"
+                    >
+                      ✕
+                    </button>
+                  </div>
                   <img
-                    src="/assets/IMG_1574.png"
-                    className="w-24 h-10"
-                    alt="FonePay Logo"
+                    src={qrCodeUrl}
+                    alt="QR Code"
+                    className="mx-auto rounded-lg border border-gray-500"
+                    style={{ width: "300px", height: "300px" }}
                   />
+                  <div className="flex items-center justify-center mt-2 space-x-2">
+                    <p className="text-red-500 ml-4 font-semibold">
+                      Powered by
+                    </p>
+                    <img
+                      src="/assets/IMG_1574.png"
+                      className="w-24 h-10"
+                      alt="FonePay Logo"
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Total Amount Section */}
               <div className="flex mt-2 text-white pt-4">
-                <p className="ml-6 text-md">TOTAL AMOUNT NPR.</p>
+                <p className="ml-6 text-sm md:text-md">TOTAL AMOUNT NPR.</p>
                 <div className="flex justify-end w-44">
                   <span className="ml-10 bg-[#00255c] opacity-80 h-8 w-20 rounded-lg text-green-600 text-xl font-bold flex items-center justify-center">
                     {calculatedAmount}
@@ -388,7 +483,6 @@ export default function QrCode({ handleX }) {
                 </div>
               </div>
 
-              {/* Note Section */}
               <p className="text-xs mt-4">
                 <span className="text-red-500"> NOTE:</span> I hereby accept the
                 Terms of Services and acknowledge that payments done for voting
@@ -396,7 +490,6 @@ export default function QrCode({ handleX }) {
               </p>
             </div>
 
-            {/* Confirm Cancel Popup */}
             {showConfirm && (
               <ConfirmCancelPopup
                 onClose={() => setShowConfirm(false)}

@@ -40,7 +40,7 @@ const ConfirmCancelPopup = ({ onClose }) => {
             </motion.span>
 
             {/* Message */}
-            <p className="text-lg font-semibold text-white mb-4">
+            <p className="text-sm md:text-lg font-semibold  text-white mb-4">
               Do you want to cancel the transaction?
             </p>
 

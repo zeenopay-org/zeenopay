@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Pencil} from "lucide-react";
+import { Pencil } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 
@@ -7,11 +7,14 @@ import countryCodes from "../contestentDetails/countryCodes.jsx";
 import PhoneInputWithCountrySelector from "../ReusableInputField/PhoneInputWithCountrySelector.jsx";
 import CustomDropdown from "../ReusableInputField/CustomDropdown.jsx";
 
-export default function EventRegistrationForm({ fields }) {
+export default function EventRegistrationForm({ fields, formId }) {
+  console.log("fields: ", fields);
+  const amount = fields.formFee;
+
+  console.log("Received fromId:", formId);
   const navigate = useNavigate();
   const [errors, setErrors] = useState({});
-  const [inputFocused, setInputFocused] = useState({}); // Track focus state for each field
-
+  const [inputFocused, setInputFocused] = useState({});
   const [formData, setFormData] = useState({
     name: "",
     gender: "",
@@ -23,6 +26,8 @@ export default function EventRegistrationForm({ fields }) {
     email: "",
     reason: "",
     source: "",
+    dateOfBirth: "",
+    video: null,
   });
 
   const [image, setImage] = useState(null);
@@ -58,6 +63,13 @@ export default function EventRegistrationForm({ fields }) {
         setImage(reader.result);
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  const handleVideoChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setFormData((prev) => ({ ...prev, video: file }));
     }
   };
 
@@ -98,6 +110,16 @@ export default function EventRegistrationForm({ fields }) {
       errors.email = "Invalid email format";
     }
 
+    // Validate Date of Birth
+    if (!formData.dateOfBirth) {
+      errors.dateOfBirth = "This field is required";
+    }
+
+    // Validate Video Upload
+    if (!formData.video) {
+      errors.video = "This field is required";
+    }
+
     setErrors(errors);
 
     // Return true if no errors, false otherwise
@@ -112,7 +134,13 @@ export default function EventRegistrationForm({ fields }) {
 
   const handleSave = () => {
     if (validateForm()) {
-      navigate("/registration/confirmation", { state: formData });
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+      navigate("/registration/confirmation", {
+        state: { ...formData, form_id: formId, amount: amount },
+      });
     }
   };
 
@@ -173,34 +201,37 @@ export default function EventRegistrationForm({ fields }) {
                     Image
                   </span>
                   <div className="relative">
-                    <div className="w-24 h-24 rounded-full border-4 border-none overflow-hidden flex items-center justify-center bg-gray-700">
+                    {/* Label wraps the image to make it clickable */}
+                    <label className="w-24 h-24 rounded-full border-4 border-none overflow-hidden flex items-center justify-center bg-gray-700 cursor-pointer">
                       {image ? (
                         <img
                           src={image}
                           alt="Profile"
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
                         />
                       ) : (
                         <img
                           src={
                             fields.female_only
-                              ? "https://cdn-icons-png.flaticon.com/512/4140/4140036.png" // Female avatar 👩
+                              ? "https://res.cloudinary.com/dhah3xwej/image/upload/v1741424906/hud8kvagujtzhehwpeho.png" // Female avatar 👩
                               : "https://cdn-icons-png.flaticon.com/512/4140/4140037.png" // Male avatar 👨
                           }
                           alt="User Icon"
-                          className="w-16 h-16 object-contain"
+                          className="w-16 h-16 object-contain transition-transform duration-300 hover:scale-110"
                         />
                       )}
-                    </div>
-
-                    <label className="absolute bottom-0 right-0 bg-blue-900 p-2 rounded-full cursor-pointer transition-transform duration-300 hover:scale-110">
-                      <Pencil size={16} color="white" />
+                      {/* Hidden file input inside the label */}
                       <input
                         type="file"
                         accept="image/*"
                         className="hidden"
                         onChange={handleImageChange}
                       />
+                    </label>
+
+                    {/* Pencil Icon (Still Clickable) */}
+                    <label className="absolute bottom-0 right-0 bg-blue-900 p-2 rounded-full cursor-pointer transition-transform duration-300 hover:scale-110">
+                      <Pencil size={16} color="white" />
                     </label>
                   </div>
                 </div>
@@ -492,29 +523,65 @@ export default function EventRegistrationForm({ fields }) {
                   )}
                 </div>
 
-                {/* Reason Field */}
+                {/* Date of Birth Field */}
                 <div className="relative">
-                  <textarea
-                    name="reason"
-                    value={formData.reason}
+                  <input
+                    type="date"
+                    name="dateOfBirth"
+                    value={formData.dateOfBirth}
                     onChange={handleInputChange}
-                    onFocus={() => handleFocus("reason")}
-                    onBlur={() => handleBlur("reason")}
+                    onFocus={() => handleFocus("dateOfBirth")}
+                    onBlur={() => handleBlur("dateOfBirth")}
                     className="mt-1 p-3 w-full bg-customDarkBlue border border-gray-600 rounded-md text-white placeholder-transparent focus:outline-none focus:border-blue-500 peer"
-                    placeholder="Why do you want to participate in this Event?"
-                    rows="4"
+                    placeholder="Date of Birth"
                   />
                   <label
-                    htmlFor="reason"
+                    htmlFor="dateOfBirth"
                     className={`absolute left-3 bg-customDarkBlue px-2 text-gray-400 text-base transition-all
                       ${
-                        formData.reason || inputFocused.reason
-                          ? "top-0 -translate-y-1/2 text-blue-500 text-xs"
-                          : "top-1/2 -translate-y-1/2 text-sm md:text-base"
+                        formData.dateOfBirth || inputFocused.dateOfBirth
+                          ? "top-0 -translate-y-1/2 text-blue-500 text-sm"
+                          : "top-1/2 -translate-y-1/2"
                       }`}
                   >
-                    Why do you want to participate in this Event?
+                    Date of Birth
                   </label>
+                  {errors.dateOfBirth && (
+                    <span className="text-red-500 text-sm">
+                      {errors.dateOfBirth}
+                    </span>
+                  )}
+                </div>
+
+                {/* Video Upload Field */}
+                <div className="relative">
+                  <label
+                    htmlFor="video"
+                    className={`absolute left-[6px] bg-customDarkBlue  px-2 text-gray-400 text- transition-all
+                      ${
+                        formData.video || inputFocused.video
+                          ? "top-0 -translate-y-1/2 text-blue-500 text-xs"
+                          : "top-1/2 -translate-y-1/2 text-sm p-2 mt-[2px] md:mt-0 border border-gray-600 rounded-md  "
+                      }`}
+                  >
+                    Upload Video
+                  </label>
+                  <input
+                    type="file"
+                    name="video"
+                    accept="video/*"
+                    onChange={handleVideoChange}
+                    onFocus={() => handleFocus("video")}
+                    onBlur={() => handleBlur("video")}
+                    className="mt-1 p-2 w-full bg-customDarkBlue border border-gray-600 rounded-md text-white 
+             focus:outline-none focus:border-blue-500 peer 
+             file:bg-customDarkBlue file:text-transparent  file:rounded-md file:border-none file:px-4 file:py-2 
+             "
+                  />
+
+                  {errors.video && (
+                    <span className="text-red-500 text-sm">{errors.video}</span>
+                  )}
                 </div>
 
                 {/* Source Field */}
@@ -544,6 +611,30 @@ export default function EventRegistrationForm({ fields }) {
                   optionBgColor="bg-customDarkBlue"
                   inputBgColor="bg-customDarkBlue"
                 />
+              </div>
+
+              <div className="flex flex-col relative mt-4">
+                <textarea
+                  name="reason"
+                  value={formData.reason}
+                  onChange={handleInputChange}
+                  onFocus={() => handleFocus("reason")}
+                  onBlur={() => handleBlur("reason")}
+                  className="mt-1 p-3 w-full bg-customDarkBlue border border-gray-600 rounded-md text-white placeholder-transparent focus:outline-none focus:border-blue-500 peer"
+                  placeholder="Why do you want to participate in this Event?"
+                  rows="4"
+                />
+                <label
+                  htmlFor="reason"
+                  className={`absolute left-3 bg-customDarkBlue px-2 text-gray-400 text-base transition-all
+                      ${
+                        formData.reason || inputFocused.reason
+                          ? "top-0 -translate-y-1/2 text-blue-500 text-xs"
+                          : "top-1/2 -translate-y-1/2 text-sm md:text-base"
+                      }`}
+                >
+                  Why do you want to participate in this Event?
+                </label>
               </div>
 
               <div className="mt-8 flex justify-center">

@@ -4,15 +4,21 @@ import { EventContext } from "../../EventProvider";
 
 function EventList() {
   const navigate = useNavigate();
-  const { onGoingEvents, loading, getAllOngoingEvents } = useContext(EventContext);
+  const { getAllOngoingEvents, loading, events, getAllEvents } = useContext(EventContext);
 
   const handleCardClick = (id) => {
+      
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+    
     navigate(`/events/${id}`);
   };
 
   useEffect(() => {
-    getAllOngoingEvents();
-  }, [getAllOngoingEvents]);
+    getAllEvents();
+  }, [getAllEvents]);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -47,7 +53,7 @@ function EventList() {
             .map((_, index) => <div key={index}>{renderSkeletonLoader()}</div>)
         ) : (
           // Render actual event data if not loading
-          onGoingEvents.map((event, index) => (
+          events.map((event, index) => (
             <div
               key={index}
               onClick={() => handleCardClick(event.id)}

@@ -30,6 +30,9 @@ function PaymentOption({ formData }) {
 
   const handlePayment = async (e) => {
     e.preventDefault();
+    if (payment.method === "stripe_gbl") {
+      setPayment({ method: "stripe" });
+    }
     const { name, phone, email, amount, currency } = state;
     const isNepal = paymentParnter?.cc === "np";
     const isIndia = paymentParnter?.cc === "in";
@@ -66,7 +69,7 @@ function PaymentOption({ formData }) {
   };
 
   const handlePaymentChange = (e) => {
-    setPayment({ method: e.target.value });
+    setPayment({ method: e.target.value === "stripe_gbl" ? "stripe" : e.target.value });
   };
 
   return (
@@ -82,8 +85,7 @@ function PaymentOption({ formData }) {
                 <label
                   key={index}
                   className={`flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer transition-all ${
-                    payment.method ===
-                    (option === "stripe_gbl" ? "stripe" : option)
+                    payment.method === (option === "stripe_gbl" ? "stripe" : option)
                       ? "bg-blue-800 text-white shadow-lg"
                       : "bg-transparent hover:bg-blue-900"
                   }`}
@@ -91,24 +93,19 @@ function PaymentOption({ formData }) {
                   <input
                     type="radio"
                     name="payment"
-                    value={option === "stripe_gbl" ? "stripe" : option}
-                    checked={
-                      payment.method ===
-                      (option === "stripe_gbl" ? "stripe" : option)
-                    }
+                    value={option}
+                    checked={payment.method === (option === "stripe_gbl" ? "stripe" : option)}
                     onChange={handlePaymentChange}
                     className="hidden"
                   />
                   <div
                     className={`w-[17px] h-[17px] flex items-center justify-center border-2 rounded-full transition-all ${
-                      payment.method ===
-                      (option === "stripe_gbl" ? "stripe" : option)
+                      payment.method === (option === "stripe_gbl" ? "stripe" : option)
                         ? "border-gray-400 border-4 hover:bg-blue-900"
                         : "border-gray-400"
                     }`}
                   >
-                    {payment.method ===
-                      (option === "stripe_gbl" ? "stripe" : option) && (
+                    {payment.method === (option === "stripe_gbl" ? "stripe" : option) && (
                       <div className="w-[10px] h-[10px] bg-gray-400 rounded-full"></div>
                     )}
                   </div>

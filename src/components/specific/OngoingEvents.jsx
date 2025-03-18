@@ -5,7 +5,7 @@ import { EventContext } from "../../EventProvider";
 
 function OngoingEvents() {
   const navigate = useNavigate();
-  const { events, loading, getAllEvents } = useContext(EventContext);
+  const { events, loading, getAllEvents,  } = useContext(EventContext);
 
   useEffect(() => {
     getAllEvents();

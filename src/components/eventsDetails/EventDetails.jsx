@@ -2,12 +2,16 @@ import React, { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { EventContext } from "../../EventProvider";
 import QrCard from "../contestentDetails/QrCard.jsx";
+import CountdownTimer from "../contestentDetails/CountdownTimer.jsx";
 
 function EventDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [pop, setPop] = useState(false);
+  const [qrId, setQrId] = useState(0);
   const [passingId, setPassingId] = useState("");
+  const [finalDate, setFinalDate] = useState("");
+  const [temp, setTemp] = useState(null);
 
   useEffect(() => {
     setPassingId(id);
@@ -33,12 +37,28 @@ function EventDetails() {
 
   useEffect(() => {
     getEvent(id);
+    console.log("ljlsbhfbsl", event);
   }, [getEvent, id]);
-  useEffect(() => {
-    console.log("Updated pop state:", pop);  // This will run after pop changes
-  }, [pop]);  // Dependency array ensures it runs when pop changes
-  
 
+  useEffect(() => {
+    const savedEvent = localStorage.getItem("event");
+
+    if (savedEvent) {
+      const parsedEvent = JSON.parse(savedEvent);
+      setTemp(parsedEvent);
+      setFinalDate(parsedEvent.finaldate);
+    } else {
+      getEvent(passingId);
+    }
+  }, [passingId, getEvent]);
+
+  useEffect(() => {
+    console.log("Updated qrId:", qrId);
+  }, [qrId]);
+
+  useEffect(() => {
+    console.log("Updated pop state:", pop);
+  }, [pop]);
 
   const eventFinalDate = new Date(event.finaldate);
   const currentDate = new Date();
@@ -49,46 +69,63 @@ function EventDetails() {
 
   const handleClick = (id, passingId) => {
     console.log("Scrolling to top...");
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
     navigate(`/contestant-details/${id}`, { state: { passingId } });
-  };
 
-  const handleQR = () => {
     window.scrollTo({
       top: 0,
       behavior: "smooth",
     });
-    setPop(true);
   };
 
+  const handleQR = (id) => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+    console.log("id before update:", id);
+
+    setQrId(id); // Set the qrId
+    setPop(true);
+    console.log("id after update (immediately after setQrId):", qrId); // Will log the old qrId immediately
+  };
   const handleX = () => {
     console.log("handleX clicked");
-  
-    setPop(false);  // Set the state to false
+    setPop(false);
   };
-  
-  
+
   return (
     <div className="bg-customBlue max-w-full py-8 px-4 flex flex-col items-center pb-20">
       <>
-        {pop && <QrCard handleX={handleX} />}
+        {pop && (
+          <>
+            {console.log("Rendering QrCard with qrId:", qrId)}
+            <QrCard handleX={handleX} qrid={qrId} />
+          </>
+        )}
+
         <div
           className={`w-full ${pop ? "blur-md pointer-events-none" : ""} flex justify-center items-center w-full`}
         >
           {loading ? (
             <div className="w-full max-w-[90%] h-auto md:h-[500px] bg-gray-300 animate-pulse rounded-2xl mb-6"></div>
           ) : (
-            <img
-              src={event.img}
-              alt={event.title}
-              className="w-full max-w-[90%] h-auto md:h-[500px] rounded-2xl mb-6"
-            />
+            <div className="relative flex flex-col w-full h-full items-center justify-center">
+              <img
+                src={event.img}
+                alt={event.title}
+                className="w-full max-w-[90%] h-auto md:h-[500px] rounded-2xl mb-6"
+              />
+              {event.services ? (
+                <img
+                  src={event.services}
+                  alt=""
+                  className="absolute -bottom-10 md:-bottom-4 left-1/2 transform -translate-x-1/2 h-28 w-28 md:h-40 md:w-40 rounded-full border-4 border-white object-fit"
+                />
+              ) : null}{" "}
+            </div>
           )}
         </div>
-        <h1 className="text-2xl md:text-4xl font-bold text-white text-center">
+        <h1 className="text-2xl md:text-4xl mt-14 mg:mt-10 font-bold text-white text-center">
           {loading ? (
             <div className="h-8 w-1/3 bg-gray-700 animate-pulse mb-2"></div>
           ) : (
@@ -99,14 +136,17 @@ function EventDetails() {
           {loading ? (
             <div className="h-4 w-1/4 bg-gray-300 animate-pulse"></div>
           ) : currentDate > eventFinalDate ? (
-            "Voting close!"
+            "Voting Close!"
           ) : (
-            "Voting  open."
+            <>
+              <CountdownTimer endTime={finalDate} />
+              Voting Open.
+            </>
           )}
         </p>
 
         <div
-          className={` w-full ${pop ? "blur-md pointer-events-none" : ""} grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-10 w-full max-w-[90%]`}
+          className={` w-full ${pop ? "blur-md pointer-events-none" : ""} grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-5 w-full max-w-[90%]`}
         >
           {loading
             ? Array(6)
@@ -116,8 +156,7 @@ function EventDetails() {
                     key={index}
                     className="relative bg-customDarkBlue rounded-2xl shadow-lg p-3 flex flex-col items-center text-center"
                   >
-                    <div className="absolute top-1 left-1 transform -translate-x-[20%] -translate-y-[12.5%] bg-[#000B44] text-white h-16 w-12 md:h-24 md:w-20 text-[28px] md:text-[36px] px-3 py-1 sm:px-4 sm:py-2 rounded-br-full rounded-tl-2xl shadow-lg shadow-blue-300">
-                    </div>
+                    <div className="absolute top-5 left-6 md:top-6 md:left-7 transform -translate-x-[20%] -translate-y-[12.5%] bg-[#000B44] text-white h-16 w-12 md:h-24 md:w-20 text-[28px] md:text-[36px] px-3 py-1 sm:px-4 sm:py-2 rounded-br-full rounded-tl-lg shadow-lg shadow-blue-300"></div>
                     <div className="w-full h-60 lg:h-[300px] md:h-60 bg-gray-700 animate-pulse rounded-2xl mb-4"></div>
                     <div className="h-6 w-3/4 bg-gray-500 animate-pulse mb-4 rounded-3xl"></div>
                     <div className="h-10 w-3/4 bg-gray-500 animate-pulse rounded-3xl"></div>
@@ -129,7 +168,12 @@ function EventDetails() {
                   className="relative bg-customDarkBlue rounded-2xl shadow-lg p-3 flex flex-col items-center text-center"
                 >
                   {contestant?.misc_kv && (
-                    <div className="absolute top-2 left-3 transform -translate-x-[20%] -translate-y-[12.5%] bg-[#009BE2] text-white h-16 w-12 md:h-24 md:w-20 text-[28px] md:text-[36px] px-3 py-1 sm:px-4 sm:py-2 rounded-br-full rounded-tl-2xl ">
+                    <div
+                      className="absolute top-5 left-[21px] md:top-6 md:left-7 transform -translate-x-[20%] -translate-y-[12.5%] 
+                    bg-[#009BE2] text-white h-16 w-12 md:h-24 md:w-20 
+                    text-[20px] md:text-[32px] flex items-center justify-center 
+                    rounded-tr-2xl rounded-tl-2xl rounded-br-full"
+                    >
                       {contestant.misc_kv}
                     </div>
                   )}
@@ -139,18 +183,22 @@ function EventDetails() {
                     onClick={() => handleClick(contestant.id)}
                     className="w-full h-60 lg:h-[300px] md:h-60 object-cover rounded-2xl mb-4"
                   />
-
                   <h2 className="text-base md:text-lg text-white font-semibold mb-4">
                     {contestant.name}
                   </h2>
-
                   {paymentCurrency?.cc?.toLowerCase() === "np" ? (
                     <div className="flex justify-between w-full gap-6">
                       <button
                         className="bg-[#003A75]  w-[55%] text-white px-4 py-2 rounded-3xl font-medium hover:bg-gray-600"
-                        onClick={handleQR}
+                        onClick={() => {
+                          console.log(
+                            "Button clicked, passing id:",
+                            contestant.id
+                          );
+                          handleQR(contestant.id);
+                        }}
                       >
-                        Get QR
+                        QR Vote
                       </button>
                       <button
                         className="bg-[#003A75] hover:bg-[#00255C] w-[55%] text-white px-4 py-2 rounded-3xl font-medium hover:bg-gray-600"

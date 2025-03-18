@@ -99,7 +99,7 @@ function HeroSlider() {
                   <img
                     src={slide.icon}
                     alt={`Slider ${slide.id}`}
-                    className="w-full h-full max-w-[800px] lg:rounded-xl rounded-md object-fit shadow-lg"
+                    className="w-[95%] md:w-full h-[90%] md:h-full max-w-[800px]  object-fit shadow-lg"
                   />
                 </div>
               );

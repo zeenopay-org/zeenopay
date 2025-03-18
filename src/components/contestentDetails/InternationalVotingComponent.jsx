@@ -3,6 +3,8 @@ import CustomDropdown from "../ReusableInputField/CustomDropdown.jsx";
 import { EventContext } from "../../EventProvider.jsx";
 
 const VotingComponent = () => {
+
+  
   const currencyOptions = [
     { value: "USD", label: "USD: United States Dollar", cc: "us" },
     { value: "AUD", label: "AUD: Australian Dollar", cc: "au" },
@@ -80,6 +82,7 @@ const VotingComponent = () => {
   const handleCurrencyChange = (currency) => {
     setSelectedCurrency(currency);
     setVoteOptions(currencyValues[currency] || []);
+    setHasValue(currencyValues[currency]);
 
     if (currencyValues[currency]) {
       handleVoteChange(currencyValues[currency][0]);
@@ -222,7 +225,7 @@ const VotingComponent = () => {
               ["KRW", "JPY", "THB", "INR"].includes(selectedCurrency)
                 ? ` One vote = ${selectedCurrency} ${votesPerCurrency[selectedCurrency]}`
                 : selectedCurrency
-                  ? ` One ${selectedCurrency} = ${votesPerCurrency[selectedCurrency]} ${selectedCurrency}`
+                  ? ` One ${selectedCurrency} = ${votesPerCurrency[selectedCurrency]} Vote`
                   : "Rs 10.0"}
             </p>
           </>
@@ -239,9 +242,7 @@ const VotingComponent = () => {
         <div className="relative flex items-center w-full gap-2 mt-6">
           <button
             onClick={() => {
-              handleVoteChange(
-                (formData.amount ) - 1
-              );
+              handleVoteChange(formData.amount - 1);
               handleButtonClick();
             }}
             className="w-12 h-12 flex items-center justify-center text-2xl text-white border border-gray-600 rounded-2xl hover:bg-gray-700 transition"
@@ -264,16 +265,13 @@ const VotingComponent = () => {
               onChange={(e) => {
                 const inputValue = Number(e.target.value) || 0;
                 if (selectedCurrency) {
-                  if (["KRW", "JPY", "THB", "INR"].includes(selectedCurrency)) {
-                    if (selectedCurrency === "INR") {
-                      const clampedValue = Math.max(
-                        10,
-                        Math.min(15000, inputValue)
-                      );
-                      setVote(clampedValue);
-                    } else {
-                      setVote(inputValue);
-                    }
+                  let clampedValue = inputValue;
+
+                  if (selectedCurrency === "INR") {
+                    clampedValue = Math.max(10, Math.min(15000, inputValue));
+                    setVote(clampedValue);
+                  } else if (["KRW", "JPY", "THB"].includes(selectedCurrency)) {
+                    setVote(inputValue);
                   } else {
                     setFormData((prev) => ({ ...prev, amount: inputValue }));
                   }

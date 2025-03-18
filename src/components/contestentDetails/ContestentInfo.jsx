@@ -6,7 +6,6 @@ import PaymentOption from "./PaymentOption";
 import QrCard from "./QrCard.jsx";
 import countryCodes from "./countryCodes";
 import nepalPartner from "./nepalPartner";
-import { useRef } from "react";
 import { motion } from "framer-motion";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import CustomDropdown from "../ReusableInputField/CustomDropdown.jsx";
@@ -15,6 +14,8 @@ import LocalVotingComponent from "./LocalVotingComponent.jsx";
 import PhoneInputWithCountrySelector from "../ReusableInputField/PhoneInputWithCountrySelector.jsx";
 import CloudMessage from "./CloudMessage.jsx";
 import ConfirmCancelPopup from "../confirmCanclePupup/ConfirmCancelPopup.jsx";
+import CountdownTimer from "./CountdownTimer.jsx";
+
 const SkeletonLoader = () => (
   <div className="min-h-screen flex flex-col items-center justify-center bg-customBlue text-white p-4">
     <div className="flex justify-center items-center w-full relative animate-pulse">
@@ -55,7 +56,6 @@ export default function VotingComponent() {
     paymentIframeUrl,
     paymentCurrency,
     getPaymentCurrency,
-    generateIntentId,
     initiatePartnerPayment,
     redirectToPaymentPage,
     redirectToFoneAndPrabhuPay,
@@ -63,7 +63,9 @@ export default function VotingComponent() {
     paymentParnter,
     formData,
     setFormData,
+    contestant,
   } = useContext(EventContext);
+
   const [inputFocused, setInputFocused] = useState(false);
   const [pop, setpop] = useState(false);
   const [generateQR, setGenerateQr] = useState(false);
@@ -74,8 +76,9 @@ export default function VotingComponent() {
   const location = useLocation();
   const { passingId } = location.state || {};
   const [temp, setTemp] = useState(null);
+  const [finalDate, setFinalDate] = useState("");
+
   useEffect(() => {
-    console.log("Updated formData:", formData);
   }, [formData]);
 
   useEffect(() => {
@@ -84,35 +87,27 @@ export default function VotingComponent() {
 
   useEffect(() => {
     const savedEvent = localStorage.getItem("event");
-    if (event) {
-      setTemp(JSON.parse(savedEvent));
+
+    if (savedEvent) {
+      const parsedEvent = JSON.parse(savedEvent); 
+      setTemp(parsedEvent);
+      setFinalDate(parsedEvent.finaldate);
     } else {
       getEvent(passingId);
     }
-  }, []);
 
-  // const handleButtonClick = () => {
-  //   inputRef.current.focus();
-  // };
-
-  // const handleDrop = () => {
-  //   setDrop(() => !drop);
-  // };
-
-  // const votePrice = 10;
+  }, [passingId, getEvent]); 
+  
 
   useEffect(() => {
     const savedCurrency = localStorage.getItem("paymentCurrency");
     if (savedCurrency) {
       const parsedCurrency = JSON.parse(savedCurrency);
       setSelectedCountry(parsedCurrency);
-      console.log("pC: " + parsedCurrency?.cc); // Log here after setting state
     } else {
       getPaymentCurrency();
     }
   }, [getPaymentCurrency]);
-
-  // const [hasValue, setHasValue] = useState(!!formData.votes);
 
   useEffect(() => {
     const fetchContestant = async () => {
@@ -120,41 +115,6 @@ export default function VotingComponent() {
     };
     fetchContestant();
   }, [getContestant, id]);
-
-  // Handle vote change
-  // const handleVoteChange = (value) => {
-  //   handleButtonClick();
-  //   const updatedVotes = Math.max(10, Math.min(15000, value));
-  //   const calculatedAmount = updatedVotes * votePrice;
-
-  //   setFormData((prevData) => ({
-  //     ...prevData,
-  //     votes: updatedVotes,
-  //     amount: calculatedAmount,
-  //   }));
-  // };
-
-  // const handleChange = (e) => {
-  //   let value = e.target.value;
-  //   if (parseInt(value, 10) > 15000) {
-  //     value = "15000";
-  //   }
-
-  //   const updatedVotes = Math.max(10, Math.min(15000, value));
-  //   const calculatedAmount = updatedVotes * votePrice;
-
-  //   setFormData((prevData) => ({
-  //     ...prevData,
-  //     votes: updatedVotes,
-  //     amount: calculatedAmount,
-  //   }));
-
-  //   setHasValue(value.trim() !== "");
-  //   setFormData((prevData) => ({
-  //     ...prevData,
-  //     votes: value,
-  //   }));
-  // };
 
   // Handle input field change
   const handleInputChange = (e) => {
@@ -176,6 +136,7 @@ export default function VotingComponent() {
     const { name, phone, email, amount, currency } = formData;
     const isNepal = paymentParnter?.cc === "np";
     const isIndia = paymentParnter?.cc === "in";
+    const intent = "V";
 
     if (!name || !phone || !amount || (!(isNepal || isIndia) && !email)) {
       alert("Name, Phone, and Amount are required. Email is required.");
@@ -183,34 +144,41 @@ export default function VotingComponent() {
     }
     const method = currency === "INR" ? "payu" : "stripe";
     try {
-      const intentID = generateIntentId();
+      const eventId = contestant.event;
+      const intentId = id;
       const paymentUrl = await initiatePartnerPayment(
-        intentID,
+        intentId,
         amount,
         name,
         isNepal || isIndia ? "" : email,
         phone,
         method,
+        eventId,
+        intent,
         currency
       );
-
-      if (paymentUrl) {
-        console.log("Redirecting to payment:", paymentUrl);
-        redirectToPaymentPage(paymentUrl);
+      if (method== "stripe") {
+        console.log("Redirecting to stripe...");
+        redirectToFoneAndPrabhuPay(paymentUrl);
       } else {
-        console.log("Payment URL is not available");
+        redirectToPaymentPage(paymentUrl);
+        console.log("Redirecting to ...");
       }
+  
     } catch (error) {
       console.error("Payment initiation failed:", error);
     } finally {
     }
   };
-
   if (loading && !pop && !generateQR) {
     return <SkeletonLoader />;
   }
 
   const handleQrClick = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
     requestAnimationFrame(() => {
       setGenerateQr(() => !generateQR);
     });
@@ -218,30 +186,22 @@ export default function VotingComponent() {
 
   const handlePartnerChange = (value) => {
     setSelectedPartner(value);
-    console.log("selected parnter" + setSelectedPartner);
-    // console.log("Selected Partner:", event.target.value);
   };
 
   const validateForm = () => {
     let newErrors = {};
-    // console.log(formData); // Logs current state whenever component renders
-
     if (!formData.name?.trim()) newErrors.name = "Name is required.";
-
     const countryCode = selectedCountry?.cc
       ? selectedCountry.cc.toUpperCase()
       : null;
-
     if (formData.phone?.trim() && countryCode) {
       const phoneNumber = parsePhoneNumberFromString(
         formData.phone,
         countryCode
       );
-
       if (!phoneNumber || !phoneNumber.isValid()) {
         newErrors.phone = "Enter a valid phone number for your country.";
       } else if (phoneNumber.metadata?.country?.[countryCode]) {
-        // Ensure metadata exists before accessing properties
         const nationalNumber = phoneNumber.nationalNumber;
         const minLength =
           phoneNumber.metadata.country[countryCode]?.minLength || 0;
@@ -259,7 +219,6 @@ export default function VotingComponent() {
       newErrors.phone = "Phone number is required.";
     }
 
-    // Validate Email only if paymentCurrency is not Nepal (NP) or India (IN)
     if (countryCode !== "NP" && countryCode !== "IN") {
       if (!formData.email?.trim()) {
         newErrors.email = "Email is required.";
@@ -267,14 +226,13 @@ export default function VotingComponent() {
         newErrors.email = "Please enter a valid email address.";
       }
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handlePayment = async (e) => {
     e.preventDefault();
-
+    const eventId = contestant.event_id;
     const isValid = validateForm();
     if (!isValid) {
       console.log("Form validation failed. Payment not initiated.");
@@ -283,10 +241,9 @@ export default function VotingComponent() {
 
     const { name, phone, email, amount, currency } = formData;
     const isIndia = paymentCurrency?.cc === "in";
-    console.log(currency + "curr");
     try {
       const partner = "phonepe";
-      const intentID = generateIntentId();
+      const intentID = id;
       const paymentUrl = await initiatePartnerPayment(
         intentID,
         amount,
@@ -294,7 +251,8 @@ export default function VotingComponent() {
         isIndia ? "" : email,
         phone,
         partner,
-        currency
+        currency,
+        eventId
       );
 
       if (paymentUrl) {
@@ -310,35 +268,46 @@ export default function VotingComponent() {
 
   const handleNepalPayment = async (e) => {
     e.preventDefault();
-    console.log("This is the selected payment partner: " + selectedPartner);
-
-    // Ensure form is valid before proceeding
-    const isValid = validateForm();
-    if (!isValid) {
-      console.log("Form validation failed. Payment not initiated.");
-      return; // Stop execution if form is invalid
+    if (!selectedPartner) {
+      console.error("No payment partner selected.");
+      return;
     }
 
-    const { name, phone, email, amount } = formData;
-    const isNepal = paymentCurrency?.cc === "np";
+    const eventId = contestant?.event;
+    const intentID = contestant?.id; // Ensure `id` is available
+    const isValid = validateForm();
 
+    if (!isValid) {
+      console.log("Form validation failed. Payment not initiated.");
+      return;
+    }
+
+    const { name, phone, email, amount,  } = formData;
+    const isNepal = paymentCurrency?.cc === "np";
+    
+    let intent;
     try {
-      const intentID = generateIntentId();
       const paymentUrl = await initiatePartnerPayment(
         intentID,
         amount,
         name,
         isNepal ? "" : email,
         phone,
-        selectedPartner
+        selectedPartner,
+        eventId,
+        intent ? "" : "V",
+
       );
 
       if (paymentUrl) {
+        console.log("selected Partner ", selectedPartner);
 
-        if (selectedPartner === "fonepay" || selectedPartner === "prabupay") {
+        if (selectedPartner === "fonepay" || selectedPartner === "prabhupay") {
+          console.log("Redirecting to Fonepay or PrabhuPay...");
           redirectToFoneAndPrabhuPay(paymentUrl);
         } else {
           redirectToPaymentPage(paymentUrl);
+          console.log("Redirecting to ...");
         }
       } else {
         console.log("Payment URL is not available");
@@ -350,10 +319,11 @@ export default function VotingComponent() {
 
   const eventFinalDate = new Date(event.finaldate);
   const currentDate = new Date();
+  
 
   return (
-    <div className="  min-h-screen flex flex-col items-center justify-center bg-customBlue text-white p-4 pt-[46px] pb-[66px]">
-      {generateQR && <QrCard handleX={handleQrClick} />}
+    <div className="  min-h-screen flex flex-col items-center justify-center bg-customBlue text-white p-4 pt-[30px] pb-[66px]">
+      {generateQR && <QrCard handleX={handleQrClick} qrid={contestant.id} />}
       <div
         className={`w-full ${generateQR ? "blur-md pointer-events-none" : ""}`}
       >
@@ -369,9 +339,7 @@ export default function VotingComponent() {
                   className="md:w-[1300px] h-[250px] md:h-[400px] rounded-2xl mb-6"
                   alt="Event Banner"
                 />
-                {/* <div className="absolute bottom-[90px] left-[240px]">
-                      <CloudMessage />
-                    </div> */}
+    
                 <div>
                   <div
                     className="absolute bottom-[-130px] left-1/2 transform -translate-x-1/2
@@ -381,7 +349,12 @@ export default function VotingComponent() {
                     <div className="relative top-16 md:top-20 left-14 md:left-20 z-50">
                       <CloudMessage />
                     </div>
-                    <ProfileCard handleQrClick={handleQrClick} />
+                    <ProfileCard />
+                    {selectedCountry?.cc === "np" && (
+                      <button onClick={handleQrClick} className="w-56 md:w-64 px-10 mt-6 ml-2 py-3 border border-white text-white text-xs md:text-md rounded-lg hover:bg-white hover:text-[#0A1128] transition duration-300">
+                        Generate QR to Vote
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -389,15 +362,19 @@ export default function VotingComponent() {
 
             <div className="mt-52 md:mt-32 flex flex-col items-center justify-center">
               <h1 className="text-xl md:text-2xl font-normal">{event.title}</h1>
-              <p className="text-white mt-2 text-center text-sm md:text-lg">
+              <p className="text-white mt- text-center text-sm md:text-lg">
                 {loading ? (
                   <div className="h-4 w-1/4 bg-gray-300 animate-pulse"></div>
                 ) : currentDate > eventFinalDate ? (
-                  "Voting close!"
+                  "Voting Close!"
                 ) : (
-                  "Voting  open."
+                  <>
+                    <CountdownTimer endTime={finalDate} />
+                    <h1>Voting Open</h1>
+                  </>
                 )}
               </p>
+
               {/* Voting Options */}
               <div className="mt-6 text-center">
                 <h2 className="text-lg font-normal">Select Voting Options</h2>
@@ -480,6 +457,7 @@ export default function VotingComponent() {
                           options={
                             nepalPartner?.[0]?.partner?.map((partner) => ({
                               value: partner.name,
+                              id: partner.id,
                               label: (
                                 <div className="flex items-center justify-center">
                                   <img
@@ -551,55 +529,53 @@ export default function VotingComponent() {
         )}
       </div>
       {paymentIframeUrl && (
-  <motion.div
-    className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-[9999]"
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    exit={{ opacity: 0 }}
-  >
-    <motion.div
-      className="w-[80%] md:w-[60%] lg:w-[40%] h-[70%] bg-customBlue rounded-2xl overflow-hidden relative flex flex-col"
-      initial={{ scale: 0.8, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      exit={{ scale: 0.8, opacity: 0 }}
-      transition={{ duration: 0.3, ease: "easeOut" }}
-    >
-      {/* Header with Close Button */}
-      <div className="bg-customBlue p-4 flex justify-between items-center">
-        <h2 className="text-white text-lg font-semibold">Payment</h2>
-        <button
-          onClick={() => setShowConfirm(true)}
-          className="text-white text-xl hover:text-gray-300 transition"
+        <motion.div
+          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-[9999]"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
         >
-          ✕
-        </button>
-      </div>
+          <motion.div
+            className="w-[80%] md:w-[60%] lg:w-[40%] h-[70%] bg-customBlue rounded-2xl overflow-hidden relative flex flex-col"
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+          >
+            {/* Header with Close Button */}
+            <div className="bg-customBlue p-4 flex justify-between items-center">
+              <h2 className="text-white text-lg font-semibold">Payment</h2>
+              <button
+                onClick={() => setShowConfirm(true)}
+                className="text-white text-xl hover:text-gray-300 transition"
+              >
+                ✕
+              </button>
+            </div>
 
-      {/* Iframe */}
-      <iframe
-        src={paymentIframeUrl}
-        className="w-full flex-grow"
-        allow="fullscreen"
-        allowFullScreen
-        style={{
-          WebkitOverflowScrolling: "touch",
-          overflowY: "auto",
-          touchAction: "manipulation",
-        }}
-      ></iframe>
-    </motion.div>
+            {/* Iframe */}
+            <iframe
+              src={paymentIframeUrl}
+              className="w-full flex-grow"
+              allow="fullscreen"
+              allowFullScreen
+              style={{
+                WebkitOverflowScrolling: "touch",
+                overflowY: "auto",
+                touchAction: "manipulation",
+              }}
+            ></iframe>
+          </motion.div>
 
-    {/* Confirmation Popup */}
-    {showConfirm && (
-      <ConfirmCancelPopup
-        onClose={() => setShowConfirm(false)}
-        onConfirm={() => window.location.reload()}
-      />
-    )}
-  </motion.div>
-)}
-
-
+          {/* Confirmation Popup */}
+          {showConfirm && (
+            <ConfirmCancelPopup
+              onClose={() => setShowConfirm(false)}
+              onConfirm={() => window.location.reload()}
+            />
+          )}
+        </motion.div>
+      )}
     </div>
   );
 }
