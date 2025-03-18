@@ -276,7 +276,7 @@ export default function VotingComponent() {
     }
 
     const eventId = contestant?.event;
-    const intentID = contestant?.id; // Ensure `id` is available
+    const intentID = contestant?.id; 
     const isValid = validateForm();
 
     if (!isValid) {
@@ -304,7 +304,7 @@ export default function VotingComponent() {
       if (paymentUrl) {
         console.log("selected Partner ", selectedPartner);
 
-        if (selectedPartner === "fonepay" || selectedPartner === "prabhupay") {
+        if (selectedPartner === "fonepay" || selectedPartner === "prabhupay" || selectedPartner === "esewa" ) {
           console.log("Redirecting to Fonepay or PrabhuPay...");
           redirectToFoneAndPrabhuPay(paymentUrl);
         } else {
