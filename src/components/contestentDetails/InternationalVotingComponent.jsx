@@ -130,6 +130,8 @@ const VotingComponent = () => {
     handleVoteChange(userValue);
 };
 
+
+
   const handleButtonClick = () => {
     inputRef.current.focus();
   };
