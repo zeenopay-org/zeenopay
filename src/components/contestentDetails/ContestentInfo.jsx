@@ -259,7 +259,7 @@ export default function VotingComponent() {
 
       if (paymentUrl) {
         console.log("Redirecting to payment:", paymentUrl);
-        redirectToPaymentPage(paymentUrl);
+        redirectToFoneAndPrabhuPay(paymentUrl);
       } else {
         console.log("Payment URL is not available");
       }
