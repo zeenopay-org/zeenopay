@@ -230,9 +230,11 @@ export default function VotingComponent() {
     return Object.keys(newErrors).length === 0;
   };
 
+  console.log("contestent id:",contestant.event);
+  
   const handlePayment = async (e) => {
     e.preventDefault();
-    const eventId = contestant.event_id;
+    const eventId = contestant.event;
     const isValid = validateForm();
     if (!isValid) {
       console.log("Form validation failed. Payment not initiated.");
@@ -251,8 +253,8 @@ export default function VotingComponent() {
         isIndia ? "" : email,
         phone,
         partner,
+        eventId,
         currency,
-        eventId
       );
 
       if (paymentUrl) {
