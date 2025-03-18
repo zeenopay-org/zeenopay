@@ -114,23 +114,21 @@ const VotingComponent = () => {
     setPrice(amount);
   };
   const handleInputBlur = () => {
-    if (!selectedCurrency || !currencyValues[selectedCurrency]) return;
+    if (!selectedCurrency) return;
 
-    const minValue = currencyValues[selectedCurrency][0];
-    const maxValue = currencyValues[selectedCurrency].slice(-1)[0];
+    let userValue;
 
-    let userValue = ["KRW", "JPY", "THB", "INR"].includes(selectedCurrency)
-      ? vote
-      : formData.amount;
-
-    if (userValue < minValue) {
-      userValue = minValue;
-    } else if (userValue > maxValue) {
-      userValue = maxValue;
+    if (selectedCurrency === "INR") {
+        userValue = Math.max(10, Math.min(15000, vote)); // INR should have min 10 and max 15000
+    } else if (currencyValues[selectedCurrency]) {
+        const minValue = currencyValues[selectedCurrency][0];
+        const maxValue = currencyValues[selectedCurrency].slice(-1)[0];
+        userValue = ["KRW", "JPY", "THB"].includes(selectedCurrency) ? vote : formData.amount;
+        userValue = Math.max(minValue, Math.min(maxValue, userValue)); // Clamp within range
     }
 
     handleVoteChange(userValue);
-  };
+};
 
   const handleButtonClick = () => {
     inputRef.current.focus();
@@ -203,9 +201,9 @@ const VotingComponent = () => {
               Min{" "}
               {selectedCurrency
                 ? selectedCurrency === "INR"
-                  ? 10
+                  ? "10"
                   : currencyValues[selectedCurrency][0]
-                : 10}{" "}
+                : ""}{" "}
               {selectedCurrency &&
               ["KRW", "JPY", "THB", "INR"].includes(selectedCurrency)
                 ? "votes"
@@ -258,9 +256,11 @@ const VotingComponent = () => {
               ref={inputRef}
               className="peer w-full h-12 bg-transparent text-white text-lg outline-none border border-gray-600 rounded-lg px-4 pt-5 pb-1 text-center appearance-none focus:border-blue-500 transition-all duration-300"
               value={
-                ["KRW", "JPY", "THB", "INR"].includes(selectedCurrency)
-                  ? vote
-                  : formData.amount
+                selectedCurrency === "INR"
+        ? Math.max(0, Math.min(15000, vote)) // Ensure within range
+        : ["KRW", "JPY", "THB"].includes(selectedCurrency)
+        ? vote
+        : formData.amount
               }
               onChange={(e) => {
                 const inputValue = Number(e.target.value) || 0;
@@ -268,7 +268,7 @@ const VotingComponent = () => {
                   let clampedValue = inputValue;
 
                   if (selectedCurrency === "INR") {
-                    clampedValue = Math.max(10, Math.min(15000, inputValue));
+                    clampedValue = Math.max(0, Math.min(15000, inputValue));
                     setVote(clampedValue);
                   } else if (["KRW", "JPY", "THB"].includes(selectedCurrency)) {
                     setVote(inputValue);
