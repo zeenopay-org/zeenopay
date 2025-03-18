@@ -21,7 +21,7 @@ function ProfileCard({ handleQrClick }) {
   const videoUrl =
     contestant?.shareable_link
     ||
-    "https://www.youtube.com/shorts/KN9Dn1hOicg ";
+    " ";
   useEffect(() => {
     if (!paymentCurrency) {
       getPaymentCurrency();
