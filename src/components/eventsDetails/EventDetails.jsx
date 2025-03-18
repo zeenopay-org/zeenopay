@@ -115,9 +115,9 @@ function EventDetails() {
                 alt={event.title}
                 className="w-full max-w-[90%] h-auto md:h-[500px] rounded-2xl mb-6"
               />
-              {event.services ? (
+              {event.misc_kv ? (
                 <img
-                  src={event.services}
+                  src={event.misc_kv}
                   alt=""
                   className="absolute -bottom-10 md:-bottom-4 left-1/2 transform -translate-x-1/2 h-28 w-28 md:h-40 md:w-40 rounded-full border-4 border-white object-fit"
                 />
