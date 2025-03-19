@@ -230,7 +230,7 @@ export default function VotingComponent() {
     return Object.keys(newErrors).length === 0;
   };
 
-  console.log("contestent id:",contestant.event);
+  console.log("contestent id:",contestant.id);
   
   const handlePayment = async (e) => {
     e.preventDefault();
