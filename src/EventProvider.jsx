@@ -53,10 +53,12 @@ const EventProvider = ({ children }) => {
           {
             intent_id: intentId,
             amount: amount,
-            name: "9800000001",
-            phone_no: "9090909090",
+            name: "administrator",
+            phone_no: "administrator",
             event_id: eventID,
             intent: "V",
+            processor: "QR",
+
           }
         );
         console.log("response:", response);
@@ -86,17 +88,18 @@ const EventProvider = ({ children }) => {
   );
 
   // **************************************************************
-  const generateStaticQr = useCallback(async (intentId, amount, eventID, phone) => {
+  const generateStaticQr = useCallback(async (intentId, amount, eventID) => {
     setQrLoading(true);
     try {
       // Step 1: API call to generate QR payment
       const response = await axios.post(`${BACKEND_URL2}/payments/qr/pay/static`, {
         intent_id: intentId,
         amount: amount,
-        name: "9800000001",
-        phone_no: "9090909090",
+        name: "administrator",
+        phone_no: "administrator",
         event_id: eventID,
         intent: "V",
+        processor: "NQR",
       });
 
       let qrUrl = response.data.goto;

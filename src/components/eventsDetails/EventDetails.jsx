@@ -167,7 +167,7 @@ function EventDetails() {
                   key={contestant.id}
                   className="relative bg-customDarkBlue rounded-2xl shadow-lg p-3 flex flex-col items-center text-center"
                 >
-                  {contestant?.misc_kv && (
+                  {contestant.misc_kv ? (
                     <div
                       className="absolute top-5 left-[21px] md:top-6 md:left-7 transform -translate-x-[20%] -translate-y-[12.5%] 
                     bg-[#009BE2] text-white h-16 w-12 md:h-24 md:w-20 
@@ -176,7 +176,7 @@ function EventDetails() {
                     >
                       {contestant.misc_kv}
                     </div>
-                  )}
+                  ) : null}
                   <img
                     src={contestant.avatar}
                     alt={contestant.name}
@@ -186,7 +186,7 @@ function EventDetails() {
                   <h2 className="text-base md:text-lg text-white font-semibold mb-4">
                     {contestant.name}
                   </h2>
-                  {paymentCurrency?.cc?.toLowerCase() === "np" ? (
+                  {paymentCurrency?.cc?.toLowerCase() === "in" ? (
                     <div className="flex justify-between w-full gap-6">
                       <button
                         className="bg-[#003A75]  w-[55%] text-white px-4 py-2 rounded-3xl font-medium hover:bg-gray-600"

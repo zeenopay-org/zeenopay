@@ -79,8 +79,7 @@ export default function VotingComponent() {
   const [temp, setTemp] = useState(null);
   const [finalDate, setFinalDate] = useState("");
 
-  useEffect(() => {
-  }, [formData]);
+  useEffect(() => {}, [formData]);
 
   useEffect(() => {
     getPaymentPartner();
@@ -90,15 +89,13 @@ export default function VotingComponent() {
     const savedEvent = localStorage.getItem("event");
 
     if (savedEvent) {
-      const parsedEvent = JSON.parse(savedEvent); 
+      const parsedEvent = JSON.parse(savedEvent);
       setTemp(parsedEvent);
       setFinalDate(parsedEvent.finaldate);
     } else {
       getEvent(passingId);
     }
-
-  }, [passingId, getEvent]); 
-  
+  }, [passingId, getEvent]);
 
   useEffect(() => {
     const savedCurrency = localStorage.getItem("paymentCurrency");
@@ -158,14 +155,13 @@ export default function VotingComponent() {
         intent,
         currency
       );
-      if (method== "stripe") {
+      if (method == "stripe") {
         console.log("Redirecting to stripe...");
         redirectToFoneAndPrabhuPay(paymentUrl);
       } else {
         redirectToPaymentPage(paymentUrl);
         console.log("Redirecting to ...");
       }
-  
     } catch (error) {
       console.error("Payment initiation failed:", error);
     } finally {
@@ -231,8 +227,8 @@ export default function VotingComponent() {
     return Object.keys(newErrors).length === 0;
   };
 
-  console.log("contestent id:",contestant.id);
-  
+  console.log("contestent id:", contestant.id);
+
   const handlePayment = async (e) => {
     e.preventDefault();
     const eventId = contestant.event;
@@ -255,7 +251,7 @@ export default function VotingComponent() {
         phone,
         partner,
         eventId,
-        currency,
+        currency
       );
 
       if (paymentUrl) {
@@ -277,7 +273,7 @@ export default function VotingComponent() {
     }
 
     const eventId = contestant?.event;
-    const intentID = contestant?.id; 
+    const intentID = contestant?.id;
     const isValid = validateForm();
 
     if (!isValid) {
@@ -285,9 +281,9 @@ export default function VotingComponent() {
       return;
     }
 
-    const { name, phone, email, amount,  } = formData;
+    const { name, phone, email, amount } = formData;
     const isNepal = paymentCurrency?.cc === "np";
-    
+
     let intent;
     try {
       const paymentUrl = await initiatePartnerPayment(
@@ -298,14 +294,17 @@ export default function VotingComponent() {
         phone,
         selectedPartner,
         eventId,
-        intent ? "" : "V",
-
+        intent ? "" : "V"
       );
 
       if (paymentUrl) {
         console.log("selected Partner ", selectedPartner);
 
-        if (selectedPartner === "fonepay" || selectedPartner === "prabhupay" || selectedPartner === "esewa" ) {
+        if (
+          selectedPartner === "fonepay" ||
+          selectedPartner === "prabhupay" ||
+          selectedPartner === "esewa"
+        ) {
           console.log("Redirecting to Fonepay or PrabhuPay...");
           redirectToFoneAndPrabhuPay(paymentUrl);
         } else {
@@ -322,7 +321,6 @@ export default function VotingComponent() {
 
   const eventFinalDate = new Date(event.finaldate);
   const currentDate = new Date();
-  
 
   return (
     <div className="  min-h-screen flex flex-col items-center justify-center bg-customBlue text-white p-4 pt-[30px] pb-[66px]">
@@ -342,19 +340,24 @@ export default function VotingComponent() {
                   className="md:w-[1300px] h-[250px] md:h-[400px] rounded-2xl mb-6"
                   alt="Event Banner"
                 />
-    
+
                 <div>
                   <div
                     className="absolute bottom-[-130px] left-1/2 transform -translate-x-1/2
   md:bottom-[-100px] md:left-20 md:translate-x-0
   lg:bottom-[-150px] lg:left-20 lg:translate-x-0"
                   >
-                    <div className="relative top-16 md:top-20 left-14 md:left-20 z-50">
-                      <CloudMessage />
-                    </div>
+                    {contestant.shareable_link? (
+                      <div className="relative top-16 md:top-20 left-14 md:left-20 z-50">
+                        <CloudMessage />
+                      </div>
+                    ):null}
                     <ProfileCard />
                     {selectedCountry?.cc === "np" && (
-                      <button onClick={handleQrClick} className="w-56 md:w-64 px-10 mt-6 ml-2 py-3 border border-white text-white text-xs md:text-md rounded-lg hover:bg-white hover:text-[#0A1128] transition duration-300">
+                      <button
+                        onClick={handleQrClick}
+                        className="w-56 md:w-64 px-10 mt-6 ml-2 py-3 border border-white text-white text-xs md:text-md rounded-lg hover:bg-white hover:text-[#0A1128] transition duration-300"
+                      >
                         Generate QR to Vote
                       </button>
                     )}

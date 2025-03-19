@@ -2,12 +2,12 @@ import React, { useRef } from "react";
 import { useReactToPrint } from "react-to-print";
 
 const VotingCard = ({
-  eventLogo = "https://i.ibb.co/tKnzfF7/Whats-App-Image-2025-01-01-at-18-32-11-bc7b4020.jpg", // Default event logo
-  contestantPicture = "https://i.ibb.co/tKnzfF7/Whats-App-Image-2025-01-01-at-18-32-11-bc7b4020.jpg", // Default contestant picture
+  eventLogo = "https://i.ibb.co/tKnzfF7/Whats-App-Image-2025-01-01-at-18-32-11-bc7b4020.jpg",
+  contestantPicture = "https://i.ibb.co/tKnzfF7/Whats-App-Image-2025-01-01-at-18-32-11-bc7b4020.jpg",
   contestantNumber = "00", // Default contestant number
   contestantName = "Contestant Name", // Default contestant name
-  qr50Votes = "https://i.ibb.co/tKnzfF7/Whats-App-Image-2025-01-01-at-18-32-11-bc7b4020.jpg", // Default QR for 50 votes
-  qr25Votes = "https://i.ibb.co/tKnzfF7/Whats-App-Image-2025-01-01-at-18-32-11-bc7b4020.jpg", // Default QR for 25 votes
+  qr50Votes = "https://i.ibb.co/tKnzfF7/Whats-App-Image-2025-01-01-at-18-32-11-bc7b4020.jpg", 
+  qr25Votes = "https://i.ibb.co/tKnzfF7/Whats-App-Image-2025-01-01-at-18-32-11-bc7b4020.jpg", 
 }) => {
   const cardRef = useRef();
   const handlePrint = useReactToPrint({

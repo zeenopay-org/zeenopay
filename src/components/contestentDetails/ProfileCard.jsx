@@ -124,7 +124,7 @@ function ProfileCard({ handleQrClick }) {
                       className="relative w-full h-full rounded-full object-cover cursor-pointer"
                       onClick={() => setIsIframeVisible(true)}
                     />
-                    {contestant?.misc_kv && (
+                    {contestant.misc_kv?  (
                     <div
                     className="absolute top-28 left-32 md:left-36 transform -translate-x-[20%] -translate-y-[12.5%] 
                     bg-customDarkBlue text-white h-10 w-10 
@@ -135,7 +135,7 @@ function ProfileCard({ handleQrClick }) {
                       {contestant.misc_kv}
                     </div>
 
-                    )} 
+                    ): null} 
                   </div>
                 </div>
                 <div className="flex gap-2 flex-col items-center">
