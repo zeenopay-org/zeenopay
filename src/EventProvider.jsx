@@ -1,6 +1,7 @@
-import { createContext, useCallback, useEffect, useState } from "react";
+import { createContext, useCallback, useEffect, useState,useRef } from "react";
 import axios from "axios";
 import { io } from "socket.io-client"; // Import WebSocket client
+import QRCodeStyling from "qr-code-styling";
 // import QRCode from "qrcode.react";
 
 const EventContext = createContext();
@@ -44,67 +45,79 @@ const EventProvider = ({ children }) => {
 
 
   const generateDynamicQr = useCallback(
-    async (intentId, amount,intent, name, email, phone,) => {
-      setQrLoading(true);
-      try {
-        const response = await axios.get(
-          `${BACKEND_URL}/payments/qr/dynamic?intent_id=${intentId}&amount=${amount}&intent=${intent || "vote"}&cc=NP`
-        );
-        const qrUrl = response.data.goto;
-
-        const txid = qrUrl.split("/")[4].split("_")[1].split(".")[0];
-        setTransactionId(txid);
-
-        setQrLoading(false);
-        return qrUrl;
-      } catch (error) {
-        console.error("Error generating QR:", error);
-        setQrLoading(false);
-      }
-    },
-    []
-  );
-
-  // **************************************************************
-  const generateStaticQr = useCallback(
-    async (intentId, amount, name = "9800000001", phone = "9090909090") => {
+    async (intentId, amount, eventID) => {
       setQrLoading(true);
       try {
         const response = await axios.post(
-          `${BACKEND_URL2}/payments/qr/pay/static`,
+          `${BACKEND_URL2}/payments/qr/pay/dynamic`,
           {
             intent_id: intentId,
             amount: amount,
             name: "9800000001",
             phone_no: "9090909090",
+            event_id: eventID,
             intent: "V",
           }
         );
-
+        console.log("response:", response);
+       
         console.log("Full API Response:", response.data);
-
         let qrUrl = response.data.goto;
-        if (!qrUrl) {
-          throw new Error("Missing 'goto' field in API response.");
-        }
+      if (!qrUrl) throw new Error("Missing 'goto' field in API response.");
 
-        console.log("Final QRURL:", qrUrl);
-        // Set QR string for the image generation
-        const QR = response.data.qr_string;
-        console.log("QR hbfbd", QR);
+      // Step 2: API call to get the QR string
+      const response2 = await axios.get(`${BACKEND_URL2}${qrUrl}`);
+      const QR = response2.data.qr_string;
+      console.log("DynamicQR", QR);
+      
+      if (!QR) throw new Error("Missing 'qr_string' field in API response.");
 
-        setQrString(QR);
+      setQrString(QR);
+      setQrLoading(false);
 
-        setQrLoading(false);
-        return qrUrl;
-      } catch (error) {
-        console.error("Error generating QR:", error);
-        setQrLoading(false);
-      }
+      return QR;
+
+    } catch (error) {
+      console.error("Error generating QR:", error);
+      setQrLoading(false);
+    }
     },
     []
   );
 
+  // **************************************************************
+  const generateStaticQr = useCallback(async (intentId, amount, eventID, phone) => {
+    setQrLoading(true);
+    try {
+      // Step 1: API call to generate QR payment
+      const response = await axios.post(`${BACKEND_URL2}/payments/qr/pay/static`, {
+        intent_id: intentId,
+        amount: amount,
+        name: "9800000001",
+        phone_no: "9090909090",
+        event_id: eventID,
+        intent: "V",
+      });
+
+      let qrUrl = response.data.goto;
+      if (!qrUrl) throw new Error("Missing 'goto' field in API response.");
+
+      // Step 2: API call to get the QR string
+      const response2 = await axios.get(`${BACKEND_URL2}${qrUrl}`);
+      const QR = response2.data.qr_string;
+      if (!QR) throw new Error("Missing 'qr_string' field in API response.");
+
+      setQrString(QR);
+      setQrLoading(false);
+
+      return QR;
+
+    } catch (error) {
+      console.error("Error generating QR:", error);
+      setQrLoading(false);
+    }
+  }, []);
+  
   const checkPaymentStatus = (txid) => {
     const socket = io("wss://api.zeenopay.com", {
       transports: ["websocket"],

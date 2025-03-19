@@ -6,6 +6,7 @@ import PhoneInputWithCountrySelector from "../ReusableInputField/PhoneInputWithC
 import ConfirmCancelPopup from "../confirmCanclePupup/ConfirmCancelPopup";
 import { motion } from "framer-motion";
 import ElegantSpinner from "../confirmCanclePupup/ElegantSpinner.jsx";
+import QRCodeStyling from "qr-code-styling";
 import { QRCodeCanvas } from "qrcode.react";
 
 export default function QrCode({ handleX, qrid }) {
@@ -14,6 +15,9 @@ export default function QrCode({ handleX, qrid }) {
   const { id: paramId } = useParams();
   const id = qrid ? qrid : paramId;
   const inputRef = useRef(null);
+
+  const qrRef = useRef(null);
+  const qrCodeInstance = useRef(null);
 
   const {
     event,
@@ -36,7 +40,7 @@ export default function QrCode({ handleX, qrid }) {
     email: "",
     votes: "",
     amount: "",
-    // qrType: "", // Add qrType to the initial state
+    qrType: "", 
   });
 
   const [hasValue, setHasValue] = useState(!!formData.votes);
@@ -86,7 +90,7 @@ export default function QrCode({ handleX, qrid }) {
 
   const validateForm = () => {
     let newErrors = {};
-    // if (!formData.qrType) newErrors.qrType = "Please select a QR type.";
+    if (!formData.qrType) newErrors.qrType = "Please select a QR type.";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -130,66 +134,91 @@ export default function QrCode({ handleX, qrid }) {
       handleQR(e);
     }, 500);
   };
+console.log("contestent_id::",contestant.event)
 
-  const handleQR = async (e) => {
-    if (validateForm()) {
-      e.preventDefault();
-      const { votes} = formData;
-      console.log(votes, ":qrtype");
 
-      if (votes < 10) {
-        alert("All fields are required, and votes should be at least 10.");
-        return;
-      }
-      // if (!qrType) {
-      //   alert("Please select a QR type.");
-      //   return;
-      // }
 
-      setShowSpinner(true); // Show the spinner
+const handleQR = async (e) => {
+  if (validateForm()) {
+    e.preventDefault();
+    const { votes, qrType } = formData;
+    const eventID = contestant.event;
 
-      const intentID = qrid;
-      console.log("intend_id:," ,intentID);
-      console.log("Qr_id:," ,qrid);
-      
-      let paymentUrl;
-
-      // 1️⃣ Generate the QR Code URL based on the selected QR type
-      // if (qrType === "One Time Use QR") {
-        paymentUrl = await generateDynamicQr(intentID, calculatedAmount);
-        console.log("Generated Dynamic QR Payment URL:", paymentUrl);
-
-        if (paymentUrl) {
-          setQrCodeUrl(paymentUrl);
-          setShowQRModal(true);
-          const txid = paymentUrl.split("/")[4].split("_")[1].split(".")[0];
-          console.log("Extracted txid:", txid);
-          setTransactionId(txid);
-        } else {
-          console.log("QR Code URL is not available.");
-        }
-      // } else if (qrType === "Multiple Time Use QR") {
-
-      //   paymentUrl = await generateStaticQr(intentID, calculatedAmount);
-      //   if (paymentUrl) {
-
-      //     setQrString(paymentUrl);
-      //     // console.log("QrString: ", qrString);
-      //     setShowQRModal(true);
-      //     console.log("Generated Static QR String:", paymentUrl);
-      //   } else {
-      //     console.log("Failed to generate Static QR.");
-      //   }
-      // }
-
-      setShowSpinner(false); // Hide the spinner
+    if (votes < 10) {
+      alert("All fields are required, and votes should be at least 10.");
+      return;
     }
-  };
+    if (!qrType) {
+      alert("Please select a QR type.");
+      return;
+    }
+
+    console.log("QR TYPE:", qrType);
+    
+    setShowSpinner(true);
+
+    const intentID = qrid;
+    let paymentUrl;
+
+    if (qrType === "One Time Use QR") {
+      paymentUrl = await generateDynamicQr(intentID, calculatedAmount, eventID);
+      if (paymentUrl) {
+        setQrString(paymentUrl);
+        
+        setShowQRModal(true);
+        // const txid = paymentUrl.split("/")[4].split("_")[1].split(".")[0];
+        // setTransactionId(txid);
+      } else {
+        console.log("QR Code URL is not available.");
+      }
+    } else if (qrType === "Multiple Time Use QR") {
+      paymentUrl = await generateStaticQr(intentID, calculatedAmount, eventID);
+      if (paymentUrl) {
+        setQrString(paymentUrl);
+        setShowQRModal(true);
+      } else {
+        console.log("Failed to generate Static QR.");
+      }
+    }
+    setShowSpinner(false);
+  }
+};
 
   const calculatedAmount = useMemo(
     () => (formData.votes || 0) * votePrice,
     [formData.votes]
   );
+  useEffect(() => {
+    if (qrString && qrRef.current) {
+      // Clear previous QR code
+      console.log("QR jhsbfrbuna", qrString);
+      
+      qrRef.current.innerHTML = "";
+
+      // Create a new QRCodeStyling instance
+      const qrCode = new QRCodeStyling({
+        width: 300,
+        height: 300,
+        type: "svg",
+        data: qrString,
+        image: "https://zeenorides.com/zeenopay_logo.svg",
+        dotsOptions: {
+          color: "#4267b2",
+          type: "rounded",
+        },
+        backgroundOptions: {
+          color: "#e9ebee",
+        },
+        imageOptions: {
+          crossOrigin: "anonymous",
+          margin: 20,
+        },
+      });
+
+      // Append QR code to the ref
+      qrCode.append(qrRef.current);
+    }
+  }, [qrString]);
 
   const voteButtons = useMemo(
     () =>
@@ -206,16 +235,16 @@ export default function QrCode({ handleX, qrid }) {
     [voteOptions]
   );
 
-  // const options = [
-  //   {
-  //     label: "One Time Use QR",
-  //     description: "Supports eSewa, Banking Apps & all other major wallets",
-  //   },
-  //   {
-  //     label: "Multiple Time Use QR",
-  //     description: "Supports Banking Apps only but can be used multiple times",
-  //   },
-  // ];
+  const options = [
+    {
+      label: "One Time Use QR",
+      description: "Supports eSewa, Banking Apps & all other major wallets",
+    },
+    {
+      label: "Multiple Time Use QR",
+      description: "Supports Banking Apps only but can be used multiple times",
+    },
+  ];
 
   return (
     <div className="absolute top-[450px] md:w-auto w-[96%] md:top-1/2 lg:top-[350px] mt-28 bg-customDarkBlue shadow-lg shadow-cyan-500/50   left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-none z-20 flex items-center justify-center text-white rounded-2xl overflow-hidden p-6">
@@ -316,7 +345,7 @@ export default function QrCode({ handleX, qrid }) {
                 </span>
               </p>
 
-              {/* <div className="space-y-4 bg-customDarkBlue p-4 rounded-lg">
+              <div className="space-y-4 bg-customDarkBlue p-4 rounded-lg">
                 {options.map((option, index) => (
                   <motion.button
                     key={index}
@@ -365,7 +394,7 @@ export default function QrCode({ handleX, qrid }) {
                 {errors?.qrType && (
                   <p className="text-red-400 text-sm">{errors.qrType}</p>
                 )}
-              </div> */}
+              </div>
             </div>
 
             <div className="flex item-center justify-center pb-16 ">
@@ -404,7 +433,7 @@ export default function QrCode({ handleX, qrid }) {
           <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
             <div className="bg-customBlue p-6 rounded-lg -mt-12 md:mt-5 text-center w-[26rem] border border-gray-700 relative">
               {/* Header with Close Button */}
-              {qrString ? (
+              {formData.qrType === "Multiple Time Use QR"?(
                 <>
                   <div className="flex justify-between items-center bg-customBlue p-2 rounded-t-lg">
                     <h2 className="text-xs text-white">
@@ -427,7 +456,7 @@ export default function QrCode({ handleX, qrid }) {
                       {/* Log the qrString */}
                       
                       {console.log("QR String:", qrString)}
-                      <QRCodeCanvas value={decodeURIComponent(qrString)} size={250} />
+                      <div ref={qrRef}></div>
 
                       <div className="flex items-center justify-center mt-2 space-x-2">
                         <p className="text-red-500 ml-4 font-semibold">
@@ -457,12 +486,7 @@ export default function QrCode({ handleX, qrid }) {
                       ✕
                     </button>
                   </div>
-                  <img
-                    src={qrCodeUrl}
-                    alt="QR Code"
-                    className="mx-auto rounded-lg border border-gray-500"
-                    style={{ width: "300px", height: "300px" }}
-                  />
+                  <div ref={qrRef}></div>
                   <div className="flex items-center justify-center mt-2 space-x-2">
                     <p className="text-red-500 ml-4 font-semibold">
                       Powered by
