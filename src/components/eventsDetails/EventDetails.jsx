@@ -114,6 +114,9 @@ function EventDetails() {
                 src={event.img}
                 alt={event.title}
                 className="w-full max-w-[90%] h-auto md:h-[500px] rounded-2xl mb-6"
+                loading="lazy"
+                onLoad={() => console.log("Avatar loaded")}
+                onError={() => console.log("Avatar failed to load")}
               />
               {event.misc_kv ? (
                 <img
@@ -182,6 +185,9 @@ function EventDetails() {
                     alt={contestant.name}
                     onClick={() => handleClick(contestant.id)}
                     className="w-full h-60 lg:h-[300px] md:h-60 object-cover rounded-2xl mb-4"
+                    loading="lazy"
+                    onLoad={() => console.log("Avatar loaded")}
+                    onError={() => console.log("Avatar failed to load")}
                   />
                   <h2 className="text-base md:text-lg text-white font-semibold mb-4">
                     {contestant.name}

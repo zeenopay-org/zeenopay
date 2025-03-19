@@ -11,30 +11,26 @@ import {
   FaCopy,
 } from "react-icons/fa";
 
-
-
 function ProfileCard({ handleQrClick }) {
-  const { contestant, loading, paymentCurrency, getPaymentCurrency } = useContext(EventContext);
+  const { contestant, loading, paymentCurrency, getPaymentCurrency } =
+    useContext(EventContext);
   const [isIframeVisible, setIsIframeVisible] = useState(false);
   const [player, setPlayer] = useState(null);
-  
-  const videoUrl =
-    contestant?.shareable_link
-    ||
-    " ";
+
+  const videoUrl = contestant?.shareable_link || " ";
   useEffect(() => {
     if (!paymentCurrency) {
       getPaymentCurrency();
     }
   }, [paymentCurrency, getPaymentCurrency]);
-  
+
   useEffect(() => {
     const loadYouTubeAPI = () => {
       if (!window.YT) {
         const tag = document.createElement("script");
         tag.src = "https://www.youtube.com/iframe_api";
         document.body.appendChild(tag);
-  
+
         window.onYouTubeIframeAPIReady = () => {
           createPlayer();
         };
@@ -42,7 +38,7 @@ function ProfileCard({ handleQrClick }) {
         createPlayer();
       }
     };
-  
+
     const createPlayer = () => {
       const newPlayer = new window.YT.Player("youtube-player", {
         events: {
@@ -55,20 +51,20 @@ function ProfileCard({ handleQrClick }) {
       });
       setPlayer(newPlayer);
     };
-  
-    if (isIframeVisible && videoUrl) { // Only load the iframe if videoUrl is not empty
+
+    if (isIframeVisible && videoUrl) {
+      // Only load the iframe if videoUrl is not empty
       loadYouTubeAPI();
     } else {
       setIsIframeVisible(false); // If videoUrl is empty, hide the iframe
     }
-  
+
     return () => {
       if (player) {
         player.destroy();
       }
     };
   }, [isIframeVisible, videoUrl]); // Depend on videoUrl as well
-  
 
   const copyToClipboard = async () => {
     try {
@@ -123,19 +119,21 @@ function ProfileCard({ handleQrClick }) {
                       alt="profile"
                       className="relative w-full h-full rounded-full object-cover cursor-pointer"
                       onClick={() => setIsIframeVisible(true)}
+                      loading="lazy"
+                      onLoad={() => console.log("Image loaded")}
+                      onError={() => console.log("Image failed to load")}
                     />
-                    {contestant.misc_kv?  (
-                    <div
-                    className="absolute top-28 left-32 md:left-36 transform -translate-x-[20%] -translate-y-[12.5%] 
+                    {contestant.misc_kv ? (
+                      <div
+                        className="absolute top-28 left-32 md:left-36 transform -translate-x-[20%] -translate-y-[12.5%] 
                     bg-customDarkBlue text-white h-10 w-10 
                     text-sm md:text-base flex items-center justify-center 
                     rounded-full border border-transparent bg-gradient-to-r from-indigo-700 via-purple-500 to-indigo-900 
                     transition duration-300 ease-in-out animate-pulse"
-                 >
-                      {contestant.misc_kv}
-                    </div>
-
-                    ): null} 
+                      >
+                        {contestant.misc_kv}
+                      </div>
+                    ) : null}
                   </div>
                 </div>
                 <div className="flex gap-2 flex-col items-center">
