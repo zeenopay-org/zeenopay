@@ -440,7 +440,7 @@ const handleQR = async (e) => {
                 <>
                   <div className="flex justify-between items-center bg-customBlue p-2 rounded-t-lg">
                     <h2 className="text-xs text-white">
-                      <span className="font-semibold">Multiple Votes are accepted!  <br />
+                      <span className="font-semibold">Multiple Votes are accepted!<br />
                       </span>You can use this QR code to
                       vote multiple times until voting ends. Screenshot and
                       share with your audiences! <br /><span className="text-[9px]">(Mobile Banking Apps only)</span>
@@ -475,9 +475,44 @@ const handleQR = async (e) => {
                   </div>
                 </>
               ) : (
-                // Dynamic QR: Show the dynamic QR Code Image
-                <div className="bg-customDarkBlue p-4 rounded-lg">
-                  <div className="flex justify-between items-center bg-customBlue p-3 rounded-t-lg">
+                // Dynamic QR: Show the dynamic QR Code Image\
+                <>
+                <div className="flex justify-between items-center bg-customBlue p-2 rounded-t-lg">
+                <h2 className="text-xs  font-semibold text-white">
+                      Scan & Pay via Banking Apps, Esewa, Khalti, and all major
+                      wallets
+                    </h2>
+                    <button
+                      onClick={() => setShowConfirm(true)}
+                      className="text-white text-xl pl-4 hover:text-red-500 transition"
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  <div className="bg-customDarkBlue p-4 rounded-lg">
+                    {/* Static QR: Generate QR Image from qr_string */}
+                    <div className="bg-customDarkBlue p-4 rounded-lg flex flex-col items-center">
+                      {/* Log the qrString */}
+                      
+                      {console.log("QR String:", qrString)}
+                      <div ref={qrRef}></div>
+
+                      <div className="flex items-center justify-center mt-2 space-x-2">
+                        <p className="text-red-500 ml-4 font-semibold">
+                           Powered by
+                        </p>
+                        <img
+                          src="/assets/IMG_1574.png"
+                          className="w-24 h-10"
+                          alt="FonePay Logo"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </>
+                /* <div className="bg-customDarkBlue p-4 rounded-lg">
+                 <div className="flex justify-between items-center bg-customBlue p-3 rounded-t-lg">
                     <h2 className="text-xs  font-semibold text-white">
                       Scan & Pay via Banking Apps, Esewa, Khalti, and all major
                       wallets
@@ -500,9 +535,11 @@ const handleQR = async (e) => {
                       alt="FonePay Logo"
                     />
                   </div>
-                </div>
-              )}
+                </div> */
+              )
+              }
 
+          
               {/* Total Amount Section */}
               <div className="flex mt-2 text-white pt-4">
                 <p className="ml-6 text-sm md:text-md">TOTAL AMOUNT NPR.</p>
