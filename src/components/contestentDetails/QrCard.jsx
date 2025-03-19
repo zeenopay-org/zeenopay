@@ -203,16 +203,19 @@ const handleQR = async (e) => {
         data: qrString,
         image: "https://zeenorides.com/zeenopay_logo.svg",
         dotsOptions: {
-          color: "#4267b2",
-          type: "rounded",
+            color: "#39b6ff",
+            type: "extra-rounded"
         },
         backgroundOptions: {
-          color: "#e9ebee",
+            color: "#000",
         },
         imageOptions: {
-          crossOrigin: "anonymous",
-          margin: 20,
-        },
+            crossOrigin: "anonymous",
+            imageSize: 0.5,
+            margin: 0,
+            hideBackgroundDots: false
+        }
+
       });
 
       // Append QR code to the ref
