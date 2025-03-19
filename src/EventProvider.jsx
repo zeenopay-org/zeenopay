@@ -412,7 +412,7 @@ const EventProvider = ({ children }) => {
       console.error("Invalid token URL for redirection.");
       return;
     }
-  
+
     console.log("Starting PhonePe transaction in", mode, "mode.");
     console.log("Token URL:", tokenUrl);
   
@@ -422,15 +422,13 @@ const EventProvider = ({ children }) => {
     }
 
     updateCSP(true);
-
-    const fullUrl = `${BACKEND_URL2}${tokenUrl}`;
   
     if (mode === "REDIRECT") {
-      console.log("Redirecting to:", fullUrl);
-      window.PhonePeCheckout.transact({ tokenUrl: fullUrl });
+      console.log("Redirecting to:", tokenUrl);
+      window.PhonePeCheckout.transact({ tokenUrl: tokenUrl});
     } else if (mode === "IFRAME") {
       window.PhonePeCheckout.transact({
-        tokenUrl: setPaymentIframeUrl(fullUrl),
+        tokenUrl: tokenUrl,
         type: "IFRAME",
         callback: (response) => {
           console.log("Transaction Response:", response);
@@ -440,8 +438,6 @@ const EventProvider = ({ children }) => {
           } else if (response === "CONCLUDED") {
             alert("Transaction completed successfully.");
           }
-  
-          // 🔹 Restore Original CSP After Transaction
           updateCSP(false);
         },
       });
