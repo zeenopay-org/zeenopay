@@ -197,8 +197,8 @@ const handleQR = async (e) => {
 
       // Create a new QRCodeStyling instance
       const qrCode = new QRCodeStyling({
-        width: 300,
-        height: 300,
+        width: 332,
+        height: 332,
         type: "svg",
         data: qrString,
         image: "https://zeenorides.com/zeenopay_logo.svg",
@@ -250,9 +250,9 @@ const handleQR = async (e) => {
   ];
 
   return (
-    <div className="absolute top-[450px] md:w-auto w-[96%] md:top-1/2 lg:top-[350px] mt-28 bg-customDarkBlue shadow-lg shadow-cyan-500/50   left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-none z-20 flex items-center justify-center text-white rounded-2xl overflow-hidden p-6">
-      <div className="relative flex items-center justify-center ">
-        <div className="p-4 bg-customDarkBlue text-white rounded-2xl overflow-y-auto max-h-[95vh]">
+    <div className="absolute top-[450px] md:w-auto w-[96%] md:top-1/2 lg:top-[400px] mt-28 bg-customDarkBlue shadow-lg shadow-cyan-500/50   left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-none z-20 flex items-center justify-center text-white rounded-2xl overflow-hidden p-6">
+      <div className="relative  flex items-center justify-center ">
+        <div className="p-4 bg-customDarkBlue text-white rounded-2xl overflow-y-auto max-h-[105vh]">
           <div className="relative">
             <button
               onClick={handleX}
@@ -478,7 +478,7 @@ const handleQR = async (e) => {
                 // Dynamic QR: Show the dynamic QR Code Image
                 <div className="bg-customDarkBlue p-4 rounded-lg">
                   <div className="flex justify-between items-center bg-customBlue p-3 rounded-t-lg">
-                    <h2 className="text-sm font-semibold text-white">
+                    <h2 className="text-xs  font-semibold text-white">
                       Scan & Pay via Banking Apps, Esewa, Khalti, and all major
                       wallets
                     </h2>
