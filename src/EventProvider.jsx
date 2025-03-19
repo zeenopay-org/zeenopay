@@ -390,6 +390,69 @@ const EventProvider = ({ children }) => {
     }
   };
 
+  const updateCSP = (allowBlob = true) => {
+    let metaCSP = document.querySelector("meta[http-equiv='Content-Security-Policy']");
+    
+    if (!metaCSP) {
+      metaCSP = document.createElement("meta");
+      metaCSP.setAttribute("http-equiv", "Content-Security-Policy");
+      document.head.appendChild(metaCSP);
+    }
+  
+    if (allowBlob) {
+      metaCSP.setAttribute("content", "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.google-analytics.com https://dgq88cldibal5.cloudfront.net https://mercurystatic.phonepe.com https://linchpin.phonepe.com https://mercury.phonepe.com; worker-src 'self' blob:;");
+    } else {
+      metaCSP.setAttribute("content", "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.google-analytics.com https://dgq88cldibal5.cloudfront.net https://mercurystatic.phonepe.com https://linchpin.phonepe.com https://mercury.phonepe.com;");
+    }
+  };
+  
+  
+  const redirectToPhonePe = async (tokenUrl, mode = "IFRAME") => {
+    if (!tokenUrl || typeof tokenUrl !== "string") {
+      console.error("Invalid token URL for redirection.");
+      return;
+    }
+  
+    console.log("Starting PhonePe transaction in", mode, "mode.");
+    console.log("Token URL:", tokenUrl);
+  
+    if (!window.PhonePeCheckout || !window.PhonePeCheckout.transact) {
+      console.error("PhonePeCheckout script not loaded yet.");
+      return;
+    }
+
+    updateCSP(true);
+
+    const fullUrl = `${BACKEND_URL2}${tokenUrl}`;
+  
+    if (mode === "REDIRECT") {
+      console.log("Redirecting to:", fullUrl);
+      window.PhonePeCheckout.transact({ tokenUrl: fullUrl });
+    } else if (mode === "IFRAME") {
+      window.PhonePeCheckout.transact({
+        tokenUrl: setPaymentIframeUrl(fullUrl),
+        type: "IFRAME",
+        callback: (response) => {
+          console.log("Transaction Response:", response);
+          
+          if (response === "USER_CANCEL") {
+            alert("Transaction was canceled by the user.");
+          } else if (response === "CONCLUDED") {
+            alert("Transaction completed successfully.");
+          }
+  
+          // 🔹 Restore Original CSP After Transaction
+          updateCSP(false);
+        },
+      });
+    } else {
+      console.error("Invalid mode. Choose 'REDIRECT' or 'IFRAME'.");
+    }
+  };
+  
+  
+  
+
   const redirectToPaymentPage = (url) => {
     if (url) {
       setPaymentIframeUrl(`${BACKEND_URL2}${url}`);
@@ -417,6 +480,7 @@ const EventProvider = ({ children }) => {
         contestant,
         redirectToPaymentPage,
         redirectToFoneAndPrabhuPay,
+        redirectToPhonePe,
         checkPaymentStatus,
         transactionStatus,
         redirectToSuccessPage,

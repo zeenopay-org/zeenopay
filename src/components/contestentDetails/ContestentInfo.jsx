@@ -59,6 +59,7 @@ export default function VotingComponent() {
     initiatePartnerPayment,
     redirectToPaymentPage,
     redirectToFoneAndPrabhuPay,
+    redirectToPhonePe,
     getPaymentPartner,
     paymentParnter,
     formData,
@@ -245,7 +246,7 @@ export default function VotingComponent() {
     const isIndia = paymentCurrency?.cc === "in";
     try {
       const partner = "phonepe";
-      const intentID = id;
+      const intentID = contestant.id;
       const paymentUrl = await initiatePartnerPayment(
         intentID,
         amount,
@@ -259,7 +260,7 @@ export default function VotingComponent() {
 
       if (paymentUrl) {
         console.log("Redirecting to payment:", paymentUrl);
-        redirectToFoneAndPrabhuPay(paymentUrl);
+        redirectToPhonePe(paymentUrl);
       } else {
         console.log("Payment URL is not available");
       }
