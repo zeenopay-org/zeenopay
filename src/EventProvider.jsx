@@ -120,11 +120,8 @@ const EventProvider = ({ children }) => {
     const intervalId = setInterval(async () => {
       const data = await DynamicQrPolling(transactionId);
       const txid = data?.prn;
-      // console.log("txid: ",txid);
   
       if (data?.paymentStatus === "success") {
-        // const txid = data?.prn;
-        // console.log("txid 12345678: ",txid);
 
         clearInterval(intervalId); 
         setPollingActive(false);

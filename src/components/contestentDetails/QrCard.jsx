@@ -144,7 +144,7 @@ const handleQR = async (e) => {
     const { votes, qrType } = formData;
     const eventID = contestant.event;
 
-    if (votes < 1) {
+    if (votes < 10) {
       alert("All fields are required, and votes should be at least 10.");
       return;
     }
