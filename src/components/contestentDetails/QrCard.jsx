@@ -26,6 +26,7 @@ export default function QrCode({ handleX, qrid }) {
     getPaymentCurrency,
     generateDynamicQr,
     generateStaticQr,
+    generateIntentId,
     qrLoading,
     paymentStatus,
     setTransactionId,
@@ -477,7 +478,7 @@ const handleQR = async (e) => {
                 // Dynamic QR: Show the dynamic QR Code Image\
                 <>
                 <div className="flex justify-between items-center bg-customBlue p-2 rounded-t-lg">
-                <h2 className="text-xs  font-semibold text-white">
+                    <h2 className="text-xs  font-semibold text-white">
                       Scan & Pay via Banking Apps, Esewa, Khalti, and all major
                       wallets
                     </h2>
@@ -490,9 +491,13 @@ const handleQR = async (e) => {
                   </div>
 
                   <div className="bg-customDarkBlue p-4 rounded-lg">
-                    <div className="bg-customDarkBlue p-4 rounded-lg flex flex-col items-center">       
+                    {/* Static QR: Generate QR Image from qr_string */}
+                    <div className="bg-customDarkBlue p-4 rounded-lg flex flex-col items-center">
+                      {/* Log the qrString */}
+                      
                       {console.log("QR String:", qrString)}
                       <div ref={qrRef}></div>
+
                       <div className="flex items-center justify-center mt-2 space-x-2">
                         <p className="text-red-500 ml-4 font-semibold">
                            Powered by

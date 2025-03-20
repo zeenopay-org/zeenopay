@@ -3,6 +3,7 @@ import axios from "axios";
 import { io } from "socket.io-client"; // Import WebSocket client
 import QRCodeStyling from "qr-code-styling";
 import { LogIn } from "lucide-react";
+
 // import QRCode from "qrcode.react";
 
 const EventContext = createContext();
@@ -37,10 +38,11 @@ const EventProvider = ({ children }) => {
     currency: "",
   });
 
+
   const [paymentStatus, setPaymentStatus] = useState("Waiting for payment...");
   const [transactionId, setTransactionId] = useState(null);
+  const [pollingActive, setPollingActive] = useState(false);
 
-  // backend URL
   const BACKEND_URL = "https://api.zeenopay.com";
   const BACKEND_URL2 = "https://auth.zeenopay.com";
 
@@ -66,8 +68,8 @@ const EventProvider = ({ children }) => {
        
         console.log("Full API Response:", response.data);
         let qrUrl = response.data.goto;
-        let transactionId  = qrUrl.split("/").pop();
-        console.log("transactionId :",transactionId);
+        let transactionID  = qrUrl.split("/").pop();
+        console.log("transactionId :",transactionID);
 
       if (!qrUrl) throw new Error("Missing 'goto' field in API response.");  
       const response2 = await axios.get(`${BACKEND_URL2}${qrUrl}`);
@@ -79,8 +81,9 @@ const EventProvider = ({ children }) => {
       setQrString(QR);
       setQrLoading(false);
 
-      return QR;
+      setTransactionId(transactionID);
 
+      return QR;
     } catch (error) {
       console.error("Error generating QR:", error);
       setQrLoading(false);
@@ -90,13 +93,55 @@ const EventProvider = ({ children }) => {
   );
 
 
-  // const DynamicQrPolling =useCallback (
-  //   async (transactionId)=>{
-  //     tr
-  //   }
-  // )
+  const DynamicQrPolling = useCallback(async (transactionID) => {
+    try {
+      const response = await axios.get(`${BACKEND_URL2}/payments/qr/verify/${transactionID}`, {
+        // headers: {
+        //   'X-Client' : 'zeenoClient/3.0'
+        // }
+      });
+
+      console.log(`${BACKEND_URL2}/payments/qr/verify/${transactionID}`);
+      console.log("Response Data:", response.data);
+
+      setPaymentStatus(response.data.paymentStatus);
+
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching QR verification:", error);
+    }
+}, []);
 
 
+
+  const startPolling = useCallback((transactionId) => {
+    setPollingActive(true);
+  
+    const intervalId = setInterval(async () => {
+      const data = await DynamicQrPolling(transactionId);
+      const txid = data?.prn;
+      // console.log("txid: ",txid);
+  
+      if (data?.paymentStatus === "success") {
+        // const txid = data?.prn;
+        // console.log("txid 12345678: ",txid);
+
+        clearInterval(intervalId); 
+        setPollingActive(false);
+        console.log("Payment successful, stopping polling.");
+        window.location.href = `/qr-success?txid=${txid}`;
+      }
+    }, 1333);
+  
+    return () => clearInterval(intervalId); 
+  }, [DynamicQrPolling]);
+  
+
+  useEffect(() => {
+    if (transactionId && !pollingActive) {
+      startPolling(transactionId);
+    }
+  }, [transactionId, pollingActive, startPolling]);
 
 
 
@@ -140,7 +185,7 @@ const EventProvider = ({ children }) => {
     });
 
     socket.on("connect", () => {
-      console.log("✅ Connected to WebSocket for payment status.");
+      console.log(" Connected to WebSocket for payment status.");
       socket.emit("check", txid);
     });
 
@@ -161,8 +206,6 @@ const EventProvider = ({ children }) => {
         } else {
           setPaymentStatus(`⏳ Payment Pending...`);
         }
-
-        // Disconnect WebSocket after final state
         if (["SUCCESS", "CANCELED"].includes(state.toUpperCase())) {
           socket.disconnect();
         }
@@ -177,47 +220,45 @@ const EventProvider = ({ children }) => {
       console.error("❌ WebSocket error:", error);
     });
 
-    // Cleanup function to disconnect WebSocket on unmount
     return () => socket.disconnect();
   };
 
-  // ✅ Automatically check payment status when txid changes
-  useEffect(() => {
-    if (!transactionId) return; // Wait for txid to be set
+  // useEffect(() => {
+  //   if (!transactionId) return; 
 
-    const socket = io("wss://api.zeenopay.com", { transports: ["websocket"] });
+  //   const socket = io("wss://api.zeenopay.com", { transports: ["websocket"] });
 
-    socket.on("connect", () => {
-      console.log("✅ Connected to WebSocket for payment status.");
-      socket.emit("check", transactionId);
-    });
+  //   socket.on("connect", () => {
+  //     console.log("✅ Connected to WebSocket for payment status.");
+  //     socket.emit("check", transactionId);
+  //   });
 
-    socket.on("status", (data) => {
-      console.log("🔄 Payment status update:", data);
+  //   socket.on("status", (data) => {
+  //     console.log("🔄 Payment status update:", data);
 
-      if (!data) return;
+  //     if (!data) return;
 
-      const [state, txid] = data.split(":");
+  //     const [state, txid] = data.split(":");
 
-      if (txid === transactionId) {
-        setPaymentStatus(state.toUpperCase()); // Update state
-      }
+  //     if (txid === transactionId) {
+  //       setPaymentStatus(state.toUpperCase());
+  //     }
 
-      if (["SUCCESS", "CANCELED"].includes(state.toUpperCase())) {
-        socket.disconnect(); // Stop listening if payment is complete
-      }
-    });
+  //     if (["SUCCESS", "CANCELED"].includes(state.toUpperCase())) {
+  //       socket.disconnect();
+  //     }
+  //   });
 
-    socket.on("connect_error", (error) => {
-      console.error("❌ WebSocket connection error:", error);
-    });
+  //   socket.on("connect_error", (error) => {
+  //     console.error("❌ WebSocket connection error:", error);
+  //   });
 
-    socket.on("error", (error) => {
-      console.error("❌ WebSocket error:", error);
-    });
+  //   socket.on("error", (error) => {
+  //     console.error("❌ WebSocket error:", error);
+  //   });
 
-    return () => socket.disconnect(); // Cleanup on unmount
-  }, [transactionId]); // Run effect when txid changes
+  //   return () => socket.disconnect(); 
+  // }, [transactionId]);
 
   // to get all the events
   const getAllEvents = useCallback(async () => {

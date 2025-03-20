@@ -1,12 +1,10 @@
-import React from 'react'
-import { useLocation } from "react-router-dom";
-
+import React from 'react';
+import { useLocation } from 'react-router-dom';
 
 const QRPaymentSuccess = () => {
   const location = useLocation();
-  const txid = location.state?.transactionId || "N/A";
-  const contestant = location.state?.contestant || { name: "Unknown" };
-  const user = location.state?.name
+  const urlParams = new URLSearchParams(location.search);
+  const txid = urlParams.get('txid'); // Extract txid from URL
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-customBlue text-white text-center">
@@ -19,24 +17,19 @@ const QRPaymentSuccess = () => {
           stroke="currentColor"
           strokeWidth={2}
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M5 13l4 4L19 7"
-          />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
         </svg>
       </div>
       <h1 className="text-2xl font-semibold">Vote Successful!</h1>
-      <p className="mt-2">Hello, {user}</p>
-      <p>Your votes have been added successfully to {contestant.name} <span className="font-bold">{ } </span></p>
-      <p>Your Transaction ID is: <span className="font-bold">{txid}</span></p>
+      <p>Your votes have been added successfully.</p>
+      <p>Your Transaction ID is: <span className="font-bold">{txid || "N/A"}</span></p>
       <p className="mt-2">
         If you have any issues, you can reach us at
         <span className="text-green-400"> +9779705511188 (WhatsApp)</span>.
       </p>
       <p className="mt-4 font-semibold">Best Regards</p>
     </div>
-  )
-}
+  );
+};
 
-export default QRPaymentSuccess
+export default QRPaymentSuccess;
