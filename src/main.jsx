@@ -68,6 +68,9 @@ const router = createBrowserRouter([
         path: "registration/confirmation",
         element: <RegistrationConfirmation />,
       },
+      {path: "success",
+        element: <QRPaymentSuccess/>
+      },
       {
         path: "qr-success",
         element: <QRPaymentSuccess/>
