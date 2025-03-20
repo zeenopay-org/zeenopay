@@ -26,7 +26,6 @@ export default function QrCode({ handleX, qrid }) {
     getPaymentCurrency,
     generateDynamicQr,
     generateStaticQr,
-    generateIntentId,
     qrLoading,
     paymentStatus,
     setTransactionId,
@@ -491,13 +490,9 @@ const handleQR = async (e) => {
                   </div>
 
                   <div className="bg-customDarkBlue p-4 rounded-lg">
-                    {/* Static QR: Generate QR Image from qr_string */}
-                    <div className="bg-customDarkBlue p-4 rounded-lg flex flex-col items-center">
-                      {/* Log the qrString */}
-                      
+                    <div className="bg-customDarkBlue p-4 rounded-lg flex flex-col items-center">       
                       {console.log("QR String:", qrString)}
                       <div ref={qrRef}></div>
-
                       <div className="flex items-center justify-center mt-2 space-x-2">
                         <p className="text-red-500 ml-4 font-semibold">
                            Powered by
@@ -511,31 +506,6 @@ const handleQR = async (e) => {
                     </div>
                   </div>
                 </>
-                /* <div className="bg-customDarkBlue p-4 rounded-lg">
-                 <div className="flex justify-between items-center bg-customBlue p-3 rounded-t-lg">
-                    <h2 className="text-xs  font-semibold text-white">
-                      Scan & Pay via Banking Apps, Esewa, Khalti, and all major
-                      wallets
-                    </h2>
-                    <button
-                      onClick={() => setShowConfirm(true)}
-                      className="text-white text-xl pl-4 hover:text-red-500 transition"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                  <div ref={qrRef}></div>
-                  <div className="flex items-center justify-center mt-2 space-x-2">
-                    <p className="text-red-500 ml-4 font-semibold">
-                      Powered by
-                    </p>
-                    <img
-                      src="/assets/IMG_1574.png"
-                      className="w-24 h-10"
-                      alt="FonePay Logo"
-                    />
-                  </div>
-                </div> */
               )
               }
 

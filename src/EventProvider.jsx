@@ -2,6 +2,7 @@ import { createContext, useCallback, useEffect, useState,useRef } from "react";
 import axios from "axios";
 import { io } from "socket.io-client"; // Import WebSocket client
 import QRCodeStyling from "qr-code-styling";
+import { LogIn } from "lucide-react";
 // import QRCode from "qrcode.react";
 
 const EventContext = createContext();
@@ -65,9 +66,10 @@ const EventProvider = ({ children }) => {
        
         console.log("Full API Response:", response.data);
         let qrUrl = response.data.goto;
-      if (!qrUrl) throw new Error("Missing 'goto' field in API response.");
+        let transactionId  = qrUrl.split("/").pop();
+        console.log("transactionId :",transactionId);
 
-      // Step 2: API call to get the QR string
+      if (!qrUrl) throw new Error("Missing 'goto' field in API response.");  
       const response2 = await axios.get(`${BACKEND_URL2}${qrUrl}`);
       const QR = response2.data.qr_string;
       console.log("DynamicQR", QR);
@@ -86,6 +88,17 @@ const EventProvider = ({ children }) => {
     },
     []
   );
+
+
+  // const DynamicQrPolling =useCallback (
+  //   async (transactionId)=>{
+  //     tr
+  //   }
+  // )
+
+
+
+
 
   // **************************************************************
   const generateStaticQr = useCallback(async (intentId, amount, eventID) => {
@@ -392,12 +405,6 @@ const EventProvider = ({ children }) => {
     []
   );
 
-  //redirect qr page
-  // const redirectToQrPage = (url) => {
-  //   if (url) {
-  //     window.location.href = `${BACKEND_URL2}${url}`;
-  //   }
-  // };
   const redirectToFoneAndPrabhuPay = (url) => {
     if (url) {
       window.location.href = `${BACKEND_URL2}${url}`;
