@@ -378,7 +378,7 @@ const EventProvider = ({ children }) => {
   const getPaymentPartner = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${BACKEND_URL2}/payments/partners`);
+      const response = await axios.get(`${BACKEND_URL}/payments/partner`);
       setPaymentPartner(response.data);
       setLoading(false);
     } catch (error) {
