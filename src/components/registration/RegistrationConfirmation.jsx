@@ -5,7 +5,6 @@ import { motion } from "framer-motion";
 import ConfirmCancelPopup from "../confirmCanclePupup/ConfirmCancelPopup.jsx";
 import ElegantSpinner from "../confirmCanclePupup/ElegantSpinner.jsx";
 
-
 function RegistrationConfirmation() {
   const location = useLocation();
   const state = location.state;
@@ -25,6 +24,7 @@ function RegistrationConfirmation() {
     initiatePartnerPayment,
     redirectToPaymentPage,
     redirectToFoneAndPrabhuPay,
+    redirectToPhonePe,
     generateDynamicQr,
     paymentIframeUrl,
     generateIntentId,
@@ -37,18 +37,34 @@ function RegistrationConfirmation() {
   // Handle form submission to initiate payment
   const handlePayment = async (e) => {
     e.preventDefault();
-    const { name, contactNumber, email, form_id, amount } = state;
-    
+    const {
+      image,
+      name,
+      gender,
+      permanentAddress,
+      temporaryAddress,
+      guardianName,
+      contactNumber,
+      optionalNumber,
+      email,
+      reason,
+      source,
+      dateOfBirth,
+      video,
+      amount,
+      form_id,
+    } = state;
+
     if (!name || !contactNumber || !email || !form_id || !amount) {
-        alert("Name, Phone, Amount, and Email are required.");
-        return;
+      alert("Name, Phone, Amount, and Email are required.");
+      return;
     }
 
     let partner = payment.method;
 
     // Convert "stripe_gbl" to "stripe"
     if (partner === "stripe_gbl") {
-        partner = "stripe";
+      partner = "stripe";
     }
 
     const intentID = form_id;
@@ -59,33 +75,34 @@ function RegistrationConfirmation() {
     const intent = "F";
 
     const paymentUrl = await initiatePartnerPayment(
-        intentID,
-        amount,
-        name,
-        email,
-        contactNumber,
-        partner,
-        eventId,
-        intent
+      intentID,
+      amount,
+      name,
+      email,
+      contactNumber,
+      partner,
+      eventId,
+      intent
     );
 
     console.log("event Id bhbshdb sjksjvunisk:", payment);
 
     if (paymentUrl) {
-        console.log("selected Partner ", partner);
+      console.log("selected Partner ", partner);
 
-        if (partner === "fonepay" || partner === "prabhupay") {
-            console.log("Redirecting to Fonepay or PrabhuPay...");
-            redirectToFoneAndPrabhuPay(paymentUrl);
-        } else {
-            redirectToPaymentPage(paymentUrl);
-            console.log("Redirecting to ...");
-        }
+      if (partner === "fonepay" || partner === "prabhupay") {
+        console.log("Redirecting to Fonepay or PrabhuPay...");
+        redirectToFoneAndPrabhuPay(paymentUrl);
+      }else if(partner === "phonepe"){
+        redirectToPhonePe(paymentUrl);
+      } else {
+        redirectToPaymentPage(paymentUrl);
+        console.log("Redirecting to ...");
+      }
     } else {
-        console.log("Payment URL is not available");
+      console.log("Payment URL is not available");
     }
-};
-
+  };
 
   const handleQR = async (e) => {
     e.preventDefault();
@@ -135,41 +152,107 @@ function RegistrationConfirmation() {
           <div className="flex justify-center items-center">
             <h1 className="text-2xl font-semibold mb-6">Filled Informations</h1>
           </div>
-          <p>
-            <strong>Name: </strong> {state?.name || "N/A"}
-          </p>
-          <p>
-            <strong>Gender: </strong> {state?.gender || "N/A"}
-          </p>
-          <p>
-            <strong>Permanent Address:</strong>{" "}
-            {state?.permanentAddress || "N/A"}
-          </p>
-          <p>
-            <strong>Temporary Address:</strong>{" "}
-            {state?.temporaryAddress || "N/A"}
-          </p>
-          <p>
-            <strong>Guardian's Name:</strong> {state?.guardianName || "N/A"}
-          </p>
-          <p>
-            <strong>Contact Number:</strong> {state?.contactNumber || "N/A"}
-          </p>
-          <p>
-            <strong>Optional Contact Number:</strong>{" "}
-            {state?.optionalNumber || "N/A"}
-          </p>
-          <p>
-            <strong>Email:</strong> {state?.email || "N/A"}
-          </p>
-          <p>
-            <strong>Why do you want to participate?</strong>{" "}
-            {state?.reason || "N/A"}
-          </p>
-          <p>
-            <strong>How did you hear about this event?</strong>{" "}
-            {state?.source || "N/A"}
-          </p>
+
+          {/* for name */}
+          {state?.name && (
+            <p>
+              <strong>Name: </strong> {state?.name || "N/A"}
+            </p>
+          )}
+
+          {/* age */}
+          {state?.age && (
+            <p>
+              <strong>Age: </strong> {state?.age || "N/A"}
+            </p>
+          )}
+
+          {/* amount */}
+          {state?.amount && (
+            <p>
+              <strong>Amount: </strong> {state?.amount || "N/A"}
+            </p>
+          )}
+
+          {state?.dateOfBirth && (
+            <p>
+              <strong>Date of Birth: </strong> {state?.dateOfBirth || "N/A"}
+            </p>
+          )}
+
+          {/* for gender */}
+          {state?.gender && (
+            <p>
+              <strong>Gender: </strong> {state?.gender || "N/A"}
+            </p>
+          )}
+
+          {/* for height */}
+          {state?.height && (
+            <p>
+              <strong>Height: </strong> {state?.height || "N/A"}
+            </p>
+          )}
+
+          {/* for weight */}
+          {state?.height && (
+            <p>
+              <strong>Weight: </strong> {state?.weight || "N/A"}
+            </p>
+          )}
+
+          {state?.permanentAddress && (
+            <p>
+              <strong>Permanent Address:</strong>{" "}
+              {state?.permanentAddress || "N/A"}
+            </p>
+          )}
+
+          {state?.temporaryAddress && (
+            <p>
+              <strong>Temporary Address:</strong>{" "}
+              {state?.temporaryAddress || "N/A"}
+            </p>
+          )}
+
+          {state?.guardianName && (
+            <p>
+              <strong>Guardian's Name:</strong> {state?.guardianName || "N/A"}
+            </p>
+          )}
+
+          {state?.contactNumber && (
+            <p>
+              <strong>Contact Number:</strong> {state?.contactNumber || "N/A"}
+            </p>
+          )}
+
+          {state?.optionalNumber && (
+            <p>
+              <strong>Optional Contact Number:</strong>{" "}
+              {state?.optionalNumber || "N/A"}
+            </p>
+          )}
+
+          {state?.email && (
+            <p>
+              <strong>Email:</strong> {state?.email || "N/A"}
+            </p>
+          )}
+
+          {state?.reason && (
+            <p>
+              <strong>Why do you want to participate?</strong>{" "}
+              {state?.reason || "N/A"}
+            </p>
+          )}
+
+          {state?.source && (
+            <p>
+              <strong>How did you hear about this event?</strong>{" "}
+              {state?.source || "N/A"}
+            </p>
+          )}
         </div>
       </div>
       <div className="flex justify-center items-center pb-6 px-6">
@@ -320,22 +403,21 @@ function RegistrationConfirmation() {
             </p>
           </div>
           {showConfirm && (
-              <ConfirmCancelPopup
-                onClose={() => setShowConfirm(false)}
-                onConfirm={() => {
-                  setShowQRModal(false);
-                  setShowConfirm(false);
-                }}
-              />
-            )}
+            <ConfirmCancelPopup
+              onClose={() => setShowConfirm(false)}
+              onConfirm={() => {
+                setShowQRModal(false);
+                setShowConfirm(false);
+              }}
+            />
+          )}
         </div>
       )}
- {showSpinner && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
-            <ElegantSpinner />
-          </div>
-        )}
-
+      {showSpinner && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
+          <ElegantSpinner />
+        </div>
+      )}
     </div>
   );
 }

@@ -5,6 +5,71 @@ import { EventContext } from "../../EventProvider.jsx";
 const VotingComponent = () => {
 
   
+  // const currencyOptions = [
+  //   { value: "USD", label: "USD: United States Dollar", cc: "us" },
+  //   { value: "AUD", label: "AUD: Australian Dollar", cc: "au" },
+  //   { value: "GBP", label: "GBP: British Pound Sterling", cc: "gb" },
+  //   { value: "CAD", label: "CAD: Canadian Dollar", cc: "ca" },
+  //   { value: "EUR", label: "EUR: Euro", cc: "eu" },
+  //   { value: "AED", label: "AED: UAE Dirham", cc: "ae" },
+  //   { value: "QAR", label: "QAR: Qatari Riyal", cc: "qa" },
+  //   { value: "MYR", label: "MYR: Malaysian Ringgit", cc: "my" },
+  //   { value: "KWD", label: "KWD: Kuwaiti Dinar", cc: "kw" },
+  //   { value: "CNY", label: "CNY: Chinese Yuan", cc: "cn" },
+  //   { value: "SAR", label: "SAR: Saudi Riyal", cc: "sa" },
+  //   { value: "SGD", label: "SGD: Singapore Dollar", cc: "sg" },
+  //   { value: "HKD", label: "HKD: Hong Kong Dollar", cc: "hk" },
+  //   { value: "NOK", label: "NOK: Norwegian Krone", cc: "no" },
+  //   { value: "KRW", label: "KRW: South Korean Won", cc: "kr" },
+  //   { value: "JPY", label: "JPY: Japanese Yen", cc: "jp" },
+  //   { value: "THB", label: "THB: Thai Baht", cc: "th" },
+  //   { value: "INR", label: "INR: Indian Rupees", cc: "in" },
+  // ];
+
+  // const currencyValues = {
+  //   USD: [25, 50, 75, 125, 150, 200],
+  //   GBP: [25, 50, 75, 125, 150, 200],
+  //   EUR: [25, 50, 75, 125, 150, 200],
+  //   AUD: [30, 60, 100, 150, 200, 300],
+  //   CAD: [30, 60, 100, 150, 200, 300],
+  //   SGD: [30, 60, 100, 150, 200, 300],
+  //   AED: [50, 100, 250, 500, 750, 1000],
+  //   QAR: [50, 100, 250, 500, 750, 1000],
+  //   CNY: [50, 100, 250, 500, 750, 1000],
+  //   SAR: [50, 100, 250, 500, 750, 1000],
+  //   MYR: [75, 150, 250, 500, 750, 1000],
+  //   KWD: [75, 150, 250, 500, 750, 1000],
+  //   HKD: [100, 200, 350, 500, 750, 1000],
+  //   NOK: [100, 200, 350, 500, 750, 1000],
+  //   KRW: [300, 700, 1500, 2500, 3500, 5000],
+  //   JPY: [300, 700, 1500, 2500, 3500, 5000],
+  //   THB: [1000, 1500, 2000, 5000, 7500, 10000],
+  //   INR: [25, 50, 75, 125, 150, 200],
+  // };
+
+  // const votesPerCurrency = {
+  //   USD: 10,
+  //   AUD: 5,
+  //   GBP: 10,
+  //   CAD: 5,
+  //   EUR: 10,
+  //   AED: 2,
+  //   QAR: 2,
+  //   MYR: 2,
+  //   KWD: 2,
+  //   HKD: 1,
+  //   CNY: 1,
+  //   SAR: 2,
+  //   OMR: 20,
+  //   SGD: 8,
+  //   NOK: 1,
+  //   KRW: 200,
+  //   JPY: 20,
+  //   THB: 4,
+  //   INR: 10,
+  // };
+
+
   const currencyOptions = [
     { value: "USD", label: "USD: United States Dollar", cc: "us" },
     { value: "AUD", label: "AUD: Australian Dollar", cc: "au" },
@@ -24,8 +89,14 @@ const VotingComponent = () => {
     { value: "JPY", label: "JPY: Japanese Yen", cc: "jp" },
     { value: "THB", label: "THB: Thai Baht", cc: "th" },
     { value: "INR", label: "INR: Indian Rupees", cc: "in" },
+    // New currencies:
+    { value: "KGS", label: "KGS: Kyrgyzstani Som", cc: "kg" },
+    { value: "RBL", label: "RBL: [RBL Currency]", cc: "rb" },
+    { value: "BDT", label: "BDT: Bangladeshi Taka", cc: "bd" },
+    { value: "NZD", label: "NZD: New Zealand Dollar", cc: "nz" },
+    { value: "ILS", label: "ILS: Israeli Shekel", cc: "il" },
   ];
-
+  
   const currencyValues = {
     USD: [25, 50, 75, 125, 150, 200],
     GBP: [25, 50, 75, 125, 150, 200],
@@ -45,8 +116,14 @@ const VotingComponent = () => {
     JPY: [300, 700, 1500, 2500, 3500, 5000],
     THB: [1000, 1500, 2000, 5000, 7500, 10000],
     INR: [25, 50, 75, 125, 150, 200],
+    // New currencies:
+    KGS: [1000, 4000, 8000, 12000, 16000, 20000],
+    RBL: [200, 800, 1600, 3200, 6400, 10000],
+    BDT: [1000, 4000, 8000, 12000, 16000, 20000],
+    NZD: [60, 120, 180, 200, 260, 300],
+    ILS: [50, 100, 250, 500, 750, 1000],
   };
-
+  
   const votesPerCurrency = {
     USD: 10,
     AUD: 5,
@@ -63,11 +140,18 @@ const VotingComponent = () => {
     OMR: 20,
     SGD: 8,
     NOK: 1,
+
     KRW: 200,
-    JPY: 20,
+    JPY: 20, 
     THB: 4,
     INR: 10,
+    RBL: 15,  // 15 RBL: 1 Vote
+    BDT: 15,  // 15 BDT: 1 Vote
+    KGS: 1,   // 1 Vote: 1 KGS
+    NZD: 5,   // 1 Vote: 5 NZD
+    ILS: 2,   // 1 Vote: 2 ILS
   };
+  
 
   const { formData, setFormData } = useContext(EventContext);
 
@@ -102,10 +186,10 @@ const VotingComponent = () => {
 
     setFormData((prevData) => ({
       ...prevData,
-      votes: ["KRW", "JPY", "THB", "INR"].includes(selectedCurrency)
+      votes: ["KRW", "JPY", "THB", "INR", "RBL","BDT","KGS","NZD","ILS"].includes(selectedCurrency)
         ? newVotes
         : amount,
-      amount: ["KRW", "JPY", "THB", "INR"].includes(selectedCurrency)
+      amount: ["KRW", "JPY", "THB", "INR", "RBL","BDT","KGS","NZD","ILS"].includes(selectedCurrency)
         ? amount
         : newVotes,
     }));
@@ -123,7 +207,7 @@ const VotingComponent = () => {
     } else if (currencyValues[selectedCurrency]) {
         const minValue = currencyValues[selectedCurrency][0];
         const maxValue = currencyValues[selectedCurrency].slice(-1)[0];
-        userValue = ["KRW", "JPY", "THB"].includes(selectedCurrency) ? vote : formData.amount;
+        userValue = ["KRW", "JPY", "THB", "RBL","BDT","KGS","NZD","ILS"].includes(selectedCurrency) ? vote : formData.amount;
         userValue = Math.max(minValue, Math.min(maxValue, userValue)); // Clamp within range
     }
 
@@ -148,7 +232,7 @@ const VotingComponent = () => {
                   onClick={() => handleVoteChange(option)}
                   className="bg-customSky hover:bg-[#0081C6] text-white px-6 py-3 rounded-lg flex items-center justify-center gap-2 w-full sm:w-auto"
                 >
-                  {["KRW", "JPY", "THB", "INR"].includes(selectedCurrency) ? (
+                  {["KRW", "JPY", "THB", "INR", "RBL","BDT","KGS","NZD","ILS"].includes(selectedCurrency) ? (
                     <>
                       <img
                         className="h-6 w-10 sm:h-8 sm:w-14"
@@ -207,7 +291,7 @@ const VotingComponent = () => {
                   : currencyValues[selectedCurrency][0]
                 : ""}{" "}
               {selectedCurrency &&
-              ["KRW", "JPY", "THB", "INR"].includes(selectedCurrency)
+              ["KRW", "JPY", "THB", "INR", "RBL","BDT","KGS","NZD","ILS"].includes(selectedCurrency)
                 ? "votes"
                 : selectedCurrency}{" "}
               & Max{" "}
@@ -217,12 +301,12 @@ const VotingComponent = () => {
                   : currencyValues[selectedCurrency].slice(-1)[0]
                 : 15000}{" "}
               {selectedCurrency &&
-              ["KRW", "JPY", "THB", "INR"].includes(selectedCurrency)
+              ["KRW", "JPY", "THB", "INR", "RBL","BDT","KGS","NZD","ILS"].includes(selectedCurrency)
                 ? "votes"
                 : selectedCurrency}
               .
               {selectedCurrency &&
-              ["KRW", "JPY", "THB", "INR"].includes(selectedCurrency)
+              ["KRW", "JPY", "THB", "INR", "RBL","BDT","KGS","NZD","ILS"].includes(selectedCurrency)
                 ? ` One vote = ${selectedCurrency} ${votesPerCurrency[selectedCurrency]}`
                 : selectedCurrency
                   ? ` One ${selectedCurrency} = ${votesPerCurrency[selectedCurrency]} Vote`
@@ -260,7 +344,7 @@ const VotingComponent = () => {
               value={
                 selectedCurrency === "INR"
         ? Math.max(0, Math.min(15000, vote)) // Ensure within range
-        : ["KRW", "JPY", "THB"].includes(selectedCurrency)
+        : ["KRW", "JPY", "THB", "RBL","BDT","KGS","NZD","ILS"].includes(selectedCurrency)
         ? vote
         : formData.amount
               }
@@ -272,7 +356,7 @@ const VotingComponent = () => {
                   if (selectedCurrency === "INR") {
                     clampedValue = Math.max(0, Math.min(15000, inputValue));
                     setVote(clampedValue);
-                  } else if (["KRW", "JPY", "THB"].includes(selectedCurrency)) {
+                  } else if (["KRW", "JPY", "THB", "RBL","BDT","KGS","NZD","ILS"].includes(selectedCurrency)) {
                     setVote(inputValue);
                   } else {
                     setFormData((prev) => ({ ...prev, amount: inputValue }));
@@ -295,7 +379,7 @@ const VotingComponent = () => {
         </div>
 
         <p className="mt-4 text-normal text-gray-400">
-          {["KRW", "JPY", "THB", "INR"].includes(selectedCurrency) ? (
+          {["KRW", "JPY", "THB", "INR", "RBL","BDT","KGS","NZD","ILS"].includes(selectedCurrency) ? (
             <div>
               Total amount:{" "}
               <span className="text-blue-400 font-semibold">{price}</span>
