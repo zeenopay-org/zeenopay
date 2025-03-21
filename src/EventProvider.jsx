@@ -75,6 +75,8 @@ const EventProvider = ({ children }) => {
       const response2 = await axios.get(`${BACKEND_URL2}${qrUrl}`);
       const QR = response2.data.qr_string;
       console.log("DynamicQR", QR);
+
+      console.log("RESPONSE => ", response2)
       
       if (!QR) throw new Error("Missing 'qr_string' field in API response.");
 
@@ -146,8 +148,7 @@ const EventProvider = ({ children }) => {
   const generateStaticQr = useCallback(async (intentId, amount, eventID) => {
     setQrLoading(true);
     try {
-      // Step 1: API call to generate QR payment
-      const response = await axios.post(`${BACKEND_URL2}/payments/qr/pay/static`, {
+      const response = await axios.post(`${BACKEND_URL2}/payments/qr/pay/static`, { // API call to generate QR payment
         intent_id: intentId,
         amount: amount,
         name: "administrator",
@@ -160,8 +161,8 @@ const EventProvider = ({ children }) => {
       let qrUrl = response.data.goto;
       if (!qrUrl) throw new Error("Missing 'goto' field in API response.");
 
-      // Step 2: API call to get the QR string
-      const response2 = await axios.get(`${BACKEND_URL2}${qrUrl}`);
+    
+      const response2 = await axios.get(`${BACKEND_URL2}${qrUrl}`);   //  API call to get the QR string
       const QR = response2.data.qr_string;
       if (!QR) throw new Error("Missing 'qr_string' field in API response.");
 
@@ -258,6 +259,8 @@ const EventProvider = ({ children }) => {
   // }, [transactionId]);
 
   // to get all the events
+  
+  
   const getAllEvents = useCallback(async () => {
     try {
       setLoading(true);
@@ -375,7 +378,7 @@ const EventProvider = ({ children }) => {
   const getPaymentPartner = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${BACKEND_URL}/payments/partner`);
+      const response = await axios.get(`${BACKEND_URL2}/payments/partners`);
       setPaymentPartner(response.data);
       setLoading(false);
     } catch (error) {

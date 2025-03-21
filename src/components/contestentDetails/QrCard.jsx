@@ -491,9 +491,7 @@ const handleQR = async (e) => {
                   </div>
 
                   <div className="bg-customDarkBlue p-4 rounded-lg">
-                    {/* Static QR: Generate QR Image from qr_string */}
                     <div className="bg-customDarkBlue p-4 rounded-lg flex flex-col items-center">
-                      {/* Log the qrString */}
                       
                       {console.log("QR String:", qrString)}
                       <div ref={qrRef}></div>

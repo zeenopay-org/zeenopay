@@ -66,6 +66,12 @@ function RegistrationConfirmation() {
     if (partner === "stripe_gbl") {
       partner = "stripe";
     }
+    if (partner === "PhonePe") {
+      partner = "phonepe";
+    }
+    if (partner === "PayU") {
+      partner = "payu";
+    }
 
     const intentID = form_id;
     const eventId = form_id;

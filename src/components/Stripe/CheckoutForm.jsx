@@ -12,7 +12,7 @@ const CheckoutForm = ({ clientSecret, price }) => {
 
         const { error } = await stripe.confirmPayment({
             elements,
-            confirmParams: { return_url: "https://api.zeenopay.com/payments/success?platform=stripe" },
+            confirmParams: { return_url: "" },
         });
 
         if (error) {
@@ -23,15 +23,15 @@ const CheckoutForm = ({ clientSecret, price }) => {
 
     return (
         <form onSubmit={handleSubmit} className="flex flex-col items-center gap-6">
-            <PaymentElement  />
-            <p className="text-right text-blue-300 font-mono">Total Payable Amount: {price}</p>
-            <button
+            {/* <PaymentElement  /> */}
+            {/* <p className="text-right text-blue-300 font-mono">Total Payable Amount: {price}</p> */}
+            {/* <button
                 type="submit"
                 className="bg-blue-500 text-white py-2 px-6 rounded-lg hover:bg-blue-700 shadow-lg"
                 disabled={!stripe}
             >
                 Submit
-            </button>
+            </button> */}
             {errorMessage && <p className="text-red-500 text-center">{errorMessage}</p>}
         </form>
     );
