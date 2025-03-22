@@ -23,6 +23,7 @@ const EventProvider = ({ children }) => {
   const [paymentUrl, setPaymentUrl] = useState("");
   const [transactionStatus, setTransactionStatus] = useState("");
   const [paymentIframeUrl, setPaymentIframeUrl] = useState(null);
+  const [wsUrl , setWsURL] = useState("");
 
   const [qrString, setQrString] = useState("");
   //for the paymet with new api
@@ -61,35 +62,35 @@ const EventProvider = ({ children }) => {
             event_id: eventID,
             intent: "V",
             processor: "QR",
-
           }
         );
-        console.log("response:", response);
-       
+  
         console.log("Full API Response:", response.data);
+        
         let qrUrl = response.data.goto;
-        let transactionID  = qrUrl.split("/").pop();
-        console.log("transactionId :",transactionID);
-
-      if (!qrUrl) throw new Error("Missing 'goto' field in API response.");  
-      const response2 = await axios.get(`${BACKEND_URL2}${qrUrl}`);
-      const QR = response2.data.qr_string;
-      console.log("DynamicQR", QR);
-
-      console.log("RESPONSE => ", response2)
-      
-      if (!QR) throw new Error("Missing 'qr_string' field in API response.");
-
-      setQrString(QR);
-      setQrLoading(false);
-
-      setTransactionId(transactionID);
-
-      return QR;
-    } catch (error) {
-      console.error("Error generating QR:", error);
-      setQrLoading(false);
-    }
+        if (!qrUrl) throw new Error("Missing 'goto' field in API response.");
+  
+        let transactionID = qrUrl.split("/").pop();
+        console.log("transactionId:", transactionID);
+  
+        const response2 = await axios.get(`${BACKEND_URL2}${qrUrl}`);
+        const QR = response2.data.qr_string;
+        const trace = response2.data.trace; // WebSocket URL
+        console.log("wsURL (trace):", trace);
+  
+        if (!QR) throw new Error("Missing 'qr_string' field in API response.");
+  
+        setQrString(QR);
+        setQrLoading(false);
+        setWsURL(trace); // Save WebSocket URL
+        setTransactionId(transactionID);
+        checkPaymentStatus(transactionID, trace);
+  
+        return { QR, transactionID, trace }; // Return relevant data
+      } catch (error) {
+        console.error("Error generating QR:", error);
+        setQrLoading(false);
+      }
     },
     []
   );
@@ -116,31 +117,31 @@ const EventProvider = ({ children }) => {
 
 
 
-  const startPolling = useCallback((transactionId) => {
-    setPollingActive(true);
+  // const startPolling = useCallback((transactionId) => {
+  //   setPollingActive(true);
   
-    const intervalId = setInterval(async () => {
-      const data = await DynamicQrPolling(transactionId);
-      const txid = data?.prn;
+  //   const intervalId = setInterval(async () => {
+  //     const data = await DynamicQrPolling(transactionId);
+  //     const txid = data?.prn;
   
-      if (data?.paymentStatus === "success") {
+  //     if (data?.paymentStatus === "success") {
 
-        clearInterval(intervalId); 
-        setPollingActive(false);
-        console.log("Payment successful, stopping polling.");
-        window.location.href = `/qr-success?txid=${txid}`;
-      }
-    }, 1333);
+  //       clearInterval(intervalId); 
+  //       setPollingActive(false);
+  //       console.log("Payment successful, stopping polling.");
+  //       window.location.href = `/qr-success?txid=${txid}`;
+  //     }
+  //   }, 1333);
   
-    return () => clearInterval(intervalId); 
-  }, [DynamicQrPolling]);
+  //   return () => clearInterval(intervalId); 
+  // }, [DynamicQrPolling]);
   
 
-  useEffect(() => {
-    if (transactionId && !pollingActive) {
-      startPolling(transactionId);
-    }
-  }, [transactionId, pollingActive, startPolling]);
+  // useEffect(() => {
+  //   if (transactionId && !pollingActive) {
+  //     startPolling(transactionId);
+  //   }
+  // }, [transactionId, pollingActive, startPolling]);
 
 
 
@@ -162,14 +163,15 @@ const EventProvider = ({ children }) => {
       if (!qrUrl) throw new Error("Missing 'goto' field in API response.");
 
     
-      const response2 = await axios.get(`${BACKEND_URL2}${qrUrl}`);   //  API call to get the QR string
+      const response2 = await axios.get(`${BACKEND_URL2}${qrUrl}`);   
+      const transactionID =response2.data.trace;
       const QR = response2.data.qr_string;
       if (!QR) throw new Error("Missing 'qr_string' field in API response.");
 
       setQrString(QR);
       setQrLoading(false);
 
-      return QR;
+      return {QR,transactionID};
 
     } catch (error) {
       console.error("Error generating QR:", error);
@@ -177,23 +179,31 @@ const EventProvider = ({ children }) => {
     }
   }, []);
   
-  const checkPaymentStatus = (txid) => {
-    const socket = io("wss://api.zeenopay.com", {
+  const checkPaymentStatus = (txid, wsUrl) => {
+    if (!wsUrl) {
+      console.error("❌ WebSocket URL is missing.");
+      return;
+    }
+  
+
+    const socket = io("wss://sio.zeenopay.com/", {
       transports: ["websocket"],
     });
-
+   console.log("txid:", txid);
+   console.log("WSurl: ", wsUrl);
     socket.on("connect", () => {
       console.log(" Connected to WebSocket for payment status.");
-      socket.emit("check", txid);
-    });
+      socket.send(`open:${txid}:${wsUrl}`);
 
+    });
+  
     socket.on("status", (data) => {
       console.log("🔄 Payment status update:", data);
-
+  
       if (!data) return;
-
+  
       const [state, transactionId] = data.split(":");
-
+  
       if (transactionId === txid) {
         if (state.toUpperCase() === "SUCCESS") {
           setPaymentStatus(`✅ Payment Successful!`);
@@ -209,6 +219,44 @@ const EventProvider = ({ children }) => {
         }
       }
     });
+  
+    socket.on("connect_error", (error) => {
+      console.error("❌ WebSocket connection error:", error);
+    });
+  
+    socket.on("error", (error) => {
+      console.error("❌ WebSocket error:", error);
+    });
+  
+    return () => socket.disconnect();
+  };
+
+  useEffect(() => {
+    if (!transactionId) return; 
+
+    const socket = io("wss://api.zeenopay.com", { transports: ["websocket"] });
+
+    socket.on("connect", () => {
+      console.log("✅ Connected to WebSocket for payment status.");
+      console.log("abcd ID", transactionId)
+      socket.emit("check", transactionId);
+    });
+
+    socket.on("status", (data) => {
+      console.log("🔄 Payment status update:", data);
+
+      if (!data) return;
+
+      const [state, txid] = data.split(":");
+
+      if (txid === transactionId) {
+        setPaymentStatus(state.toUpperCase());
+      }
+
+      if (["SUCCESS", "CANCELED"].includes(state.toUpperCase())) {
+        socket.disconnect();
+      }
+    });
 
     socket.on("connect_error", (error) => {
       console.error("❌ WebSocket connection error:", error);
@@ -218,45 +266,8 @@ const EventProvider = ({ children }) => {
       console.error("❌ WebSocket error:", error);
     });
 
-    return () => socket.disconnect();
-  };
-
-  // useEffect(() => {
-  //   if (!transactionId) return; 
-
-  //   const socket = io("wss://api.zeenopay.com", { transports: ["websocket"] });
-
-  //   socket.on("connect", () => {
-  //     console.log("✅ Connected to WebSocket for payment status.");
-  //     socket.emit("check", transactionId);
-  //   });
-
-  //   socket.on("status", (data) => {
-  //     console.log("🔄 Payment status update:", data);
-
-  //     if (!data) return;
-
-  //     const [state, txid] = data.split(":");
-
-  //     if (txid === transactionId) {
-  //       setPaymentStatus(state.toUpperCase());
-  //     }
-
-  //     if (["SUCCESS", "CANCELED"].includes(state.toUpperCase())) {
-  //       socket.disconnect();
-  //     }
-  //   });
-
-  //   socket.on("connect_error", (error) => {
-  //     console.error("❌ WebSocket connection error:", error);
-  //   });
-
-  //   socket.on("error", (error) => {
-  //     console.error("❌ WebSocket error:", error);
-  //   });
-
-  //   return () => socket.disconnect(); 
-  // }, [transactionId]);
+    return () => socket.disconnect(); 
+  }, [transactionId]);
 
   // to get all the events
   

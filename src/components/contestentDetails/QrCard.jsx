@@ -77,11 +77,13 @@ export default function QrCode({ handleX, qrid }) {
   };
 
   useEffect(() => {
-    const { name } = formData;
+    // const { name } = formData;
     const storedPaymentStatus = localStorage.getItem("paymentStatus");
+    console.log("TransictionID SPD Emergency:",transactionId);
+    console.log("contestentID SPD Emergency:",contestant.name);
 
     if (paymentStatus === "SUCCESS" || storedPaymentStatus === "SUCCESS") {
-      navigate("/success", { state: { transactionId, contestant, name } });
+      navigate("/success", { state: { transactionId, contestant } });
       requestAnimationFrame(() => {
         localStorage.removeItem("paymentStatus");
       });
@@ -117,7 +119,7 @@ export default function QrCode({ handleX, qrid }) {
 
   const handleVoteChange = (value) => {
     handleButtonClick();
-    const updatedVotes = Math.max(0, Math.min(15000, value));
+    const updatedVotes = Math.max(10, Math.min(15000, value));
     setFormData((prevData) => ({
       ...prevData,
       votes: updatedVotes,
@@ -162,12 +164,17 @@ const handleQR = async (e) => {
 
     if (qrType === "One Time Use QR") {
       paymentUrl = await generateDynamicQr(intentID, calculatedAmount, eventID);
+      console.log("PaymentURL: ",paymentUrl)
       if (paymentUrl) {
+        console.log("PaymentURL: ",paymentUrl)
+
         setQrString(paymentUrl);
+        const txid = paymentUrl.transactionID;
+        console.log("hjbhvsiuhrlslsdksbs: ", txid)
         
         setShowQRModal(true);
-        // const txid = paymentUrl.split("/")[4].split("_")[1].split(".")[0];
-        // setTransactionId(txid);
+       
+        setTransactionId(txid);
       } else {
         console.log("QR Code URL is not available.");
       }
@@ -200,7 +207,7 @@ const handleQR = async (e) => {
         width: 332,
         height: 332,
         type: "svg",
-        data: qrString,
+        data: qrString.QR,
         image: "https://zeenorides.com/zeenopay_logo.svg",
         dotsOptions: {
             color: "#39b6ff",

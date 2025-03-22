@@ -17,6 +17,7 @@ import ContestantDetails from "./pages/ContestantDetails.jsx";
 import RegistrationConfirmation from "./components/registration/RegistrationConfirmation.jsx";
 import ErrorPage from "./pages/ErrorPage.jsx";
 import QRPaymentSuccess from "./components/success/QRPaymentSuccess.jsx";
+import VotingCard from "./components/VoteCard/voteCard.jsx";
 
 const router = createBrowserRouter([
   {
@@ -67,6 +68,10 @@ const router = createBrowserRouter([
       {
         path: "registration/confirmation",
         element: <RegistrationConfirmation />,
+      },
+      {
+        path: "votecard",
+        element: <VotingCard />,
       },
       {path: "success",
         element: <QRPaymentSuccess/>

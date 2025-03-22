@@ -15,6 +15,7 @@ import PhoneInputWithCountrySelector from "../ReusableInputField/PhoneInputWithC
 import CloudMessage from "./CloudMessage.jsx";
 import ConfirmCancelPopup from "../confirmCanclePupup/ConfirmCancelPopup.jsx";
 import CountdownTimer from "./CountdownTimer.jsx";
+import VotingCard from "../VoteCard/voteCard.jsx";
 
 const SkeletonLoader = () => (
   <div className="min-h-screen flex flex-col items-center justify-center bg-customBlue text-white p-4">
@@ -78,6 +79,7 @@ export default function VotingComponent() {
   const { passingId } = location.state || {};
   const [temp, setTemp] = useState(null);
   const [finalDate, setFinalDate] = useState("");
+  const [showCard, setShowCard] = useState(false);
 
   useEffect(() => {}, [formData]);
 
@@ -113,7 +115,6 @@ export default function VotingComponent() {
     };
     fetchContestant();
   }, [getContestant, id]);
-
   // Handle input field change
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -181,6 +182,12 @@ export default function VotingComponent() {
     });
   };
 
+  const handleVoteCard = () => {
+    setShowCard(true);
+  };
+  const closeCard = () => {
+    setShowCard(false);
+  };
   const handlePartnerChange = (value) => {
     setSelectedPartner(value);
   };
@@ -347,24 +354,39 @@ export default function VotingComponent() {
   md:bottom-[-100px] md:left-20 md:translate-x-0
   lg:bottom-[-150px] lg:left-20 lg:translate-x-0"
                   >
-                    {contestant.shareable_link? (
+                    {contestant.shareable_link ? (
                       <div className="relative top-16 md:top-20 left-14 md:left-20 z-50">
                         <CloudMessage />
                       </div>
-                    ):null}
+                    ) : null}
                     <ProfileCard />
                     {selectedCountry?.cc === "np" && (
-                      <button
-                        onClick={handleQrClick}
-                        className="w-56 md:w-64 px-10 mt-6 ml-2 py-3 border border-white text-white text-xs md:text-md rounded-lg hover:bg-white hover:text-[#0A1128] transition duration-300"
-                      >
-                        Generate QR to Vote
-                      </button>
+                      // <>
+                        <button
+                          onClick={handleQrClick}
+                          className="w-56 md:w-64 px-10 mt-6 ml-2 py-3 border border-white text-white text-xs md:text-md rounded-lg hover:bg-white hover:text-[#0A1128] transition duration-300"
+                        >
+                          Generate QR to Vote
+                        </button>
+                      //   <button
+                      //     onClick={handleVoteCard}
+                      //     className="w-56 md:w-64 px-10 mt-6 ml-2 py-3 border border-white text-white text-xs md:text-md rounded-lg hover:bg-white hover:text-[#0A1128] transition duration-300"
+                      //   >
+                      //     Show Vote Card
+                      //   </button>
+                      // </>
                     )}
                   </div>
                 </div>
               </div>
             </div>
+            {showCard && (
+              <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                <div className="relative bg-white p-6 rounded-lg shadow-lg">
+                  <VotingCard contestant={contestant} event={event} onClose={closeCard} />
+                </div>
+              </div>
+            )}
 
             <div className="mt-52 md:mt-32 flex flex-col items-center justify-center">
               <h1 className="text-xl md:text-2xl font-normal">{event.title}</h1>
@@ -375,8 +397,10 @@ export default function VotingComponent() {
                   "Voting Close!"
                 ) : (
                   <>
-                    <CountdownTimer endTime={finalDate} />
-                    <h1>Voting Open</h1>
+                    <div className="relative z-0">
+                      <CountdownTimer endTime={finalDate} />
+                    </div>
+                    <h1 className="relative z-10">Voting Open</h1>
                   </>
                 )}
               </p>

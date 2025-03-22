@@ -4,6 +4,7 @@ import { EventContext } from "../../EventProvider";
 import { motion } from "framer-motion";
 import ConfirmCancelPopup from "../confirmCanclePupup/ConfirmCancelPopup.jsx";
 import ElegantSpinner from "../confirmCanclePupup/ElegantSpinner.jsx";
+import { Currency } from "lucide-react";
 
 function RegistrationConfirmation() {
   const location = useLocation();
@@ -63,7 +64,7 @@ function RegistrationConfirmation() {
     let partner = payment.method;
 
     // Convert "stripe_gbl" to "stripe"
-    if (partner === "stripe_gbl") {
+    if (partner === "stripe_uk") {
       partner = "stripe";
     }
     if (partner === "PhonePe") {
@@ -88,7 +89,7 @@ function RegistrationConfirmation() {
       contactNumber,
       partner,
       eventId,
-      intent
+      intent,
     );
 
     console.log("event Id bhbshdb sjksjvunisk:", payment);
