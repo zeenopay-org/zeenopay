@@ -1,26 +1,24 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { EventContext } from "../../EventProvider";
 import { motion } from "framer-motion";
 import ConfirmCancelPopup from "../confirmCanclePupup/ConfirmCancelPopup.jsx";
 import ElegantSpinner from "../confirmCanclePupup/ElegantSpinner.jsx";
+import QRCodeStyling from "qr-code-styling";
 import { Currency } from "lucide-react";
 
 function RegistrationConfirmation() {
   const location = useLocation();
   const state = location.state;
   // Ensures `state` is never undefined
-
   const [payment, setPayment] = useState({ method: "" });
   const [showConfirm, setShowConfirm] = useState(false);
   const [showSpinner, setShowSpinner] = useState(false);
   const [showQRModal, setShowQRModal] = useState(false);
   const [qrCodeUrl, setQrCodeUrl] = useState("");
+  const [qrString, setQrString] = useState("");
   const { action_id } = location.state || {};
-  console.log("states: ", state);
-  
-  console.log("in the registration confirm paage the action id is "+ action_id)
-
+  const qrRef = useRef(null);
   const {
     paymentParnter,
     getPaymentPartner,
@@ -31,12 +29,12 @@ function RegistrationConfirmation() {
     generateDynamicQr,
     paymentIframeUrl,
     generateIntentId,
+    setTransactionId,
   } = useContext(EventContext);
 
   useEffect(() => {
     getPaymentPartner();
   }, [getPaymentPartner]);
-  console.log("paymentPartner location,", paymentParnter.cc );
 
   // Handle form submission to initiate payment
   const handlePayment = async (e) => {
@@ -57,26 +55,18 @@ function RegistrationConfirmation() {
       video,
       amount,
       form_id,
-      action_id
+      action_id,
     } = state;
-
-
-
-
     if (!name || !contactNumber || !email || !form_id || !amount) {
       alert("Name, Phone, Amount, and Email are required.");
       return;
     }
-
     let partner = payment.method;
-
-    // Convert "stripe_gbl" to "stripe"
     if (partner === "stripe_uk") {
       partner = "stripe";
     }
     if (partner === "PhonePe") {
       partner = "phonepe";
-      
     }
     if (partner === "PayU") {
       partner = "payu";
@@ -84,20 +74,15 @@ function RegistrationConfirmation() {
 
     const intentID = form_id;
     const eventId = form_id;
-    console.log(eventId, ": event id");
-    console.log(intentID, ": intend Id");
 
-    let currency
-    if (paymentParnter.cc=="in"){
-      currency= "INR";
-    }else if(paymentParnter.cc=="np"){
-      currency= "NPR";
+    let currency;
+    if (paymentParnter.cc == "in") {
+      currency = "INR";
+    } else if (paymentParnter.cc == "np") {
+      currency = "NPR";
     }
-    console.log("currency spd Emergency",currency)
-
     const intent = "F";
     const actionId = action_id;
-    console.log("actionID spd Emergency:",actionId)
     const paymentUrl = await initiatePartnerPayment(
       intentID,
       amount,
@@ -108,19 +93,18 @@ function RegistrationConfirmation() {
       eventId,
       intent,
       currency,
-      actionId,
-
+      actionId
     );
-
-    console.log("event Id bhbshdb", payment);
-
     if (paymentUrl) {
-      console.log("selected Partner ", partner);
-
-      if (partner === "fonepay" || partner === "prabhupay") {
+      if (
+        partner === "esewa" ||
+        partner === "fonepay" ||
+        partner === "prabhupay"
+        // partner == "stripe"
+      ) {
         console.log("Redirecting to Fonepay or PrabhuPay...");
         redirectToFoneAndPrabhuPay(paymentUrl);
-      }else if(partner === "phonepe"){
+      } else if (partner === "phonepe") {
         redirectToPhonePe(paymentUrl);
       } else {
         redirectToPaymentPage(paymentUrl);
@@ -133,44 +117,77 @@ function RegistrationConfirmation() {
 
   const handleQR = async (e) => {
     e.preventDefault();
-    const { name, contactNumber, email, form_id, amount } = state;
-
+    const { name, contactNumber, email, form_id, amount, action_id } = state;
     if (!name || !contactNumber || !email || !form_id || !amount) {
       alert("Name, Phone, Amount, and Email are required.");
       return;
     }
-
     const intentID = form_id;
     const partner = payment.method;
     const eventId = form_id;
-    const intent = "form";
-
-    console.log("eventId:", eventId);
-    console.log("intentID:", intentID);
-
+    const intent = "F";
+    const actionId = action_id;
     setShowSpinner(true); // Show spinner while generating QR
 
     try {
       // Generate the QR Code URL
-      const paymentUrl = await generateDynamicQr(intentID, amount, intent);
-      console.log("Generated Dynamic QR Payment URL:", paymentUrl);
-
-      // Update the QR code URL state
-      setQrCodeUrl(paymentUrl);
-
-      // Show the QR code modal
-      setShowQRModal(true);
+      const paymentUrl = await generateDynamicQr(
+        intentID,
+        amount,
+        eventId,
+        intent,
+        actionId
+      );
+      if (paymentUrl) {
+        setQrString(paymentUrl);
+        const txid = paymentUrl.transactionID;
+        setShowQRModal(true);
+        setTransactionId(txid);
+      } else {
+        console.log("QR Code URL is not available.");
+      }
     } catch (error) {
       console.error("Error generating QR code:", error);
       alert("Failed to generate QR code. Please try again.");
     } finally {
-      setShowSpinner(false); // Hide the spinner
+      setShowSpinner(false);
     }
   };
 
   const handlePaymentChange = (e) => {
     setPayment({ method: e.target.value });
   };
+
+  useEffect(() => {
+    if (qrString && qrRef.current) {
+      qrRef.current.innerHTML = "";
+
+      // Create a new QRCodeStyling instance
+      const qrCode = new QRCodeStyling({
+        width: 332,
+        height: 332,
+        type: "svg",
+        data: qrString.QR,
+        image: "https://zeenorides.com/zeenopay_logo.svg",
+        dotsOptions: {
+          color: "#39b6ff",
+          type: "extra-rounded",
+        },
+        backgroundOptions: {
+          color: "#000",
+        },
+        imageOptions: {
+          crossOrigin: "anonymous",
+          imageSize: 0.5,
+          margin: 0,
+          hideBackgroundDots: false,
+        },
+      });
+
+      // Append QR code to the ref
+      qrCode.append(qrRef.current);
+    }
+  }, [qrString]);
 
   return (
     <div className=" w-full bg-customBlue ">
@@ -356,7 +373,6 @@ function RegistrationConfirmation() {
               </button>
             </div>
 
-            {/* Iframe */}
             <iframe
               src={paymentIframeUrl}
               className="w-full flex-grow"
@@ -382,28 +398,23 @@ function RegistrationConfirmation() {
 
       {showQRModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
-          <div className="bg-customBlue p-6 rounded-lg -mt-12 md:mt-5 text-center w-[26rem] border border-gray-700 relative">
+          <div className="bg-customBlue p-3 rounded-lg  md:mt-20 text-center w-[26rem] border border-gray-700 relative">
             {/* Header with Close Button */}
+            <div className="flex justify-between items-center bg-customBlue p-3 rounded-t-lg">
+              <h2 className="text-sm font-semibold text-white">
+                Scan & Pay via Banking Apps, Esewa, Khalti, and all major
+                wallets
+              </h2>
+              <button
+                onClick={() => setShowConfirm(true)}
+                className="text-white text-xl pl-4 hover:text-red-500 transition"
+              >
+                ✕
+              </button>
+            </div>
             <div className="bg-customDarkBlue p-4 rounded-lg">
-              <div className="bg-customDarkBlue p-4 rounded-lg">
-                <div className="flex justify-between items-center bg-customBlue p-3 rounded-t-lg">
-                  <h2 className="text-sm font-semibold text-white">
-                    Scan & Pay via Banking Apps, Esewa, Khalti, and all major
-                    wallets
-                  </h2>
-                  <button
-                    onClick={() => setShowConfirm(true)}
-                    className="text-white text-xl pl-4 hover:text-red-500 transition"
-                  >
-                    ✕
-                  </button>
-                </div>
-                <img
-                  src={qrCodeUrl}
-                  alt="QR Code"
-                  className="mx-auto rounded-lg border border-gray-500"
-                  style={{ width: "300px", height: "300px" }}
-                />
+              <div className="bg-customDarkBlue pl-3 rounded-lg">
+                <div ref={qrRef}></div>
                 <div className="flex items-center justify-center mt-2 space-x-2">
                   <p className="text-red-500 ml-4 font-semibold">Powered by</p>
                   <img

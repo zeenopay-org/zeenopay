@@ -45,12 +45,12 @@ const EventProvider = ({ children }) => {
 
   const [paymentStatus, setPaymentStatus] = useState("Waiting for payment...");
   const [transactionId, setTransactionId] = useState(null);
-  const [pollingActive, setPollingActive] = useState(false);
+  // const [pollingActive, setPollingActive] = useState(false);
 
   const BACKEND_URL = "https://api.zeenopay.com";
   const BACKEND_URL2 = "https://auth.zeenopay.com";
 
-  const generateDynamicQr = useCallback(async (intentId, amount, eventID) => {
+  const generateDynamicQr = useCallback(async (intentId, amount, eventID,intent, actionID) => {
     setQrLoading(true);
     try {
       const response = await axios.post(
@@ -61,8 +61,9 @@ const EventProvider = ({ children }) => {
           name: "administrator",
           phone_no: "administrator",
           event_id: eventID,
-          intent: "V",
+          intent: intent ? intent: "V",
           processor: "QR",
+          action_id: actionID,
         }
       );
 
@@ -76,8 +77,7 @@ const EventProvider = ({ children }) => {
 
       const response2 = await axios.get(`${BACKEND_URL2}${qrUrl}`);
       const QR = response2.data.qr_string;
-      const trace = response2.data.trace; // WebSocket URL
-      // console.log("wsURL (trace):", trace);
+      const trace = response2.data.trace; 
 
       if (!QR) throw new Error("Missing 'qr_string' field in API response.");
 

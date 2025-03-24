@@ -427,7 +427,9 @@ const handleQR = async (e) => {
           <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
             <div className="bg-customBlue p-6 rounded-lg -mt-12 md:mt-5 text-center w-[26rem] border border-gray-700 relative">
               {/* Header with Close Button */}
+             
               {formData.qrType === "Multiple Time Use QR"?(
+                 //static QR:show the Static QR code Image
                 <>
                   <div className="flex justify-between items-center bg-customBlue p-2 rounded-t-lg">
                     <h2 className="text-xs text-white">
@@ -475,7 +477,7 @@ const handleQR = async (e) => {
                     >
                       ✕
                     </button>
-                  </div>
+                </div>
 
                   <div className="bg-customDarkBlue p-4 rounded-lg">
                     <div className="bg-customDarkBlue p-4 rounded-lg flex flex-col items-center">

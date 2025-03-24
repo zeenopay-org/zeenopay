@@ -535,7 +535,7 @@ export default function VotingComponent() {
                     className="mt-6 bg-white hover:bg-gray-300 text-sm text-purple-800 px-6 py-3 rounded-2xl"
                     onClick={handlePayment}
                   >
-                    Proceed to Pay in
+                    Proceed to Pay
                   </button>
                 ) : selectedCountry?.cc === "np" ? (
                   <button
