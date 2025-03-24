@@ -16,8 +16,10 @@ function RegistrationConfirmation() {
   const [showSpinner, setShowSpinner] = useState(false);
   const [showQRModal, setShowQRModal] = useState(false);
   const [qrCodeUrl, setQrCodeUrl] = useState("");
-
+  const { action_id } = location.state || {};
   console.log("states: ", state);
+  
+  console.log("in the registration confirm paage the action id is "+ action_id)
 
   const {
     paymentParnter,
@@ -34,6 +36,7 @@ function RegistrationConfirmation() {
   useEffect(() => {
     getPaymentPartner();
   }, [getPaymentPartner]);
+  console.log("paymentPartner location,", paymentParnter.cc );
 
   // Handle form submission to initiate payment
   const handlePayment = async (e) => {
@@ -54,7 +57,11 @@ function RegistrationConfirmation() {
       video,
       amount,
       form_id,
+      action_id
     } = state;
+
+
+
 
     if (!name || !contactNumber || !email || !form_id || !amount) {
       alert("Name, Phone, Amount, and Email are required.");
@@ -69,6 +76,7 @@ function RegistrationConfirmation() {
     }
     if (partner === "PhonePe") {
       partner = "phonepe";
+      
     }
     if (partner === "PayU") {
       partner = "payu";
@@ -79,8 +87,17 @@ function RegistrationConfirmation() {
     console.log(eventId, ": event id");
     console.log(intentID, ": intend Id");
 
-    const intent = "F";
+    let currency
+    if (paymentParnter.cc=="in"){
+      currency= "INR";
+    }else if(paymentParnter.cc=="np"){
+      currency= "NPR";
+    }
+    console.log("currency spd Emergency",currency)
 
+    const intent = "F";
+    const actionId = action_id;
+    console.log("actionID spd Emergency:",actionId)
     const paymentUrl = await initiatePartnerPayment(
       intentID,
       amount,
@@ -90,9 +107,12 @@ function RegistrationConfirmation() {
       partner,
       eventId,
       intent,
+      currency,
+      actionId,
+
     );
 
-    console.log("event Id bhbshdb sjksjvunisk:", payment);
+    console.log("event Id bhbshdb", payment);
 
     if (paymentUrl) {
       console.log("selected Partner ", partner);

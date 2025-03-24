@@ -1,14 +1,16 @@
-import { createContext, useCallback, useEffect, useState,useRef } from "react";
+import { createContext, useCallback, useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { io } from "socket.io-client"; // Import WebSocket client
 import QRCodeStyling from "qr-code-styling";
 import { LogIn } from "lucide-react";
+// import { Navigate, useNavigate } from "react-router-dom";
 
 // import QRCode from "qrcode.react";
 
 const EventContext = createContext();
 
 const EventProvider = ({ children }) => {
+  // const navigate = useNavigate();
   const [events, setEvents] = useState([]);
   const [event, setEvent] = useState([]);
   const [forms, setForms] = useState([]);
@@ -23,11 +25,13 @@ const EventProvider = ({ children }) => {
   const [paymentUrl, setPaymentUrl] = useState("");
   const [transactionStatus, setTransactionStatus] = useState("");
   const [paymentIframeUrl, setPaymentIframeUrl] = useState(null);
-  const [wsUrl , setWsURL] = useState("");
+  const [wsUrl, setWsURL] = useState("");
 
   const [qrString, setQrString] = useState("");
   //for the paymet with new api
   const [eventId, setEventId] = useState("");
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     intentId: 0,
@@ -39,7 +43,6 @@ const EventProvider = ({ children }) => {
     currency: "",
   });
 
-
   const [paymentStatus, setPaymentStatus] = useState("Waiting for payment...");
   const [transactionId, setTransactionId] = useState(null);
   const [pollingActive, setPollingActive] = useState(false);
@@ -47,62 +50,60 @@ const EventProvider = ({ children }) => {
   const BACKEND_URL = "https://api.zeenopay.com";
   const BACKEND_URL2 = "https://auth.zeenopay.com";
 
+  const generateDynamicQr = useCallback(async (intentId, amount, eventID) => {
+    setQrLoading(true);
+    try {
+      const response = await axios.post(
+        `${BACKEND_URL2}/payments/qr/pay/dynamic`,
+        {
+          intent_id: intentId,
+          amount: amount,
+          name: "administrator",
+          phone_no: "administrator",
+          event_id: eventID,
+          intent: "V",
+          processor: "QR",
+        }
+      );
 
-  const generateDynamicQr = useCallback(
-    async (intentId, amount, eventID) => {
-      setQrLoading(true);
-      try {
-        const response = await axios.post(
-          `${BACKEND_URL2}/payments/qr/pay/dynamic`,
-          {
-            intent_id: intentId,
-            amount: amount,
-            name: "administrator",
-            phone_no: "administrator",
-            event_id: eventID,
-            intent: "V",
-            processor: "QR",
-          }
-        );
-  
-        console.log("Full API Response:", response.data);
-        
-        let qrUrl = response.data.goto;
-        if (!qrUrl) throw new Error("Missing 'goto' field in API response.");
-  
-        let transactionID = qrUrl.split("/").pop();
-        console.log("transactionId:", transactionID);
-  
-        const response2 = await axios.get(`${BACKEND_URL2}${qrUrl}`);
-        const QR = response2.data.qr_string;
-        const trace = response2.data.trace; // WebSocket URL
-        console.log("wsURL (trace):", trace);
-  
-        if (!QR) throw new Error("Missing 'qr_string' field in API response.");
-  
-        setQrString(QR);
-        setQrLoading(false);
-        setWsURL(trace); // Save WebSocket URL
-        setTransactionId(transactionID);
-        checkPaymentStatus(transactionID, trace);
-  
-        return { QR, transactionID, trace }; // Return relevant data
-      } catch (error) {
-        console.error("Error generating QR:", error);
-        setQrLoading(false);
-      }
-    },
-    []
-  );
+      // console.log("Full API Response:", response.data);
 
+      let qrUrl = response.data.goto;
+      if (!qrUrl) throw new Error("Missing 'goto' field in API response.");
+
+      let transactionID = qrUrl.split("/").pop();
+      // console.log("transactionId:", transactionID);
+
+      const response2 = await axios.get(`${BACKEND_URL2}${qrUrl}`);
+      const QR = response2.data.qr_string;
+      const trace = response2.data.trace; // WebSocket URL
+      // console.log("wsURL (trace):", trace);
+
+      if (!QR) throw new Error("Missing 'qr_string' field in API response.");
+
+      setQrString(QR);
+      setQrLoading(false);
+      setWsURL(trace); // Save WebSocket URL
+      setTransactionId(transactionID);
+      checkPaymentStatus(transactionID, trace);
+
+      return { QR, transactionID, trace }; // Return relevant data
+    } catch (error) {
+      console.error("Error generating QR:", error);
+      setQrLoading(false);
+    }
+  }, []);
 
   const DynamicQrPolling = useCallback(async (transactionID) => {
     try {
-      const response = await axios.get(`${BACKEND_URL2}/payments/qr/verify/${transactionID}`, {
-        // headers: {
-        //   'X-Client' : 'zeenoClient/3.0'
-        // }
-      });
+      const response = await axios.get(
+        `${BACKEND_URL2}/payments/qr/verify/${transactionID}`,
+        {
+          // headers: {
+          //   'X-Client' : 'zeenoClient/3.0'
+          // }
+        }
+      );
 
       console.log(`${BACKEND_URL2}/payments/qr/verify/${transactionID}`);
       console.log("Response Data:", response.data);
@@ -113,29 +114,26 @@ const EventProvider = ({ children }) => {
     } catch (error) {
       console.error("Error fetching QR verification:", error);
     }
-}, []);
-
-
+  }, []);
 
   // const startPolling = useCallback((transactionId) => {
   //   setPollingActive(true);
-  
+
   //   const intervalId = setInterval(async () => {
   //     const data = await DynamicQrPolling(transactionId);
   //     const txid = data?.prn;
-  
+
   //     if (data?.paymentStatus === "success") {
 
-  //       clearInterval(intervalId); 
+  //       clearInterval(intervalId);
   //       setPollingActive(false);
   //       console.log("Payment successful, stopping polling.");
   //       window.location.href = `/qr-success?txid=${txid}`;
   //     }
   //   }, 1333);
-  
-  //   return () => clearInterval(intervalId); 
+
+  //   return () => clearInterval(intervalId);
   // }, [DynamicQrPolling]);
-  
 
   // useEffect(() => {
   //   if (transactionId && !pollingActive) {
@@ -143,77 +141,85 @@ const EventProvider = ({ children }) => {
   //   }
   // }, [transactionId, pollingActive, startPolling]);
 
-
-
   // **************************************************************
   const generateStaticQr = useCallback(async (intentId, amount, eventID) => {
     setQrLoading(true);
     try {
-      const response = await axios.post(`${BACKEND_URL2}/payments/qr/pay/static`, { // API call to generate QR payment
-        intent_id: intentId,
-        amount: amount,
-        name: "administrator",
-        phone_no: "administrator",
-        event_id: eventID,
-        intent: "V",
-        processor: "NQR",
-      });
+      const response = await axios.post(
+        `${BACKEND_URL2}/payments/qr/pay/static`,
+        {
+          // API call to generate QR payment
+          intent_id: intentId,
+          amount: amount,
+          name: "administrator",
+          phone_no: "administrator",
+          event_id: eventID,
+          intent: "V",
+          processor: "NQR",
+        }
+      );
 
       let qrUrl = response.data.goto;
       if (!qrUrl) throw new Error("Missing 'goto' field in API response.");
 
-    
-      const response2 = await axios.get(`${BACKEND_URL2}${qrUrl}`);   
-      const transactionID =response2.data.trace;
+      const response2 = await axios.get(`${BACKEND_URL2}${qrUrl}`);
+      const transactionID = response2.data.trace;
       const QR = response2.data.qr_string;
       if (!QR) throw new Error("Missing 'qr_string' field in API response.");
 
       setQrString(QR);
       setQrLoading(false);
 
-      return {QR,transactionID};
-
+      return { QR, transactionID };
     } catch (error) {
       console.error("Error generating QR:", error);
       setQrLoading(false);
     }
   }, []);
-  
+
   const checkPaymentStatus = (txid, wsUrl) => {
     if (!wsUrl) {
       console.error("❌ WebSocket URL is missing.");
       return;
     }
   
-
     const socket = io("wss://sio.zeenopay.com/", {
       transports: ["websocket"],
     });
-   console.log("txid:", txid);
-   console.log("WSurl: ", wsUrl);
+  
     socket.on("connect", () => {
-      console.log(" Connected to WebSocket for payment status.");
+      console.log("✅ Connected to WebSocket for payment status.");
       socket.send(`open:${txid}:${wsUrl}`);
-
     });
   
-    socket.on("status", (data) => {
+    socket.on("status", async (data) => { // ✅ Marked as async
       console.log("🔄 Payment status update:", data);
   
       if (!data) return;
   
       const [state, transactionId] = data.split(":");
+      console.log("state: ", state);
   
       if (transactionId === txid) {
         if (state.toUpperCase() === "SUCCESS") {
-          setPaymentStatus(`✅ Payment Successful!`);
+          try {
+            console.log("📡 Verifying payment with backend...");
+            const response = await axios.get(
+              `${BACKEND_URL2}/payments/qr/verify/${transactionId}`
+            );
+            console.log("✅ Response Data:", response.data);
+            setPaymentStatus("✅ Payment Successful!");
+          } catch (error) {
+            console.error("❌ Error verifying payment:", error);
+          }
         } else if (state.toUpperCase() === "CANCELED") {
-          setPaymentStatus(`❌ Payment Canceled`);
+          setPaymentStatus("❌ Payment Canceled");
         } else if (state.toUpperCase() === "SCANNED") {
-          setPaymentStatus(`📲 QR Code Scanned`);
+          setPaymentStatus("📲 QR Code Scanned");
         } else {
-          setPaymentStatus(`⏳ Payment Pending...`);
+          setPaymentStatus("⏳ Payment Pending...");
         }
+  
         if (["SUCCESS", "CANCELED"].includes(state.toUpperCase())) {
           socket.disconnect();
         }
@@ -230,15 +236,16 @@ const EventProvider = ({ children }) => {
   
     return () => socket.disconnect();
   };
+  
 
   useEffect(() => {
-    if (!transactionId) return; 
+    if (!transactionId) return;
 
     const socket = io("wss://api.zeenopay.com", { transports: ["websocket"] });
 
     socket.on("connect", () => {
       console.log("✅ Connected to WebSocket for payment status.");
-      console.log("abcd ID", transactionId)
+      console.log("abcd ID", transactionId);
       socket.emit("check", transactionId);
     });
 
@@ -266,12 +273,11 @@ const EventProvider = ({ children }) => {
       console.error("❌ WebSocket error:", error);
     });
 
-    return () => socket.disconnect(); 
+    return () => socket.disconnect();
   }, [transactionId]);
 
   // to get all the events
-  
-  
+
   const getAllEvents = useCallback(async () => {
     try {
       setLoading(true);
@@ -308,6 +314,39 @@ const EventProvider = ({ children }) => {
     }
   }, []); // Empty dependency array
 
+  // for the form submitting
+  const submitRegistrationForm = useCallback(
+    async (formId, formData, amount) => {
+      setIsSubmitting(true); // Start loading
+      try {
+        const response = await fetch(
+          `https://auth.zeenopay.com/events/form/response/${formId}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ response: formData }),
+          }
+        );
+
+        if (!response.ok) throw new Error("Failed to submit form");
+
+        const data = await response.json();
+        console.log("✅ Form submitted successfully:", data);
+        return data;
+
+        // navigate("/registration/confirmation", {
+        //   state: { ...formData, form_id: formId, amount: amount },
+        // });
+      } catch (error) {
+        console.error("❌ Error submitting form:", error);
+        alert("An error occurred while submitting the form. Please try again.");
+      } finally {
+        setIsSubmitting(false); // Stop loading
+      }
+    },
+    []
+  );
+
   // get event by id
   const getEvent = useCallback(async (id) => {
     try {
@@ -340,7 +379,9 @@ const EventProvider = ({ children }) => {
   const getAllContestants = useCallback(async (id) => {
     try {
       setLoading(true);
-      const response = await axios.get(`${BACKEND_URL2}/events/contestants?event_id=${id}`);
+      const response = await axios.get(
+        `${BACKEND_URL2}/events/contestants?event_id=${id}`
+      );
       setContestants(response.data);
       setLoading(false);
     } catch (error) {
@@ -352,7 +393,9 @@ const EventProvider = ({ children }) => {
   const getContestant = useCallback(async (id) => {
     try {
       setLoading(true);
-      const response = await axios.get(`${BACKEND_URL2}/events/contestants/${id}`);
+      const response = await axios.get(
+        `${BACKEND_URL2}/events/contestants/${id}`
+      );
       setContestant(response.data);
       setLoading(false);
     } catch (error) {
@@ -398,7 +441,18 @@ const EventProvider = ({ children }) => {
   }, []);
 
   const initiatePartnerPayment = useCallback(
-    async (intentId, amount, name, email, phone, partner, eventId, intent, currency) => {
+    async (
+      intentId,
+      amount,
+      name,
+      email,
+      phone,
+      partner,
+      eventId,
+      intent,
+      currency,
+      actionId
+    ) => {
       try {
         setLoading(true);
         console.log("This is event ID: " + eventId);
@@ -407,18 +461,19 @@ const EventProvider = ({ children }) => {
           intent_id: intentId,
           amount: amount,
           name: name || "98000000001",
-          email: email || "admin@gmail.com", 
-          phone_no: phone || "9800000001", 
-          payment_type: "O", 
-          processor: partner.toUpperCase(), 
+          email: email || "admin@gmail.com",
+          phone_no: phone || "9800000001",
+          payment_type: "O",
+          processor: partner.toUpperCase(),
           intent: intent || "V",
           event_id: eventId,
           status: "P",
-          currency: currency, 
+          currency: currency,
+          action_id: actionId || "",
         };
         console.log(requestBody);
         console.log("requestBody :", requestBody);
-        
+
         const response = await axios.post(
           `${BACKEND_URL2}/payments/${partner}/pay/`,
           requestBody,
@@ -428,14 +483,12 @@ const EventProvider = ({ children }) => {
             },
           }
         );
-        console.log("responseURL", response.data);
 
-        let url = response.data.goto || response.data.redirect_url || null; 
+        let url = response.data.goto || response.data.redirect_url || null;
 
         if (!url) {
           throw new Error("Payment URL is not available in the response.");
         }
-        console.log("Payment URL:", url);
         setPaymentUrl(url);
         setLoading(false);
         return url;
@@ -466,22 +519,29 @@ const EventProvider = ({ children }) => {
   };
 
   const updateCSP = (allowBlob = true) => {
-    let metaCSP = document.querySelector("meta[http-equiv='Content-Security-Policy']");
-    
+    let metaCSP = document.querySelector(
+      "meta[http-equiv='Content-Security-Policy']"
+    );
+
     if (!metaCSP) {
       metaCSP = document.createElement("meta");
       metaCSP.setAttribute("http-equiv", "Content-Security-Policy");
       document.head.appendChild(metaCSP);
     }
-  
+
     if (allowBlob) {
-      metaCSP.setAttribute("content", "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.google-analytics.com https://dgq88cldibal5.cloudfront.net https://mercurystatic.phonepe.com https://linchpin.phonepe.com https://mercury.phonepe.com; worker-src 'self' blob:;");
+      metaCSP.setAttribute(
+        "content",
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.google-analytics.com https://dgq88cldibal5.cloudfront.net https://mercurystatic.phonepe.com https://linchpin.phonepe.com https://mercury.phonepe.com; worker-src 'self' blob:;"
+      );
     } else {
-      metaCSP.setAttribute("content", "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.google-analytics.com https://dgq88cldibal5.cloudfront.net https://mercurystatic.phonepe.com https://linchpin.phonepe.com https://mercury.phonepe.com;");
+      metaCSP.setAttribute(
+        "content",
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.google-analytics.com https://dgq88cldibal5.cloudfront.net https://mercurystatic.phonepe.com https://linchpin.phonepe.com https://mercury.phonepe.com;"
+      );
     }
   };
-  
-  
+
   const redirectToPhonePe = async (tokenUrl, mode = "IFRAME") => {
     if (!tokenUrl || typeof tokenUrl !== "string") {
       console.error("Invalid token URL for redirection.");
@@ -489,25 +549,24 @@ const EventProvider = ({ children }) => {
     }
 
     console.log("Starting PhonePe transaction in", mode, "mode.");
-    console.log("Token URL:", tokenUrl);
-  
+
     if (!window.PhonePeCheckout || !window.PhonePeCheckout.transact) {
       console.error("PhonePeCheckout script not loaded yet.");
       return;
     }
 
     updateCSP(true);
-  
+
     if (mode === "REDIRECT") {
       console.log("Redirecting to:", tokenUrl);
-      window.PhonePeCheckout.transact({ tokenUrl: tokenUrl});
+      window.PhonePeCheckout.transact({ tokenUrl: tokenUrl });
     } else if (mode === "IFRAME") {
       window.PhonePeCheckout.transact({
         tokenUrl: tokenUrl,
         type: "IFRAME",
         callback: (response) => {
           console.log("Transaction Response:", response);
-          
+
           if (response === "USER_CANCEL") {
             alert("Transaction was canceled by the user.");
           } else if (response === "CONCLUDED") {
@@ -520,9 +579,6 @@ const EventProvider = ({ children }) => {
       console.error("Invalid mode. Choose 'REDIRECT' or 'IFRAME'.");
     }
   };
-  
-  
-  
 
   const redirectToPaymentPage = (url) => {
     if (url) {
@@ -578,6 +634,10 @@ const EventProvider = ({ children }) => {
         formData,
         setFormData,
         eventId,
+        isSubmitting,
+        setIsSubmitting,
+        submitRegistrationForm,
+        
       }}
     >
       {children}

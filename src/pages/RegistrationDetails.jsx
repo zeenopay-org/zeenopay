@@ -7,11 +7,11 @@ import { useParams } from "react-router-dom";
 const RegistrationDetails = () => {
   const { form, getForm } = useContext(EventContext);
   const [fields, setFields] = useState([]);
-  console.log("annohbsbius", form);
+  // console.log("annohbsbius", form);
   
 
   const { id } = useParams();
-  console.log("svblhvbsl", id);
+  // console.log("svblhvbsl", id);
   
 
   // Fetch form data when `id` changes

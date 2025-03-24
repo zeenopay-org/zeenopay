@@ -37,7 +37,6 @@ function EventDetails() {
 
   useEffect(() => {
     getEvent(id);
-    console.log("ljlsbhfbsl", event);
   }, [getEvent, id]);
 
   useEffect(() => {
@@ -52,13 +51,13 @@ function EventDetails() {
     }
   }, [passingId, getEvent]);
 
-  useEffect(() => {
-    console.log("Updated qrId:", qrId);
-  }, [qrId]);
+  // useEffect(() => {
+  //   console.log("Updated qrId:", qrId);
+  // }, [qrId]);
 
-  useEffect(() => {
-    console.log("Updated pop state:", pop);
-  }, [pop]);
+  // useEffect(() => {
+  //   console.log("Updated pop state:", pop);
+  // }, [pop]);
 
   const eventFinalDate = new Date(event.finaldate);
   const currentDate = new Date();
@@ -82,11 +81,9 @@ function EventDetails() {
       top: 0,
       behavior: "smooth",
     });
-    console.log("id before update:", id);
 
     setQrId(id); // Set the qrId
     setPop(true);
-    console.log("id after update (immediately after setQrId):", qrId); // Will log the old qrId immediately
   };
   const handleX = () => {
     console.log("handleX clicked");
@@ -98,7 +95,6 @@ function EventDetails() {
       <>
         {pop && (
           <>
-            {console.log("Rendering QrCard with qrId:", qrId)}
             <QrCard handleX={handleX} qrid={qrId} />
           </>
         )}
@@ -197,10 +193,6 @@ function EventDetails() {
                       <button
                         className="bg-[#003A75]  w-[55%] text-white px-4 py-2 rounded-3xl font-medium hover:bg-gray-600"
                         onClick={() => {
-                          console.log(
-                            "Button clicked, passing id:",
-                            contestant.id
-                          );
                           handleQR(contestant.id);
                         }}
                       >

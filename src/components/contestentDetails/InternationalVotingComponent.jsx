@@ -120,7 +120,7 @@ const VotingComponent = () => {
     KGS: [1000, 4000, 8000, 12000, 16000, 20000],
     RBL: [200, 800, 1600, 3200, 6400, 10000],
     BDT: [1000, 4000, 8000, 12000, 16000, 20000],
-    NZD: [60, 120, 180, 200, 260, 300],
+    NZD: [50, 100, 250, 500, 750, 1000],
     ILS: [50, 100, 250, 500, 750, 1000],
   };
   
@@ -140,6 +140,7 @@ const VotingComponent = () => {
     OMR: 20,
     SGD: 8,
     NOK: 1,
+    NZD: 4,   // 4 Vote: 1 NZD
 
     KRW: 200,
     JPY: 20, 
@@ -148,7 +149,6 @@ const VotingComponent = () => {
     RBL: 15,  // 15 RBL: 1 Vote
     BDT: 15,  // 15 BDT: 1 Vote
     KGS: 1,   // 1 Vote: 1 KGS
-    NZD: 5,   // 1 Vote: 5 NZD
     ILS: 2,   // 1 Vote: 2 ILS
   };
   
@@ -186,10 +186,10 @@ const VotingComponent = () => {
 
     setFormData((prevData) => ({
       ...prevData,
-      votes: ["KRW", "JPY", "THB", "INR", "RBL","BDT","KGS","NZD","ILS"].includes(selectedCurrency)
+      votes: ["KRW", "JPY", "THB", "INR", "RBL","BDT","KGS","ILS"].includes(selectedCurrency)
         ? newVotes
         : amount,
-      amount: ["KRW", "JPY", "THB", "INR", "RBL","BDT","KGS","NZD","ILS"].includes(selectedCurrency)
+      amount: ["KRW", "JPY", "THB", "INR", "RBL","BDT","KGS","ILS"].includes(selectedCurrency)
         ? amount
         : newVotes,
     }));
@@ -207,7 +207,7 @@ const VotingComponent = () => {
     } else if (currencyValues[selectedCurrency]) {
         const minValue = currencyValues[selectedCurrency][0];
         const maxValue = currencyValues[selectedCurrency].slice(-1)[0];
-        userValue = ["KRW", "JPY", "THB", "RBL","BDT","KGS","NZD","ILS"].includes(selectedCurrency) ? vote : formData.amount;
+        userValue = ["KRW", "JPY", "THB", "RBL","BDT","KGS","ILS"].includes(selectedCurrency) ? vote : formData.amount;
         userValue = Math.max(minValue, Math.min(maxValue, userValue)); // Clamp within range
     }
 
@@ -232,7 +232,7 @@ const VotingComponent = () => {
                   onClick={() => handleVoteChange(option)}
                   className="bg-customSky hover:bg-[#0081C6] text-white px-6 py-3 rounded-lg flex items-center justify-center gap-2 w-full sm:w-auto"
                 >
-                  {["KRW", "JPY", "THB", "INR", "RBL","BDT","KGS","NZD","ILS"].includes(selectedCurrency) ? (
+                  {["KRW", "JPY", "THB", "INR", "RBL","BDT","KGS","ILS"].includes(selectedCurrency) ? (
                     <>
                       <img
                         className="h-6 w-10 sm:h-8 sm:w-14"
@@ -291,7 +291,7 @@ const VotingComponent = () => {
                   : currencyValues[selectedCurrency][0]
                 : ""}{" "}
               {selectedCurrency &&
-              ["KRW", "JPY", "THB", "INR", "RBL","BDT","KGS","NZD","ILS"].includes(selectedCurrency)
+              ["KRW", "JPY", "THB", "INR", "RBL","BDT","KGS","ILS"].includes(selectedCurrency)
                 ? "votes"
                 : selectedCurrency}{" "}
               & Max{" "}
@@ -301,12 +301,12 @@ const VotingComponent = () => {
                   : currencyValues[selectedCurrency].slice(-1)[0]
                 : 15000}{" "}
               {selectedCurrency &&
-              ["KRW", "JPY", "THB", "INR", "RBL","BDT","KGS","NZD","ILS"].includes(selectedCurrency)
+              ["KRW", "JPY", "THB", "INR", "RBL","BDT","KGS","ILS"].includes(selectedCurrency)
                 ? "votes"
                 : selectedCurrency}
               .
               {selectedCurrency &&
-              ["KRW", "JPY", "THB", "INR", "RBL","BDT","KGS","NZD","ILS"].includes(selectedCurrency)
+              ["KRW", "JPY", "THB", "INR", "RBL","BDT","KGS","ILS"].includes(selectedCurrency)
                 ? ` One vote = ${selectedCurrency} ${votesPerCurrency[selectedCurrency]}`
                 : selectedCurrency
                   ? ` One ${selectedCurrency} = ${votesPerCurrency[selectedCurrency]} Vote`
@@ -343,8 +343,8 @@ const VotingComponent = () => {
               className="peer w-full h-12 bg-transparent text-white text-lg outline-none border border-gray-600 rounded-lg px-4 pt-5 pb-1 text-center appearance-none focus:border-blue-500 transition-all duration-300"
               value={
                 selectedCurrency === "INR"
-        ? Math.max(0, Math.min(15000, vote)) // Ensure within range
-        : ["KRW", "JPY", "THB", "RBL","BDT","KGS","NZD","ILS"].includes(selectedCurrency)
+        ? Math.max(10, Math.min(15000, vote)) // Ensure within range
+        : ["KRW", "JPY", "THB", "RBL","BDT","KGS","ILS"].includes(selectedCurrency)
         ? vote
         : formData.amount
               }
@@ -356,7 +356,7 @@ const VotingComponent = () => {
                   if (selectedCurrency === "INR") {
                     clampedValue = Math.max(0, Math.min(15000, inputValue));
                     setVote(clampedValue);
-                  } else if (["KRW", "JPY", "THB", "RBL","BDT","KGS","NZD","ILS"].includes(selectedCurrency)) {
+                  } else if (["KRW", "JPY", "THB", "RBL","BDT","KGS","ILS"].includes(selectedCurrency)) {
                     setVote(inputValue);
                   } else {
                     setFormData((prev) => ({ ...prev, amount: inputValue }));
@@ -379,7 +379,7 @@ const VotingComponent = () => {
         </div>
 
         <p className="mt-4 text-normal text-gray-400">
-          {["KRW", "JPY", "THB", "INR", "RBL","BDT","KGS","NZD","ILS"].includes(selectedCurrency) ? (
+          {["KRW", "JPY", "THB", "INR", "RBL","BDT","KGS","ILS"].includes(selectedCurrency) ? (
             <div>
               Total amount:{" "}
               <span className="text-blue-400 font-semibold">{price}</span>

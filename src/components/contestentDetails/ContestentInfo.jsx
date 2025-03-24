@@ -234,7 +234,7 @@ export default function VotingComponent() {
     return Object.keys(newErrors).length === 0;
   };
 
-  console.log("contestent id:", contestant.id);
+ 
 
   const handlePayment = async (e) => {
     e.preventDefault();
@@ -262,7 +262,6 @@ export default function VotingComponent() {
       );
 
       if (paymentUrl) {
-        console.log("Redirecting to payment:", paymentUrl);
         redirectToPhonePe(paymentUrl);
       } else {
         console.log("Payment URL is not available");

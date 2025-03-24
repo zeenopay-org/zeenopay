@@ -10,7 +10,7 @@ import QRCodeStyling from "qr-code-styling";
 import { QRCodeCanvas } from "qrcode.react";
 
 export default function QrCode({ handleX, qrid }) {
-  console.log("ididididi    Qr  jnsnj:", qrid);
+
 
   const { id: paramId } = useParams();
   const id = qrid ? qrid : paramId;
@@ -77,11 +77,7 @@ export default function QrCode({ handleX, qrid }) {
   };
 
   useEffect(() => {
-    // const { name } = formData;
     const storedPaymentStatus = localStorage.getItem("paymentStatus");
-    console.log("TransictionID SPD Emergency:",transactionId);
-    console.log("contestentID SPD Emergency:",contestant.name);
-
     if (paymentStatus === "SUCCESS" || storedPaymentStatus === "SUCCESS") {
       navigate("/success", { state: { transactionId, contestant } });
       requestAnimationFrame(() => {
@@ -136,7 +132,6 @@ export default function QrCode({ handleX, qrid }) {
       handleQR(e);
     }, 500);
   };
-console.log("contestent_id::",contestant.event)
 
 
 
@@ -154,8 +149,6 @@ const handleQR = async (e) => {
       alert("Please select a QR type.");
       return;
     }
-
-    console.log("QR TYPE:", qrType);
     
     setShowSpinner(true);
 
@@ -164,16 +157,10 @@ const handleQR = async (e) => {
 
     if (qrType === "One Time Use QR") {
       paymentUrl = await generateDynamicQr(intentID, calculatedAmount, eventID);
-      console.log("PaymentURL: ",paymentUrl)
       if (paymentUrl) {
-        console.log("PaymentURL: ",paymentUrl)
-
         setQrString(paymentUrl);
         const txid = paymentUrl.transactionID;
-        console.log("hjbhvsiuhrlslsdksbs: ", txid)
-        
         setShowQRModal(true);
-       
         setTransactionId(txid);
       } else {
         console.log("QR Code URL is not available.");
@@ -197,9 +184,6 @@ const handleQR = async (e) => {
   );
   useEffect(() => {
     if (qrString && qrRef.current) {
-      // Clear previous QR code
-      console.log("QR jhsbfrbuna", qrString);
-      
       qrRef.current.innerHTML = "";
 
       // Create a new QRCodeStyling instance
@@ -463,11 +447,7 @@ const handleQR = async (e) => {
                   <div className="bg-customDarkBlue p-4 rounded-lg">
                     {/* Static QR: Generate QR Image from qr_string */}
                     <div className="bg-customDarkBlue p-4 rounded-lg flex flex-col items-center">
-                      {/* Log the qrString */}
-                      
-                      {console.log("QR String:", qrString)}
-                      <div ref={qrRef}></div>
-
+                      <div ref={qrRef}></div>  {/* qr_String pass */}
                       <div className="flex items-center justify-center mt-2 space-x-2">
                         <p className="text-red-500 ml-4 font-semibold">
                            Powered by
@@ -499,10 +479,7 @@ const handleQR = async (e) => {
 
                   <div className="bg-customDarkBlue p-4 rounded-lg">
                     <div className="bg-customDarkBlue p-4 rounded-lg flex flex-col items-center">
-                      
-                      {console.log("QR String:", qrString)}
                       <div ref={qrRef}></div>
-
                       <div className="flex items-center justify-center mt-2 space-x-2">
                         <p className="text-red-500 ml-4 font-semibold">
                            Powered by

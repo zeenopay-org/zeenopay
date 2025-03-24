@@ -1,27 +1,30 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { Pencil } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-
 import countryCodes from "../contestentDetails/countryCodes.jsx";
 import PhoneInputWithCountrySelector from "../ReusableInputField/PhoneInputWithCountrySelector.jsx";
 import CustomDropdown from "../ReusableInputField/CustomDropdown.jsx";
+import { uploadToS3 } from "../middleware/AwsUploader.jsx";
+import { EventContext } from "../../EventProvider.jsx";
 
 export default function EventRegistrationForm({ fields, formId }) {
-  console.log("fields: ", fields);
   const amount = fields.formFee;
 
-  console.log("Received fromId:", formId);
+  // console.log("Received fromId:", formId);
   const navigate = useNavigate();
   const [errors, setErrors] = useState({});
   const [inputFocused, setInputFocused] = useState({});
+  const [imageUrl, setImageUrl] = useState("");
+  const [progress, setProgress] = useState(0);
+  const { submitRegistrationForm , isSubmitting} = useContext(EventContext);
   const [formData, setFormData] = useState({
     image: "",
     name: "",
     gender: "",
-    height:"",
+    height: "",
     weight: "",
-    age:"",
+    age: "",
     permanentAddress: "",
     temporaryAddress: "",
     guardianName: "",
@@ -43,6 +46,15 @@ export default function EventRegistrationForm({ fields, formId }) {
     }, 2000);
   }, []);
 
+  useEffect(() => {
+    if (imageUrl) {
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        image: imageUrl, // Update the image field in formData
+      }));
+    }
+  }, [imageUrl]);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -61,13 +73,35 @@ export default function EventRegistrationForm({ fields, formId }) {
 
   const handleImageChange = (event) => {
     const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        setImage(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
+    if (!file) return;
+
+    // Show preview before uploading
+    const reader = new FileReader();
+    reader.onload = () => {
+      console.log("✅ Preview URL:", reader.result);
+      setImage(reader.result);
+    };
+    reader.readAsDataURL(file);
+
+    console.log("📤 Starting upload to S3...");
+
+    // Upload to AWS S3 using uploadToS3
+    uploadToS3(
+      file,
+      (progress) => {
+        console.log(`📊 Upload Progress: ${progress}%`);
+        setProgress(progress);
+      },
+      (uploadedUrl) => {
+        console.log("✅ Uploaded URL:", uploadedUrl);
+        setImageUrl(uploadedUrl);
+      },
+      (error) => {
+        console.error("❌ S3 Upload Error:", error);
+      }
+    );
+
+    console.log("📤 Upload function called!");
   };
 
   const handleVideoChange = (event) => {
@@ -122,24 +156,25 @@ export default function EventRegistrationForm({ fields, formId }) {
     let errors = {};
     if (fields.female_only) {
       if (!formData.age) errors.age = "This field is required";
-      if (heightQuestion?.isRequired && !formData.height) errors.height = "This field is required";
+      if (heightQuestion?.isRequired && !formData.height)
+        errors.height = "This field is required";
     }
-   
+
     if (nameQuestion?.isRequired && !formData.name.trim()) {
       errors.name = "This field is required";
     }
-    
+
     if (radioQuestion?.isRequired && !formData.gender && !fields.female_only)
       errors.gender = "This field is required";
 
     if (guardianNameQuestion?.isRequired && !formData.guardianName.trim())
       errors.guardianName = "This field is required";
 
-    if ( PermanentAddQuestion?.isRequired && !formData.permanentAddress.trim())
+    if (PermanentAddQuestion?.isRequired && !formData.permanentAddress.trim())
       errors.permanentAddress = "This field is required";
 
     // Validate Contact Number
-    if ( contactNumberQuestion?.isRequired && !formData.contactNumber.trim()) {
+    if (contactNumberQuestion?.isRequired && !formData.contactNumber.trim()) {
       errors.contactNumber = "This field is required";
     } else if (!/^\+?\d{10,15}$/.test(formData.contactNumber)) {
       errors.contactNumber = "Invalid contact number";
@@ -147,7 +182,8 @@ export default function EventRegistrationForm({ fields, formId }) {
 
     // Validate Optional Number (Only if it's filled)
     if (
-      tempContactNumberQuestion?.isRequired && formData.optionalNumber.trim() &&
+      tempContactNumberQuestion?.isRequired &&
+      formData.optionalNumber.trim() &&
       !/^\+?\d{10,15}$/.test(formData.optionalNumber)
     ) {
       errors.optionalNumber = "Invalid contact number";
@@ -180,17 +216,19 @@ export default function EventRegistrationForm({ fields, formId }) {
     { value: "prefer-not", label: "Prefer not to say" },
   ];
 
-  const handleSave = () => {
-    console.log(formData)
-    if (validateForm()) {
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth",
-      });
-      navigate("/registration/confirmation", {
-        state: { ...formData, form_id: formId, amount: amount },
-      });
-    }
+  const handleSave = async () => {
+    if (!validateForm()) return;
+    console.log("formID", formId);
+
+   const data = await submitRegistrationForm(formId, formData, amount);
+   const action_id = data.action_id
+   console.log(action_id+" this is acton id")
+   if (data){
+    console.log("hi hellow", data);
+    navigate("/registration/confirmation", {
+      state: { ...formData, form_id: formId, amount: amount, action_id: action_id },
+    });
+   }
   };
 
   const handleDropdownChange = (value) => {
