@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState, useRef } from "react";
-import { useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { EventContext } from "../../EventProvider";
 import { motion } from "framer-motion";
 import ConfirmCancelPopup from "../confirmCanclePupup/ConfirmCancelPopup.jsx";
@@ -18,6 +18,8 @@ function RegistrationConfirmation() {
   const [qrCodeUrl, setQrCodeUrl] = useState("");
   const [qrString, setQrString] = useState("");
   const { action_id } = location.state || {};
+  const [formData, setFormData] = useState(null);
+  const navigate = useNavigate();
   const qrRef = useRef(null);
   const {
     paymentParnter,
@@ -28,15 +30,46 @@ function RegistrationConfirmation() {
     redirectToPhonePe,
     generateDynamicQr,
     paymentIframeUrl,
+    paymentStatus,
+    transactionId,
     generateIntentId,
     setTransactionId,
+    getForm,
   } = useContext(EventContext);
 
   useEffect(() => {
     getPaymentPartner();
   }, [getPaymentPartner]);
 
+  // const { form_id } = state;
   // Handle form submission to initiate payment
+  // useEffect(() => {
+  //   if (!form_id) return; // Prevent unnecessary API calls
+  
+  //   const fetchForm = async () => {
+  //     try {
+  //       const response = await getForm(form_id);
+  //       setFormData(response);
+  //     } catch (error) {
+  //       console.error("Error fetching form:", error);
+  //     }
+  //   };
+  
+  //   fetchForm();
+  // }, [getForm, form_id]);
+  
+
+  
+  useEffect(() => {
+    const storedPaymentStatus = localStorage.getItem("paymentStatus");
+    if (paymentStatus === "SUCCESS" || storedPaymentStatus === "SUCCESS") {
+      navigate("/registration-success", { state: { transactionId } });
+      requestAnimationFrame(() => {
+        localStorage.removeItem("paymentStatus");
+      });
+    }
+  }, [paymentStatus]);
+
   const handlePayment = async (e) => {
     e.preventDefault();
     const {
@@ -188,7 +221,11 @@ function RegistrationConfirmation() {
       qrCode.append(qrRef.current);
     }
   }, [qrString]);
+  // const paymentspartners = {
+  //   partner: ["fonepay", "esewa", "qr"],
+  // };
 
+  // console.log(paymentspartners);
   return (
     <div className=" w-full bg-customBlue ">
       <div className="flex justify-center items-center  pt-11 pb-6 px-6">
@@ -306,38 +343,49 @@ function RegistrationConfirmation() {
           </div>
           {/* Payment Options */}
           <div className="flex flex-col gap-3">
-            {paymentParnter?.partner?.map((option, index) => (
-              <label
-                key={index}
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer transition-all ${
-                  payment.method === option
-                    ? "bg-blue-800 text-white shadow-lg"
-                    : "bg-transparent hover:bg-blue-900"
-                }`}
-              >
-                <input
-                  type="radio"
-                  name="payment"
-                  value={option}
-                  checked={payment.method === option}
-                  onChange={handlePaymentChange}
-                  className="hidden"
-                />
-                <div
-                  className={`w-[17px] h-[17px] flex items-center justify-center border-2 rounded-full transition-all ${
-                    payment.method === option
-                      ? "border-gray-400 border-4 hover:bg-blue-900"
-                      : "border-gray-400"
-                  }`}
-                >
-                  {payment.method === option && (
-                    <div className="w-[10px] h-[10px] bg-gray-400 rounded-full"></div>
-                  )}
-                </div>
-                {option}
-              </label>
-            ))}
+  {paymentParnter?.partner?.length > 0 ? (
+    paymentParnter.partner.map((option, index) =>
+      option === "stripe_uk" ? (
+        <p key={index} className="text-red-500">
+          Registration is not available in your country.
+        </p>
+      ) : (
+        <label
+          key={index}
+          className={`flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer transition-all ${
+            payment.method === option
+              ? "bg-blue-800 text-white shadow-lg"
+              : "bg-transparent hover:bg-blue-900"
+          }`}
+        >
+          <input
+            type="radio"
+            name="payment"
+            value={option}
+            checked={payment.method === option}
+            onChange={handlePaymentChange}
+            className="hidden"
+          />
+          <div
+            className={`w-[17px] h-[17px] flex items-center justify-center border-2 rounded-full transition-all ${
+              payment.method === option
+                ? "border-gray-400 border-4 hover:bg-blue-900"
+                : "border-gray-400"
+            }`}
+          >
+            {payment.method === option && (
+              <div className="w-[10px] h-[10px] bg-gray-400 rounded-full"></div>
+            )}
           </div>
+          {option}
+        </label>
+      )
+    )
+  ) : (
+    <p className="text-red-500">No payment partners available.</p>
+  )}
+</div>
+
         </div>
       </div>
       <div className="flex justify-center items-center pb-11 px-6">

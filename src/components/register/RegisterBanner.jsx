@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { Calendar, Clock, MapPin, DollarSign } from "lucide-react";
-import { useParams } from "react-router-dom";
+// import { useParams } from "react-router-dom";
 import { EventContext } from "../../EventProvider";
 
 function Register({ fields }) {
