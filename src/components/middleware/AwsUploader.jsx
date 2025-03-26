@@ -44,12 +44,7 @@ export const uploadToS3 = async (file, onProgress, onSuccess, onError) => {
 
     const command = new PutObjectCommand(params);
     const response = await s3Client.send(command);
-
-    console.log("✅ Upload Success:", response);
-
     const fileUrl = `https://${S3_BUCKET}.s3.${REGION}.amazonaws.com/${file.name}`;
-    console.log("✅ File URL:", fileUrl);
-
     onSuccess(fileUrl);
   } catch (error) {
     console.error("❌ AWS Upload Error:", error);

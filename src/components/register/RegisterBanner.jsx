@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
 import { Calendar, Clock, MapPin, DollarSign } from "lucide-react";
-// import { useParams } from "react-router-dom";
 import { EventContext } from "../../EventProvider";
 
 function Register({ fields }) {
@@ -9,7 +8,7 @@ function Register({ fields }) {
 
   useEffect(() => {
     setTimeout(() => {
-      setLoading(false); // Stop loading after 2 seconds
+      setLoading(false); 
     }, 2000);
   }, []);
 
@@ -26,7 +25,6 @@ function Register({ fields }) {
         });
   };
 
-  // Skeleton loader components
   const SkeletonLoader = () => (
     <div className="animate-pulse space-y-4">
       <div className="h-8 bg-gray-700 rounded w-2/3 mx-auto"></div>
@@ -45,7 +43,7 @@ function Register({ fields }) {
   }
 
   return (
-    <div className="bg-customBlue pt-10 w-full flex items-center justify-center">
+    <div className="bg-customBlue p-4 pt-10 w-full flex items-center justify-center">
       <div className="flex bg-customDarkBlue flex-col-reverse md:flex-row w-full max-w-6xl md:mx-auto text-white rounded-lg overflow-hidden shadow-lg">
         <div className="p-6 md:p-4 lg:p-8 flex gap-6 flex-col justify-center w-full md:w-2/3">
           {loading ? (
@@ -77,8 +75,8 @@ function Register({ fields }) {
 
                 {fields.formFee && (
                   <div className="flex items-center">
-                    <DollarSign className="w-5 h-5 mr-2 text-gray-300" />
-                    <p className="text-xl font-semibold">{fields.formFee}</p>
+                    {/* <DollarSign className="w-5 h-5 mr-2 text-gray-300" /> */}
+                    <p className="text-xl font-semibold">Rs {fields.formFee}</p>
                   </div>
                 )}
               </div>

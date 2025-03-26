@@ -35,8 +35,7 @@ function OngoingEvents() {
         animate={{ opacity: 1 }}
         transition={{ duration: 1 }}
       >
-        {loading
-          ? // Skeleton Loader
+        {loading ?
             Array.from({ length: 4 }).map((_, index) => (
               <div
                 key={index}
@@ -74,7 +73,7 @@ function OngoingEvents() {
                   className="w-full p-2 rounded-3xl h-52 md:h-44 lg:h-44 object-cover"
                 />
                 <div className="flex flex-col pl-4 pr-4 flex-grow">
-                  <h3 className="text-sm md:text-[16px] font-semibold">
+                  <h3 className="text-sm md:text-[12px] font-semibold">
                     {event.title}
                   </h3>
                   <p className="text-xs md:text-[10px] text-gray-300 mt-1 flex-grow">

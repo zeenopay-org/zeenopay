@@ -10,15 +10,12 @@ import { Currency } from "lucide-react";
 function RegistrationConfirmation() {
   const location = useLocation();
   const state = location.state;
-  // Ensures `state` is never undefined
+  // Ensures state is never undefined
   const [payment, setPayment] = useState({ method: "" });
   const [showConfirm, setShowConfirm] = useState(false);
   const [showSpinner, setShowSpinner] = useState(false);
   const [showQRModal, setShowQRModal] = useState(false);
-  const [qrCodeUrl, setQrCodeUrl] = useState("");
   const [qrString, setQrString] = useState("");
-  const { action_id } = location.state || {};
-  const [formData, setFormData] = useState(null);
   const navigate = useNavigate();
   const qrRef = useRef(null);
   const {
@@ -32,7 +29,7 @@ function RegistrationConfirmation() {
     paymentIframeUrl,
     paymentStatus,
     transactionId,
-    generateIntentId,
+    // generateIntentId,
     setTransactionId,
     getForm,
   } = useContext(EventContext);
@@ -40,25 +37,6 @@ function RegistrationConfirmation() {
   useEffect(() => {
     getPaymentPartner();
   }, [getPaymentPartner]);
-
-  // const { form_id } = state;
-  // Handle form submission to initiate payment
-  // useEffect(() => {
-  //   if (!form_id) return; // Prevent unnecessary API calls
-  
-  //   const fetchForm = async () => {
-  //     try {
-  //       const response = await getForm(form_id);
-  //       setFormData(response);
-  //     } catch (error) {
-  //       console.error("Error fetching form:", error);
-  //     }
-  //   };
-  
-  //   fetchForm();
-  // }, [getForm, form_id]);
-  
-
   
   useEffect(() => {
     const storedPaymentStatus = localStorage.getItem("paymentStatus");
@@ -221,11 +199,22 @@ function RegistrationConfirmation() {
       qrCode.append(qrRef.current);
     }
   }, [qrString]);
-  // const paymentspartners = {
-  //   partner: ["fonepay", "esewa", "qr"],
-  // };
 
-  // console.log(paymentspartners);
+  // Define payment partners based on country code
+  const getPaymentPartners = () => {
+    if (paymentParnter?.cc === "np") {
+      return {
+        fonepay: "Mobile/Internet Banking",
+        esewa: "eSewa",
+        khalti: "khalti",
+        qr: "Through QR"
+      };
+    }
+    return paymentParnter?.partner || [];
+  };
+
+  const paymentPartners = getPaymentPartners();
+
   return (
     <div className=" w-full bg-customBlue ">
       <div className="flex justify-center items-center  pt-11 pb-6 px-6">
@@ -343,7 +332,39 @@ function RegistrationConfirmation() {
           </div>
           {/* Payment Options */}
           <div className="flex flex-col gap-3">
-  {paymentParnter?.partner?.length > 0 ? (
+  {paymentParnter?.cc === "np" ? (
+    Object.entries(paymentPartners).map(([key, value], index) => (
+      <label
+        key={index}
+        className={`flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer transition-all ${
+          payment.method === key
+            ? "bg-blue-800 text-white shadow-lg"
+            : "bg-transparent hover:bg-blue-900"
+        }`}
+      >
+        <input
+          type="radio"
+          name="payment"
+          value={key}
+          checked={payment.method === key}
+          onChange={handlePaymentChange}
+          className="hidden"
+        />
+        <div
+          className={`w-[17px] h-[17px] flex items-center justify-center border-2 rounded-full transition-all ${
+            payment.method === key
+              ? "border-gray-400 border-4 hover:bg-blue-900"
+              : "border-gray-400"
+          }`}
+        >
+          {payment.method === key && (
+            <div className="w-[10px] h-[10px] bg-gray-400 rounded-full"></div>
+          )}
+        </div>
+        {value}
+      </label>
+    ))
+  ) : paymentParnter?.partner?.length > 0 ? (
     paymentParnter.partner.map((option, index) =>
       option === "stripe_uk" ? (
         <p key={index} className="text-red-500">
@@ -385,7 +406,6 @@ function RegistrationConfirmation() {
     <p className="text-red-500">No payment partners available.</p>
   )}
 </div>
-
         </div>
       </div>
       <div className="flex justify-center items-center pb-11 px-6">
