@@ -741,7 +741,7 @@ export default function EventRegistrationForm({ fields, formId }) {
                       ${
                         formData.reason || inputFocused.reason
                           ? "top-0 -translate-y-1/2 text-blue-500 text-xs"
-                          : "top-1/2 -translate-y-1/2 text-sm md:text-base"
+                          : "top-1/2 -translate-y-1/2 text-xs md:text-base"
                       }`}
                   >
                     Why do you want to participate in this Event?

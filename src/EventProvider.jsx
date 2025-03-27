@@ -43,7 +43,7 @@ const EventProvider = ({ children }) => {
     currency: "",
   });
 
-  const [paymentStatus, setPaymentStatus] = useState("Waiting for payment...");
+  const [paymentStatus, setPaymentStatus] = useState(null);
   const [transactionId, setTransactionId] = useState(null);
   // const [pollingActive, setPollingActive] = useState(false);
 
@@ -94,27 +94,27 @@ const EventProvider = ({ children }) => {
     }
   }, []);
 
-  const DynamicQrPolling = useCallback(async (transactionID) => {
-    try {
-      const response = await axios.get(
-        `${BACKEND_URL2}/payments/qr/verify/${transactionID}`,
-        {
-          // headers: {
-          //   'X-Client' : 'zeenoClient/3.0'
-          // }
-        }
-      );
+  // const DynamicQrPolling = useCallback(async (transactionID) => {
+  //   try {
+  //     const response = await axios.get(
+  //       `${BACKEND_URL2}/payments/qr/verify/${transactionID}`,
+  //       {
+  //         // headers: {
+  //         //   'X-Client' : 'zeenoClient/3.0'
+  //         // }
+  //       }
+  //     );
 
-      console.log(`${BACKEND_URL2}/payments/qr/verify/${transactionID}`);
-      console.log("Response Data:", response.data);
+  //     console.log(`${BACKEND_URL2}/payments/qr/verify/${transactionID}`);
+  //     console.log("Response Data:", response.data);
 
-      setPaymentStatus(response.data.paymentStatus);
+  //     setPaymentStatus(response.data.paymentStatus);
 
-      return response.data;
-    } catch (error) {
-      console.error("Error fetching QR verification:", error);
-    }
-  }, []);
+  //     return response.data;
+  //   } catch (error) {
+  //     console.error("Error fetching QR verification:", error);
+  //   }
+  // }, []);
 
   // const startPolling = useCallback((transactionId) => {
   //   setPollingActive(true);
@@ -177,6 +177,7 @@ const EventProvider = ({ children }) => {
     }
   }, []);
 
+  
   const checkPaymentStatus = (txid, wsUrl) => {
     if (!wsUrl) {
       console.error("❌ WebSocket URL is missing.");
@@ -192,37 +193,40 @@ const EventProvider = ({ children }) => {
       socket.send(`open:${txid}:${wsUrl}`);
     });
   
-    socket.on("status", async (data) => { // ✅ Marked as async
+    socket.on("status", async (data) => {
       console.log("🔄 Payment status update:", data);
   
       if (!data) return;
   
       const [state, transactionId] = data.split(":");
-      console.log("state: ", state);
+      console.log("State: ", state);
   
-      if (transactionId === txid) {
-        if (state.toUpperCase() === "SUCCESS") {
-          try {
-            console.log("📡 Verifying payment with backend...");
-            const response = await axios.get(
-              `${BACKEND_URL2}/payments/qr/verify/${transactionId}`
-            );
-            console.log("✅ Response Data:", response.data);
-            setPaymentStatus("✅ Payment Successful!");
-          } catch (error) {
-            console.error("❌ Error verifying payment:", error);
+      if (transactionId === txid && state.toUpperCase() === "SUCCESS") {
+        try {
+          console.log("📡 Verifying payment with backend...");
+          const response = await axios.get(
+            `${BACKEND_URL2}/payments/qr/verify/${transactionId}`
+          );
+          // console.log("✅ Response Data:", response.data);
+  
+          if (response.data.paymentStatus === "success") {
+            setPaymentStatus("SUCCESS"); //  Only update if backend confirms success
           }
-        } else if (state.toUpperCase() === "CANCELED") {
-          setPaymentStatus("❌ Payment Canceled");
-        } else if (state.toUpperCase() === "SCANNED") {
-          setPaymentStatus("📲 QR Code Scanned");
-        } else {
-          setPaymentStatus("⏳ Payment Pending...");
+        } catch (error) {
+          console.error("❌ Error verifying payment:", error);
         }
+      }
   
-        if (["SUCCESS", "CANCELED"].includes(state.toUpperCase())) {
-          socket.disconnect();
-        }
+      if (["CANCELED"].includes(state.toUpperCase())) {
+        setPaymentStatus("❌ Payment Canceled");
+      } else if (state.toUpperCase() === "SCANNED") {
+        setPaymentStatus("📲 QR Code Scanned");
+      } else if (state.toUpperCase() !== "SUCCESS") {
+        setPaymentStatus("⏳ Payment Pending...");
+      }
+  
+      if (["SUCCESS", "CANCELED"].includes(state.toUpperCase())) {
+        socket.disconnect();
       }
     });
   
@@ -237,44 +241,53 @@ const EventProvider = ({ children }) => {
     return () => socket.disconnect();
   };
   
-
+  //  WebSocket Listener for Checking Payment Status
   useEffect(() => {
     if (!transactionId) return;
-
+  
     const socket = io("wss://api.zeenopay.com", { transports: ["websocket"] });
-
+  
     socket.on("connect", () => {
       console.log("✅ Connected to WebSocket for payment status.");
-      console.log("abcd ID", transactionId);
+      console.log("🔄 Transaction ID:", transactionId);
       socket.emit("check", transactionId);
     });
-
+  
     socket.on("status", (data) => {
       console.log("🔄 Payment status update:", data);
-
+  
       if (!data) return;
-
+  
       const [state, txid] = data.split(":");
-
-      if (txid === transactionId) {
-        setPaymentStatus(state.toUpperCase());
+  
+      if (txid === transactionId && state.toUpperCase() === "SUCCESS") {
+        checkPaymentStatus(transactionId, "wss://api.zeenopay.com"); // Call function to verify success
       }
-
+  
+      if (["CANCELED"].includes(state.toUpperCase())) {
+        setPaymentStatus(" Payment Canceled");
+      }
+  
       if (["SUCCESS", "CANCELED"].includes(state.toUpperCase())) {
         socket.disconnect();
       }
     });
-
+  
     socket.on("connect_error", (error) => {
       console.error("❌ WebSocket connection error:", error);
     });
-
+  
     socket.on("error", (error) => {
       console.error("❌ WebSocket error:", error);
     });
-
-    return () => socket.disconnect();
-  }, [transactionId]);
+  
+    return () => {
+      console.log("🔌 Disconnecting WebSocket...");
+      socket.disconnect();
+    };
+  }, [transactionId]); // ✅ Runs only when transactionId changes
+  
+  
 
   // to get all the events
 

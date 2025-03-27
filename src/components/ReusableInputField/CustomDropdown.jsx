@@ -47,7 +47,7 @@ const CustomDropdown = ({
         className={`absolute left-3 px-2 text-gray-400 text-base pointer-events-none transition-all duration-300 ease-in-out ${labelBgColor} ${
           selectedOption || inputFocused
             ? "top-0 -translate-y-1/2 text-xs text-blue-500 scale-90 px-2"
-            : "top-1/2 md:top-[24px] -translate-y-1/2 text-sm scale-100"
+            : "top-1/2 md:top-[24px] -translate-y-1/2 text-xs pr-20 scale-100"
         }`}
       >
         {placeholder}

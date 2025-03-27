@@ -112,7 +112,7 @@ const PhoneInputWithCountrySelector = ({
           name={fieldName}
           placeholder={placeholder}
           className="bg-transparent flex-grow outline-none text-white placeholder-gray-400 placeholder:text-sm
-  [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+            [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
           value={formData[fieldName] || ""}
           onChange={(e) =>
             setFormData((prevData) => ({
