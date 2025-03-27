@@ -481,7 +481,7 @@ export default function VotingComponent() {
                   {selectedCountry?.cc === "np" && (
                     <>
                       {/* Partner Dropdown */}
-                      <div className=" w-full max-w-[600px]">
+                      <div className=" w-full max-w-[700px]">
                         <CustomDropdown
                           options={
                             nepalPartner?.[0]?.partner?.map((partner) => ({

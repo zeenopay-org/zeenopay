@@ -445,7 +445,7 @@ const EventProvider = ({ children }) => {
   const getPaymentPartner = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${BACKEND_URL}/payments/partner`);
+      const response = await axios.get(`${BACKEND_URL2}/payments/partners`);
       setPaymentPartner(response.data);
       setLoading(false);
     } catch (error) {
@@ -469,7 +469,7 @@ const EventProvider = ({ children }) => {
       try {
         setLoading(true);
         console.log("This is event ID: " + eventId);
-        console.log("This is intent: " + currency);
+        // console.log("This is intent: " + currency);
         const requestBody = {
           intent_id: intentId,
           amount: amount,

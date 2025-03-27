@@ -72,7 +72,7 @@ function RegistrationConfirmation() {
       return;
     }
     let partner = payment.method;
-    if (partner === "stripe_uk") {
+    if (partner === "Stripe") {
       partner = "stripe";
     }
     if (partner === "PhonePe") {
@@ -367,7 +367,7 @@ function RegistrationConfirmation() {
               ))
             ) : paymentParnter?.partner?.length > 0 ? (
               paymentParnter.partner.map((option, index) =>
-                option === "stripe_uk" ? (
+                option === "Stripe" ? (
                   <p key={index} className="text-red-500">
                     Registration is not available in your country.
                   </p>
