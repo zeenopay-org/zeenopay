@@ -30,7 +30,7 @@ function PaymentOption({ formData }) {
 
   const handlePayment = async (e) => {
     e.preventDefault();
-    if (payment.method === "stripe_gbl") {
+    if (payment.method === "Stripe") {
       setPayment({ method: "stripe" });
     }
     const { name, phone, email, amount, currency } = state;
@@ -69,7 +69,7 @@ function PaymentOption({ formData }) {
   };
 
   const handlePaymentChange = (e) => {
-    setPayment({ method: e.target.value === "stripe_gbl" ? "stripe" : e.target.value });
+    setPayment({ method: e.target.value === "Stripe" ? "stripe" : e.target.value });
   };
 
   return (
@@ -85,7 +85,7 @@ function PaymentOption({ formData }) {
                 <label
                   key={index}
                   className={`flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer transition-all ${
-                    payment.method === (option === "stripe_gbl" ? "stripe" : option)
+                    payment.method === (option === "Stripe" ? "stripe" : option)
                       ? "bg-blue-800 text-white shadow-lg"
                       : "bg-transparent hover:bg-blue-900"
                   }`}
@@ -94,7 +94,7 @@ function PaymentOption({ formData }) {
                     type="radio"
                     name="payment"
                     value={option}
-                    checked={payment.method === (option === "stripe_gbl" ? "stripe" : option)}
+                    checked={payment.method === (option === "Stripe" ? "stripe" : option)}
                     onChange={handlePaymentChange}
                     className="hidden"
                   />
@@ -105,11 +105,11 @@ function PaymentOption({ formData }) {
                         : "border-gray-400"
                     }`}
                   >
-                    {payment.method === (option === "stripe_gbl" ? "stripe" : option) && (
+                    {payment.method === (option === "Stripe" ? "stripe" : option) && (
                       <div className="w-[10px] h-[10px] bg-gray-400 rounded-full"></div>
                     )}
                   </div>
-                  {option === "stripe_gbl" ? "Stripe" : option}
+                  {option === "Stripe" ? "Stripe" : option}
                 </label>
               ))
             ) : (
