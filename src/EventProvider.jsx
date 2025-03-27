@@ -63,7 +63,7 @@ const EventProvider = ({ children }) => {
           event_id: eventID,
           intent: intent ? intent: "V",
           processor: "QR",
-          action_id: actionID,
+          action_id: actionID ? actionID : "null",
         }
       );
 
@@ -482,7 +482,7 @@ const EventProvider = ({ children }) => {
           event_id: eventId,
           status: "P",
           currency: currency,
-          action_id: actionId || "",
+          action_id: actionId || "null",
         };
         console.log(requestBody);
         console.log("requestBody :", requestBody);
@@ -530,7 +530,7 @@ const EventProvider = ({ children }) => {
       console.log(`${BACKEND_URL2}${url}`);
     }
   };
-
+   // update CSP for phonepe => this function only trigger when the redirectToPhonePe() will trigger.
   const updateCSP = (allowBlob = true) => {
     let metaCSP = document.querySelector(
       "meta[http-equiv='Content-Security-Policy']"
