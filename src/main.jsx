@@ -17,15 +17,15 @@ import ContestantDetails from "./pages/ContestantDetails.jsx";
 import RegistrationConfirmation from "./components/registration/RegistrationConfirmation.jsx";
 import ErrorPage from "./pages/ErrorPage.jsx";
 import QRPaymentSuccess from "./components/success/QRPaymentSuccess.jsx";
-import VotingCard from "./components/VoteCard/voteCard.jsx";
 import RegistrationSuccess from "./components/success/RegistrationSuccess.jsx";
 import FailurePage from "./components/failure/failure.jsx";
+import VotingCard from "./components/VoteCard/voteCard.jsx";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <App />,
-   errorElement: <ErrorPage/>,
+  //  errorElement: <ErrorPage/>,
     children: [
       {
         path: "",
@@ -85,6 +85,7 @@ const router = createBrowserRouter([
       {path: "registration-success",
         element: <RegistrationSuccess/>
       },
+    
       {
         path: "qr-success",
         element: <QRPaymentSuccess/>

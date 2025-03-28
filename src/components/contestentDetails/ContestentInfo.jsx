@@ -183,7 +183,9 @@ export default function VotingComponent() {
   };
 
   const handleVoteCard = () => {
-    setShowCard(true);
+    requestAnimationFrame(() => {
+      setShowCard(true);
+    });
   };
   const closeCard = () => {
     setShowCard(false);
@@ -234,8 +236,6 @@ export default function VotingComponent() {
     return Object.keys(newErrors).length === 0;
   };
 
- 
-
   const handlePayment = async (e) => {
     e.preventDefault();
     const eventId = contestant.event;
@@ -245,9 +245,9 @@ export default function VotingComponent() {
       return;
     }
 
-    const { name, phone, email, amount} = formData;
+    const { name, phone, email, amount } = formData;
     const isIndia = paymentCurrency?.cc === "in";
-    const currency ="INR"
+    const currency = "INR";
     const intent = "V";
     try {
       const partner = "phonepe";
@@ -333,7 +333,16 @@ export default function VotingComponent() {
 
   return (
     <div className="  min-h-screen flex flex-col items-center justify-center bg-customBlue text-white p-4 pt-[30px] pb-[66px]">
+      {showCard && (
+        // <div className=" bg-black bg-opacity-50">
+        //   <div className="relative bg-white p-6 rounded-lg shadow-lg">
+        <VotingCard contestant={contestant} event={event} onClose={closeCard} />
+        //   </div>
+        //  </div>
+      )}
+
       {generateQR && <QrCard handleX={handleQrClick} qrid={contestant.id} />}
+
       <div
         className={`w-full ${generateQR ? "blur-md pointer-events-none" : ""}`}
       >
@@ -357,38 +366,31 @@ export default function VotingComponent() {
   lg:bottom-[-150px] lg:left-20 lg:translate-x-0"
                   >
                     {contestant.shareable_link ? (
-                      <div className="relative top-16 md:top-20 left-14 md:left-20 z-50">
+                      <div className="relative top-16 md:-top-10 left-14 md:left-20 z-50">
                         <CloudMessage />
                       </div>
                     ) : null}
                     <ProfileCard />
                     {selectedCountry?.cc === "np" && (
-                      // <>
+                      <>
                         <button
                           onClick={handleQrClick}
-                          className="w-56 md:w-64 px-10 mt-6 ml-2 py-3 border border-white text-white text-xs md:text-md rounded-lg hover:bg-white hover:text-[#0A1128] transition duration-300"
+                          className="w-24 md:w-32 mt-6 ml-2 py-3 border border-white text-white text-[7px] rounded-lg hover:bg-white hover:text-[#0A1128] transition duration-300"
                         >
                           Generate QR to Vote
                         </button>
-                      //   <button
-                      //     onClick={handleVoteCard}
-                      //     className="w-56 md:w-64 px-10 mt-6 ml-2 py-3 border border-white text-white text-xs md:text-md rounded-lg hover:bg-white hover:text-[#0A1128] transition duration-300"
-                      //   >
-                      //     Show Vote Card
-                      //   </button>
-                      // </>
+                        <button
+                          onClick={handleVoteCard}
+                          className="w-24 md:w-32 mt-6 ml-2 py-3 border border-white text-white text-[7px] rounded-lg hover:bg-white hover:text-[#0A1128] transition duration-300"
+                        >
+                          Show Vote Card
+                        </button>
+                      </>
                     )}
                   </div>
                 </div>
               </div>
             </div>
-            {showCard && (
-              <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-                <div className="relative bg-white p-6 rounded-lg shadow-lg">
-                  <VotingCard contestant={contestant} event={event} onClose={closeCard} />
-                </div>
-              </div>
-            )}
 
             <div className="mt-52 md:mt-32 flex flex-col items-center justify-center">
               <h1 className="text-xl md:text-2xl font-normal">{event.title}</h1>

@@ -47,7 +47,7 @@ const EventProvider = ({ children }) => {
   const [transactionId, setTransactionId] = useState(null);
   // const [pollingActive, setPollingActive] = useState(false);
 
-  const BACKEND_URL = "https://api.zeenopay.com";
+  // const BACKEND_URL = "https://api.zeenopay.com";
   const BACKEND_URL2 = "https://auth.zeenopay.com";
 
   const generateDynamicQr = useCallback(async (intentId, amount, eventID,intent, actionID) => {
@@ -428,7 +428,7 @@ const EventProvider = ({ children }) => {
   const getPaymentCurrency = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${BACKEND_URL}/payments/currency`);
+      const response = await axios.get(`${BACKEND_URL2}/payments/currency`);
       const url1 = response.data;
       setPaymentCurrency(url1);
       // Save to localStorage
