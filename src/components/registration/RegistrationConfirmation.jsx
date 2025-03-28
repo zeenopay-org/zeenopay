@@ -39,13 +39,41 @@ function RegistrationConfirmation() {
 
   useEffect(() => {
     // const storedPaymentStatus = localStorage.getItem("paymentStatus");
-    if (paymentStatus === "SUCCESS" ) {
+    if (paymentStatus === "SUCCESS") {
       navigate("/registration-success", { state: { transactionId } });
       requestAnimationFrame(() => {
         localStorage.removeItem("paymentStatus");
       });
     }
   }, [paymentStatus]);
+
+  const handleCOD = (action_id, amount) => {
+    try {
+      // Create the COD data object
+      const codData = {
+        action_id: action_id,
+        amount: amount,
+        paymentStatus: "DUE",
+      };
+
+      // Convert to JSON string
+      const codDataString = JSON.stringify(codData);
+      console.log("codDataString:",codDataString)
+
+      // Set the QR string state which will trigger the QR code generation
+      setQrString({ QR: codDataString });
+
+      // Show the QR modal
+      setShowQRModal(true);
+
+      console.log("COD QR code generated successfully");
+      return codData;
+    } catch (error) {
+      console.error("Error generating COD QR code:", error);
+      alert("Failed to generate COD QR code. Please try again.");
+      throw error;
+    }
+  };
 
   const handlePayment = async (e) => {
     e.preventDefault();
@@ -72,6 +100,10 @@ function RegistrationConfirmation() {
       return;
     }
     let partner = payment.method;
+    console.log("partner: ", partner);
+    if (partner === "COD") {
+      return handleCOD(action_id, amount);
+    }
     if (partner === "Stripe") {
       partner = "stripe";
     }
@@ -110,7 +142,6 @@ function RegistrationConfirmation() {
         partner === "esewa" ||
         partner === "fonepay" ||
         partner === "prabhupay"
-        // partner == "stripe"
       ) {
         console.log("Redirecting to Fonepay or PrabhuPay...");
         redirectToFoneAndPrabhuPay(paymentUrl);
@@ -133,7 +164,7 @@ function RegistrationConfirmation() {
       return;
     }
     const intentID = form_id;
-    const partner = payment.method;
+
     const eventId = form_id;
     const intent = "F";
     const actionId = action_id;
@@ -207,8 +238,7 @@ function RegistrationConfirmation() {
         esewa: "eSewa",
         khalti: "khalti",
         qr: "Through QR",
-        
-        // COD : "Pay Later (Payment can be done at the auditions venue)"
+        COD: "Pay Later (Payment can be done at the auditions venue)",
       };
     }
     return paymentParnter?.partner || [];
@@ -467,12 +497,13 @@ function RegistrationConfirmation() {
 
       {showQRModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
-          <div className="bg-customBlue p-3 rounded-lg  md:mt-20 text-center w-[26rem] border border-gray-700 relative">
+          <div className="bg-customBlue p-3 rounded-lg md:mt-20 text-center w-[26rem] border border-gray-700 relative">
             {/* Header with Close Button */}
             <div className="flex justify-between items-center bg-customBlue p-3 rounded-t-lg">
               <h2 className="text-sm font-semibold text-white">
-                Scan & Pay via Banking Apps, Esewa, Khalti, and all major
-                wallets
+                {payment.method === "COD"
+                  ? "Payment Due - Scan at Venue"
+                  : "Scan & Pay via Banking Apps, Esewa, Khalti, and all major wallets"}
               </h2>
               <button
                 onClick={() => setShowConfirm(true)}
@@ -484,14 +515,24 @@ function RegistrationConfirmation() {
             <div className="bg-customDarkBlue p-4 rounded-lg">
               <div className="bg-customDarkBlue pl-3 rounded-lg">
                 <div ref={qrRef}></div>
-                <div className="flex items-center justify-center mt-2 space-x-2">
-                  <p className="text-red-500 ml-4 font-semibold">Powered by</p>
-                  <img
-                    src="/assets/IMG_1574.png"
-                    className="w-24 h-10"
-                    alt="FonePay Logo"
-                  />
-                </div>
+                {payment.method === "COD" && (
+                  <p className="text-white mt-2">
+                    Please present this QR code at the venue to complete your
+                    payment
+                  </p>
+                )}
+                {payment.method !== "COD" && (
+                  <div className="flex items-center justify-center mt-2 space-x-2">
+                    <p className="text-red-500 ml-4 font-semibold">
+                      Powered by
+                    </p>
+                    <img
+                      src="/assets/IMG_1574.png"
+                      className="w-24 h-10"
+                      alt="FonePay Logo"
+                    />
+                  </div>
+                )}
               </div>
             </div>
             {/* Total Amount Section */}

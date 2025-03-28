@@ -142,6 +142,7 @@ const EventProvider = ({ children }) => {
   // }, [transactionId, pollingActive, startPolling]);
 
   // **************************************************************
+  
   const generateStaticQr = useCallback(async (intentId, amount, eventID) => {
     setQrLoading(true);
     try {
@@ -380,7 +381,7 @@ const EventProvider = ({ children }) => {
   const getAllOngoingEvents = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${BACKEND_URL}/events/ongoing`);
+      const response = await axios.get(`${BACKEND_URL2}/events/ongoing`);
       setOnGoingEvents(response.data);
       setLoading(false);
     } catch (error) {
@@ -431,9 +432,11 @@ const EventProvider = ({ children }) => {
       const url1 = response.data;
       setPaymentCurrency(url1);
       // Save to localStorage
-
+      console.log("url1",url1);
       localStorage.setItem("paymentCurrency", JSON.stringify(response.data));
       setLoading(false);
+  
+      
       return url1;
     } catch (error) {
       console.log(error);
@@ -601,7 +604,7 @@ const EventProvider = ({ children }) => {
 
   // Step 4: Redirect to success page after successful payment
   const redirectToSuccessPage = () => {
-    window.location.href = ` ${BACKEND_URL}/payments/payu/success`;
+    window.location.href = ` ${BACKEND_URL2}/payments/payu/success`;
   };
 
   return (

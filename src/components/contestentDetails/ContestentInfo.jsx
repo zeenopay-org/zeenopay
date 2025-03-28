@@ -245,8 +245,10 @@ export default function VotingComponent() {
       return;
     }
 
-    const { name, phone, email, amount, currency } = formData;
+    const { name, phone, email, amount} = formData;
     const isIndia = paymentCurrency?.cc === "in";
+    const currency ="INR"
+    const intent = "V";
     try {
       const partner = "phonepe";
       const intentID = contestant.id;
@@ -258,6 +260,7 @@ export default function VotingComponent() {
         phone,
         partner,
         eventId,
+        intent,
         currency
       );
 
