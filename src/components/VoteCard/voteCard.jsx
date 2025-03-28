@@ -101,11 +101,11 @@ const VotingCard = ({ contestant, event, onClose }) => {
   const handleDownloadJPG = async () => {
     setError(null);
     setLoadingJPG(true);
-
+  
     try {
       if (!pageRef.current) throw new Error("Page reference not available");
       if (loading50 || loading25) throw new Error("QR codes still loading");
-
+  
       // Ensure images are loaded
       const imagePromises = [];
       if (event.misc_kv && !eventImageBase64) {
@@ -119,7 +119,7 @@ const VotingCard = ({ contestant, event, onClose }) => {
         );
       }
       await Promise.all(imagePromises);
-
+  
       // Create a hidden clone with exact A4 dimensions
       const originalElement = pageRef.current;
       const clone = originalElement.cloneNode(true);
@@ -128,27 +128,30 @@ const VotingCard = ({ contestant, event, onClose }) => {
       clone.style.width = `${A4_WIDTH_PX}px`;
       clone.style.height = `${A4_HEIGHT_PX}px`;
       clone.style.overflow = "visible";
+      clone.style.backgroundColor = "#000"; // ✅ Ensures background is white
+  
+      // Force text color to black in the clone
+      clone.querySelectorAll("*").forEach((el) => {
+        el.style.color = "#FFF"; // ✅ Ensures all text is black
+      });
+  
       document.body.appendChild(clone);
-
+  
       // Wait for clone to render
       await new Promise((resolve) => setTimeout(resolve, 500));
-
+  
       // Capture the clone with html2canvas
       const canvas = await html2canvas(clone, {
         scale: 2,
         width: A4_WIDTH_PX,
         height: A4_HEIGHT_PX,
         useCORS: true,
-        allowTaint: true,
-        logging: true,
-        backgroundColor: null,
-      }).catch((e) => {
-        throw new Error(`Canvas capture failed: ${e.message}`);
+        backgroundColor: "#FFF", // ✅ Ensures white background
       });
-
+  
       // Remove the clone
       document.body.removeChild(clone);
-
+  
       // Convert canvas to JPG and download
       const imageData = canvas.toDataURL("image/jpeg", 0.95);
       const link = document.createElement("a");
@@ -164,7 +167,7 @@ const VotingCard = ({ contestant, event, onClose }) => {
       setLoadingJPG(false);
     }
   };
-
+  
   return (
     <div className="fixed inset-0 mt-20 flex items-center justify-center bg-customDarkBlue bg-opacity-10 z-50">
       {/* Scrollable container for A4 content */}
@@ -235,7 +238,7 @@ const VotingCard = ({ contestant, event, onClose }) => {
               )}
 
               {/* Contestant misc_kv Display - Positioned Properly */}
-              <div className="absolute top-[70%] right-[280px] transform translate-x-1/2 bg-white text-black px-3 py-1 rounded-full text-sm font-bold shadow-md">
+              <div className="absolute top-[70%] right-[280px] transform translate-x-1/2 bg-black text-white px-3 py-1 rounded-full text-sm font-bold shadow-md">
                 {contestant.misc_kv}
               </div>
             </div>
