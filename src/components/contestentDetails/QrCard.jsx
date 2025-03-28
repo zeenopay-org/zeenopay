@@ -10,14 +10,13 @@ import QRCodeStyling from "qr-code-styling";
 import { QRCodeCanvas } from "qrcode.react";
 
 export default function QrCode({ handleX, qrid }) {
-
-
   const { id: paramId } = useParams();
   const id = qrid ? qrid : paramId;
   const inputRef = useRef(null);
-
   const qrRef = useRef(null);
-  const qrCodeInstance = useRef(null);
+  // const qrCodeInstance = useRef(null);
+  const [countdown, setCountdown] = useState(360);
+  const navigate = useNavigate();
 
   const {
     event,
@@ -40,7 +39,7 @@ export default function QrCode({ handleX, qrid }) {
     email: "",
     votes: "",
     amount: "",
-    qrType: "", 
+    qrType: "",
   });
 
   const [hasValue, setHasValue] = useState(!!formData.votes);
@@ -57,8 +56,62 @@ export default function QrCode({ handleX, qrid }) {
   const handleButtonClick = () => {
     inputRef.current.focus();
   };
+  //  this useEffect for the countdown timer
+useEffect(() => {
+  let timer;
+  if (showQRModal && formData.qrType === "One Time Use QR") {
+    timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }
+  return () => {
+    if (timer) clearInterval(timer);
+  };
+}, [showQRModal, formData.qrType]);
 
-  const navigate = useNavigate();
+// Simplified redirect effect
+useEffect(() => {
+  if (countdown === 0 && showQRModal && formData.qrType === "One Time Use QR") {
+    const redirect = async () => {
+      // Close modal first
+      await new Promise(resolve => {
+        setShowQRModal(false);
+        resolve();
+      });
+      
+      // Then navigate
+      navigate("/failure", { 
+        state: { 
+          message: "QR Code expired",
+          contestant,
+          amount: calculatedAmount
+        } 
+      });
+    };
+    
+    redirect();
+  }
+}, [countdown, showQRModal, formData.qrType, navigate]);
+
+// Reset countdown when modal closes
+useEffect(() => {
+  if (!showQRModal) {
+    setCountdown(360);
+  }
+}, [showQRModal]);
+
+  // Format the time (mm:ss)
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+  };
 
   useEffect(() => {
     const savedCurrency = localStorage.getItem("paymentCurrency");
@@ -133,50 +186,56 @@ export default function QrCode({ handleX, qrid }) {
     }, 500);
   };
 
+  const handleQR = async (e) => {
+    if (validateForm()) {
+      e.preventDefault();
+      const { votes, qrType } = formData;
+      const eventID = contestant.event;
 
-
-const handleQR = async (e) => {
-  if (validateForm()) {
-    e.preventDefault();
-    const { votes, qrType } = formData;
-    const eventID = contestant.event;
-
-    if (votes < 10) {
-      alert("All fields are required, and votes should be at least 10.");
-      return;
-    }
-    if (!qrType) {
-      alert("Please select a QR type.");
-      return;
-    }
-    
-    setShowSpinner(true);
-
-    const intentID = qrid;
-    let paymentUrl;
-
-    if (qrType === "One Time Use QR") {
-      paymentUrl = await generateDynamicQr(intentID, calculatedAmount, eventID);
-      if (paymentUrl) {
-        setQrString(paymentUrl);
-        const txid = paymentUrl.transactionID;
-        setShowQRModal(true);
-        setTransactionId(txid);
-      } else {
-        console.log("QR Code URL is not available.");
+      if (votes < 10) {
+        alert("All fields are required, and votes should be at least 10.");
+        return;
       }
-    } else if (qrType === "Multiple Time Use QR") {
-      paymentUrl = await generateStaticQr(intentID, calculatedAmount, eventID);
-      if (paymentUrl) {
-        setQrString(paymentUrl);
-        setShowQRModal(true);
-      } else {
-        console.log("Failed to generate Static QR.");
+      if (!qrType) {
+        alert("Please select a QR type.");
+        return;
       }
+
+      setShowSpinner(true);
+
+      const intentID = qrid;
+      let paymentUrl;
+
+      if (qrType === "One Time Use QR") {
+        paymentUrl = await generateDynamicQr(
+          intentID,
+          calculatedAmount,
+          eventID
+        );
+        if (paymentUrl) {
+          setQrString(paymentUrl);
+          const txid = paymentUrl.transactionID;
+          setShowQRModal(true);
+          setTransactionId(txid);
+        } else {
+          console.log("QR Code URL is not available.");
+        }
+      } else if (qrType === "Multiple Time Use QR") {
+        paymentUrl = await generateStaticQr(
+          intentID,
+          calculatedAmount,
+          eventID
+        );
+        if (paymentUrl) {
+          setQrString(paymentUrl);
+          setShowQRModal(true);
+        } else {
+          console.log("Failed to generate Static QR.");
+        }
+      }
+      setShowSpinner(false);
     }
-    setShowSpinner(false);
-  }
-};
+  };
 
   const calculatedAmount = useMemo(
     () => (formData.votes || 0) * votePrice,
@@ -194,19 +253,18 @@ const handleQR = async (e) => {
         data: qrString.QR,
         image: "https://zeenorides.com/zeenopay_logo.svg",
         dotsOptions: {
-            color: "#39b6ff",
-            type: "extra-rounded"
+          color: "#39b6ff",
+          type: "extra-rounded",
         },
         backgroundOptions: {
-            color: "#000",
+          color: "#000",
         },
         imageOptions: {
-            crossOrigin: "anonymous",
-            imageSize: 0.5,
-            margin: 0,
-            hideBackgroundDots: false
-        }
-
+          crossOrigin: "anonymous",
+          imageSize: 0.5,
+          margin: 0,
+          hideBackgroundDots: false,
+        },
       });
 
       // Append QR code to the ref
@@ -427,16 +485,22 @@ const handleQR = async (e) => {
           <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
             <div className="bg-customBlue p-6 rounded-lg -mt-12 md:mt-5 text-center w-[26rem] border border-gray-700 relative">
               {/* Header with Close Button */}
-             
-              {formData.qrType === "Multiple Time Use QR"?(
-                 //static QR:show the Static QR code Image
+
+              {formData.qrType === "Multiple Time Use QR" ? (
+                //static QR:show the Static QR code Image
                 <>
                   <div className="flex justify-between items-center bg-customBlue p-2 rounded-t-lg">
                     <h2 className="text-xs text-white">
-                      <span className="font-semibold">Multiple Votes are accepted!<br />
-                      </span>You can use this QR code to
-                      vote multiple times until voting ends. Screenshot and
-                      share with your audiences! <br /><span className="text-[9px]">(Mobile Banking Apps only)</span>
+                      <span className="font-semibold">
+                        Multiple Votes are accepted!
+                        <br />
+                      </span>
+                      You can use this QR code to vote multiple times until
+                      voting ends. Screenshot and share with your audiences!{" "}
+                      <br />
+                      <span className="text-[9px]">
+                        (Mobile Banking Apps only)
+                      </span>
                     </h2>
                     <button
                       onClick={() => setShowConfirm(true)}
@@ -449,10 +513,10 @@ const handleQR = async (e) => {
                   <div className="bg-customDarkBlue p-4 rounded-lg">
                     {/* Static QR: Generate QR Image from qr_string */}
                     <div className="bg-customDarkBlue p-4 rounded-lg flex flex-col items-center">
-                      <div ref={qrRef}></div>  {/* qr_String pass */}
+                      <div ref={qrRef}></div> {/* qr_String pass */}
                       <div className="flex items-center justify-center mt-2 space-x-2">
                         <p className="text-red-500 ml-4 font-semibold">
-                           Powered by
+                          Powered by
                         </p>
                         <img
                           src="/assets/nepalpay.png"
@@ -466,7 +530,7 @@ const handleQR = async (e) => {
               ) : (
                 // Dynamic QR: Show the dynamic QR Code Image\
                 <>
-                <div className="flex justify-between items-center bg-customBlue p-2 rounded-t-lg">
+                  <div className="flex justify-between items-center bg-customBlue p-2 rounded-t-lg">
                     <h2 className="text-xs  font-semibold text-white">
                       Scan & Pay via Banking Apps, Esewa, Khalti, and all major
                       wallets
@@ -477,14 +541,39 @@ const handleQR = async (e) => {
                     >
                       ✕
                     </button>
-                </div>
+                  </div>
 
                   <div className="bg-customDarkBlue p-4 rounded-lg">
                     <div className="bg-customDarkBlue p-4 rounded-lg flex flex-col items-center">
                       <div ref={qrRef}></div>
+                      {/* Add countdown timer here */}
+                      {formData.qrType === "One Time Use QR" && (
+                        <div className="flex mt-2 text-center">
+                          <p className="text-sm text-white">
+                            {countdown > 0
+                              ? "QR expires in:"
+                              : "QR has expired!"}
+                          </p>
+                          {countdown > 0 ? (
+                            <p
+                              className={`text-lg -mt-1 ml-1 font-bold ${
+                                countdown <= 60
+                                  ? "text-red-500"
+                                  : "text-green-500"
+                              }`}
+                            >
+                              {formatTime(countdown)}
+                            </p>
+                          ) : (
+                            <p className="text-lg font-bold text-red-500">
+                              Redirecting...
+                            </p>
+                          )}
+                        </div>
+                      )}
                       <div className="flex items-center justify-center mt-2 space-x-2">
                         <p className="text-red-500 ml-4 font-semibold">
-                           Powered by
+                          Powered by
                         </p>
                         <img
                           src="/assets/IMG_1574.png"
@@ -495,10 +584,8 @@ const handleQR = async (e) => {
                     </div>
                   </div>
                 </>
-              )
-              }
+              )}
 
-          
               {/* Total Amount Section */}
               <div className="flex mt-2 text-white pt-4">
                 <p className="ml-6 text-sm md:text-md">TOTAL AMOUNT NPR.</p>

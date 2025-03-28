@@ -15,6 +15,8 @@ function RegistrationConfirmation() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [showSpinner, setShowSpinner] = useState(false);
   const [showQRModal, setShowQRModal] = useState(false);
+  const [countdown, setCountdown] = useState(360); // 6 minutes in seconds
+const [isCountdownActive, setIsCountdownActive] = useState(false);
   const [qrString, setQrString] = useState("");
   const navigate = useNavigate();
   const qrRef = useRef(null);
@@ -37,6 +39,63 @@ function RegistrationConfirmation() {
     getPaymentPartner();
   }, [getPaymentPartner]);
 
+// Countdown timer effect
+useEffect(() => {
+  let timer;
+  if (isCountdownActive && showQRModal && payment.method !== "COD") {
+    timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }
+  return () => {
+    if (timer) clearInterval(timer);
+  };
+}, [isCountdownActive, showQRModal, payment.method]);
+
+// Handle redirect when countdown reaches 0
+useEffect(() => {
+  if (countdown === 0 && isCountdownActive && showQRModal && payment.method !== "COD") {
+    const redirect = async () => {
+      // Close modal first
+      await new Promise(resolve => {
+        setShowQRModal(false);
+        resolve();
+      });
+      
+      // Then navigate to failure page
+      navigate("/failure", { 
+        state: { 
+          message: "QR Code expired",
+          amount: state?.amount
+        } 
+      });
+    };
+    
+    redirect();
+  }
+}, [countdown, isCountdownActive, showQRModal, payment.method, navigate, state?.amount]);
+
+// Reset countdown when modal closes or payment method changes
+useEffect(() => {
+  if (!showQRModal || payment.method === "COD") {
+    setCountdown(360);
+    setIsCountdownActive(false);
+  }
+}, [showQRModal, payment.method]);
+
+// Format time function
+const formatTime = (seconds) => {
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+};
+  
   useEffect(() => {
     // const storedPaymentStatus = localStorage.getItem("paymentStatus");
     if (paymentStatus === "SUCCESS") {
@@ -164,14 +223,12 @@ function RegistrationConfirmation() {
       return;
     }
     const intentID = form_id;
-
     const eventId = form_id;
     const intent = "F";
     const actionId = action_id;
-    setShowSpinner(true); // Show spinner while generating QR
-
+    setShowSpinner(true);
+  
     try {
-      // Generate the QR Code URL
       const paymentUrl = await generateDynamicQr(
         intentID,
         amount,
@@ -183,9 +240,8 @@ function RegistrationConfirmation() {
         setQrString(paymentUrl);
         const txid = paymentUrl.transactionID;
         setShowQRModal(true);
+        setIsCountdownActive(true); // Activate countdown here
         setTransactionId(txid);
-      } else {
-        console.log("QR Code URL is not available.");
       }
     } catch (error) {
       console.error("Error generating QR code:", error);
@@ -515,6 +571,25 @@ function RegistrationConfirmation() {
             <div className="bg-customDarkBlue p-4 rounded-lg">
               <div className="bg-customDarkBlue pl-3 rounded-lg">
                 <div ref={qrRef}></div>
+                {payment.method !== "COD" && (
+            <div className=" flex justify-center mt-2 text-center">
+              <p className="text-sm text-white">
+                {countdown > 0 ? "QR expires in:" : "QR has expired!"}
+              </p>
+              {countdown > 0 ? (
+                <p className={`text-lg ml-1 -mt-1 font-bold ${
+                  countdown <= 60 ? "text-red-500" : "text-green-500"
+                }`}>
+                  {formatTime(countdown)}
+                </p>
+              ) : (
+                <p className="text-lg font-bold text-red-500">
+                  Redirecting...
+                </p>
+              )}
+            </div>
+          )}
+
                 {payment.method === "COD" && (
                   <p className="text-white mt-2">
                     Please present this QR code at the venue to complete your
