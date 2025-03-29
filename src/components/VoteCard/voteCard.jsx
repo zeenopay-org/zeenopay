@@ -5,6 +5,7 @@ import QRCodeStyling from "qr-code-styling";
 
 const VotingCard = ({ contestant, event, onClose }) => {
   const { generateStaticQr } = useContext(EventContext);
+  console.log("event:",event.title  )
   const pageRef = useRef();
   const qr50Ref = useRef(null);
   const qr25Ref = useRef(null);
@@ -55,7 +56,7 @@ const VotingCard = ({ contestant, event, onClose }) => {
         data: qrString,
         image: "https://zeenorides.com/zeenopay_logo.svg",
         dotsOptions: { color: "#39b6ff", type: "extra-rounded" },
-        backgroundOptions: { color: "" },
+        backgroundOptions: { color: "black" },
         imageOptions: {
           crossOrigin: "anonymous",
           imageSize: 0.5,
@@ -134,6 +135,18 @@ const VotingCard = ({ contestant, event, onClose }) => {
       clone.style.overflow = "visible";
       clone.style.backgroundColor = "#000";
   
+      // Find and hide the download button in the clone
+      const downloadButton = clone.querySelector('button[onclick]');
+      if (downloadButton) {
+        downloadButton.style.display = 'none';
+      }
+  
+      // Also hide the error message if present
+      const errorDiv = clone.querySelector('.text-red-500');
+      if (errorDiv) {
+        errorDiv.style.display = 'none';
+      }
+  
       // Function to scale all numeric style values
       const scaleStyleValues = (element, factor) => {
         if (!element || !element.style) return;
@@ -159,31 +172,28 @@ const VotingCard = ({ contestant, event, onClose }) => {
       // Scale all elements in the clone
       const elements = clone.querySelectorAll('*');
       elements.forEach(el => {
-        scaleStyleValues(el, 1/scaleFactor); // Reverse the mobile scaling
+        scaleStyleValues(el, 1/scaleFactor);
         if (el.style) {
           el.style.color = "#FFF";
         }
       });
   
-      // Find the QR code containers in the clone
-      const qrContainers = clone.querySelectorAll('.qr-container');
+      // Re-render QR codes at full size
+      const qr50Container = clone.querySelector('#qr50-container');
+      const qr25Container = clone.querySelector('#qr25-container');
       
-      // Increase QR code size specifically for download (25% larger than original)
-      const qrDownloadSize = isMobile ? 200 : 160; // Bigger size for mobile download
-      
-      // Re-render QR codes at larger size for download
-      if (qr50String) {
-        const qr50Container = clone.querySelector('#qr50-container');
-        if (qr50Container) {
-          qr50Container.innerHTML = "";
+      if (qr50String && qr50Container) {
+        const qrDiv = qr50Container.querySelector('div');
+        if (qrDiv) {
+          qrDiv.innerHTML = "";
           const qrCode = new QRCodeStyling({
-            width: qrDownloadSize,
-            height: qrDownloadSize,
+            width: 200,
+            height: 200,
             type: "svg",
             data: qr50String,
             image: "https://zeenorides.com/zeenopay_logo.svg",
             dotsOptions: { color: "#39b6ff", type: "extra-rounded" },
-            backgroundOptions: { color: "" },
+            backgroundOptions: { color: "black" },
             imageOptions: {
               crossOrigin: "anonymous",
               imageSize: 0.5,
@@ -191,22 +201,22 @@ const VotingCard = ({ contestant, event, onClose }) => {
               hideBackgroundDots: false,
             },
           });
-          qrCode.append(qr50Container);
+          qrCode.append(qrDiv);
         }
       }
   
-      if (qr25String) {
-        const qr25Container = clone.querySelector('#qr25-container');
-        if (qr25Container) {
-          qr25Container.innerHTML = "";
+      if (qr25String && qr25Container) {
+        const qrDiv = qr25Container.querySelector('div');
+        if (qrDiv) {
+          qrDiv.innerHTML = "";
           const qrCode = new QRCodeStyling({
-            width: qrDownloadSize,
-            height: qrDownloadSize,
+            width: 200,
+            height: 200,
             type: "svg",
             data: qr25String,
             image: "https://zeenorides.com/zeenopay_logo.svg",
             dotsOptions: { color: "#39b6ff", type: "extra-rounded" },
-            backgroundOptions: { color: "" },
+            backgroundOptions: { color: "black" },
             imageOptions: {
               crossOrigin: "anonymous",
               imageSize: 0.5,
@@ -214,16 +224,16 @@ const VotingCard = ({ contestant, event, onClose }) => {
               hideBackgroundDots: false,
             },
           });
-          qrCode.append(qr25Container);
+          qrCode.append(qrDiv);
         }
       }
   
       document.body.appendChild(clone);
   
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Give time for rendering
+      await new Promise((resolve) => setTimeout(resolve, 1000));
   
       const canvas = await html2canvas(clone, {
-        scale: 2, // Higher scale for better quality
+        scale: 2,
         width: 794,
         height: 1123,
         useCORS: true,
@@ -234,7 +244,7 @@ const VotingCard = ({ contestant, event, onClose }) => {
   
       document.body.removeChild(clone);
   
-      const imageData = canvas.toDataURL("image/jpeg", 1.0); // Highest quality
+      const imageData = canvas.toDataURL("image/jpeg", 1.0);
       const link = document.createElement("a");
       link.href = imageData;
       link.download = `${contestant.name}-Voting-Card.jpg`;
@@ -322,7 +332,16 @@ const VotingCard = ({ contestant, event, onClose }) => {
                   Loading...
                 </div>
               )}
+              
             </div>
+            <h2
+              className="text-center font-bold mb-8"
+              style={{ fontSize: `${18 * scaleFactor}px` }}
+            >
+              {event.title}
+            </h2>
+            
+
 
             {/* Contestant Image */}
             <div className="relative flex justify-center mb-6">
@@ -380,7 +399,7 @@ const VotingCard = ({ contestant, event, onClose }) => {
                 </h3>
                 <ol
                   className="list-decimal ml-4 space-y-2"
-                  style={{ fontSize: `${8 * scaleFactor}px` }}
+                  style={{ fontSize: `${10 * scaleFactor}px` }}
                 >
                   <li>Go to zeenopay.com</li>
                   <li>Find your event</li>
@@ -396,7 +415,7 @@ const VotingCard = ({ contestant, event, onClose }) => {
               </div>
 
               {/* QR Codes */}
-              <div className="w-1/2 flex md:gap-6">
+              <div className="w-1/2 flex mr-10 md:mr-2 gap-4 md:gap-6">
                 <div className="text-center qr-container" id="qr50-container">
                   <p
                     className="font-bold mb-2"
@@ -419,7 +438,7 @@ const VotingCard = ({ contestant, event, onClose }) => {
             </div>
 
             {/* Download Button */}
-            <div className="mt-80">
+            <div className="mt-20 md:mt-64">
               <button
                 onClick={handleDownloadJPG}
                 className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 flex justify-center items-center"

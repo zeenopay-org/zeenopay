@@ -331,7 +331,7 @@ const EventProvider = ({ children }) => {
   // for the form submitting
   const submitRegistrationForm = useCallback(
     async (formId, formData, amount) => {
-      setIsSubmitting(true); // Start loading
+      setIsSubmitting(true); 
       try {
         const response = await fetch(
           `https://auth.zeenopay.com/events/form/response/${formId}`,
@@ -355,7 +355,7 @@ const EventProvider = ({ children }) => {
         console.error("❌ Error submitting form:", error);
         alert("An error occurred while submitting the form. Please try again.");
       } finally {
-        setIsSubmitting(false); // Stop loading
+        setIsSubmitting(false); 
       }
     },
     []
@@ -642,7 +642,6 @@ const EventProvider = ({ children }) => {
         initiatePartnerPayment,
         generateDynamicQr,
         generateStaticQr,
-        // redirectToQrPage,
         qrLoading,
         paymentStatus,
         setTransactionId,

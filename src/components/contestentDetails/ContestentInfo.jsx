@@ -371,17 +371,17 @@ export default function VotingComponent() {
                       </div>
                     ) : null}
                     <ProfileCard />
-                    {selectedCountry?.cc === "np"  && (
+                    {(selectedCountry?.cc === "np"|| selectedCountry?.cc === "in")  && (
                       <>
                         <button
                           onClick={handleQrClick}
-                          className="w-24 md:w-32 mt-6 ml-2 py-3 border border-white text-white text-[7px] rounded-lg hover:bg-white hover:text-[#0A1128] transition duration-300"
+                          className="w-28 md:w-32 mt-6 ml-2 py-3 border border-white text-white text-[7px] rounded-lg hover:bg-white hover:text-[#0A1128] transition duration-300"
                         >
                           Generate QR to Vote
                         </button>
                         <button
                           onClick={handleVoteCard}
-                          className="w-24 md:w-32 mt-6 ml-2 py-3 border border-white text-white text-[7px] rounded-lg hover:bg-white hover:text-[#0A1128] transition duration-300"
+                          className="w-28 md:w-32 mt-6 ml-2 py-3 border border-white text-white text-[7px] rounded-lg hover:bg-white hover:text-[#0A1128] transition duration-300"
                         >
                           Show Vote Card
                         </button>
