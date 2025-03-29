@@ -371,7 +371,7 @@ export default function VotingComponent() {
                       </div>
                     ) : null}
                     <ProfileCard />
-                    {(selectedCountry?.cc === "in" || selectedCountry?.cc === "in" )  && (
+                    {selectedCountry?.cc === "np"  && (
                       <>
                         <button
                           onClick={handleQrClick}
