@@ -18,9 +18,11 @@ const VotingCard = ({ contestant, event, onClose }) => {
   const [contestantImageBase64, setContestantImageBase64] = useState("");
   const [error, setError] = useState(null);
 
-  // A4 dimensions in pixels (at 96dpi)
-  const A4_WIDTH_PX = 794; // 210mm
-  const A4_HEIGHT_PX = 1123; // 297mm
+  // Responsive scaling factor (0.7 for mobile, 1 for desktop)
+  const isMobile = window.innerWidth < 768;
+  const scaleFactor = isMobile ? 0.65 : 1;
+  const A4_WIDTH_PX = 794 * scaleFactor;
+  const A4_HEIGHT_PX = 1123 * scaleFactor;
 
   useEffect(() => {
     const fetchQRs = async () => {
@@ -47,8 +49,8 @@ const VotingCard = ({ contestant, event, onClose }) => {
     if (qrString && ref.current) {
       ref.current.innerHTML = "";
       const qrCode = new QRCodeStyling({
-        width: 160,
-        height: 160,
+        width: 160 * scaleFactor,
+        height: 160 * scaleFactor,
         type: "svg",
         data: qrString,
         image: "https://zeenorides.com/zeenopay_logo.svg",
@@ -65,8 +67,8 @@ const VotingCard = ({ contestant, event, onClose }) => {
     }
   };
 
-  useEffect(() => renderQRCode(qr50String, qr50Ref), [qr50String]);
-  useEffect(() => renderQRCode(qr25String, qr25Ref), [qr25String]);
+  useEffect(() => renderQRCode(qr50String, qr50Ref), [qr50String, scaleFactor]);
+  useEffect(() => renderQRCode(qr25String, qr25Ref), [qr25String, scaleFactor]);
 
   const convertImageToBase64 = async (imgUrl, setBase64) => {
     try {
@@ -106,7 +108,6 @@ const VotingCard = ({ contestant, event, onClose }) => {
       if (!pageRef.current) throw new Error("Page reference not available");
       if (loading50 || loading25) throw new Error("QR codes still loading");
   
-      // Ensure images are loaded
       const imagePromises = [];
       if (event.misc_kv && !eventImageBase64) {
         imagePromises.push(
@@ -120,40 +121,120 @@ const VotingCard = ({ contestant, event, onClose }) => {
       }
       await Promise.all(imagePromises);
   
-      // Create a hidden clone with exact A4 dimensions
+      // Create a clone with original A4 dimensions
       const originalElement = pageRef.current;
       const clone = originalElement.cloneNode(true);
+      
+      // Remove any scaling transforms
+      clone.style.transform = 'none';
+      clone.style.width = '794px';
+      clone.style.height = '1123px';
       clone.style.position = "absolute";
       clone.style.left = "-9999px";
-      clone.style.width = `${A4_WIDTH_PX}px`;
-      clone.style.height = `${A4_HEIGHT_PX}px`;
       clone.style.overflow = "visible";
-      clone.style.backgroundColor = "#000"; // ✅ Ensures background is white
+      clone.style.backgroundColor = "#000";
   
-      // Force text color to black in the clone
-      clone.querySelectorAll("*").forEach((el) => {
-        el.style.color = "#FFF"; // ✅ Ensures all text is black
+      // Function to scale all numeric style values
+      const scaleStyleValues = (element, factor) => {
+        if (!element || !element.style) return;
+        
+        const style = element.style;
+        const numericProperties = [
+          'width', 'height', 'fontSize', 'marginTop', 'marginBottom', 
+          'marginLeft', 'marginRight', 'paddingTop', 'paddingBottom',
+          'paddingLeft', 'paddingRight', 'top', 'right', 'bottom', 'left'
+        ];
+  
+        numericProperties.forEach(prop => {
+          if (style[prop]) {
+            const value = style[prop];
+            if (typeof value === 'string' && value.includes('px')) {
+              const numericValue = parseFloat(value);
+              style[prop] = `${numericValue * factor}px`;
+            }
+          }
+        });
+      };
+  
+      // Scale all elements in the clone
+      const elements = clone.querySelectorAll('*');
+      elements.forEach(el => {
+        scaleStyleValues(el, 1/scaleFactor); // Reverse the mobile scaling
+        if (el.style) {
+          el.style.color = "#FFF";
+        }
       });
+  
+      // Find the QR code containers in the clone
+      const qrContainers = clone.querySelectorAll('.qr-container');
+      
+      // Increase QR code size specifically for download (25% larger than original)
+      const qrDownloadSize = isMobile ? 200 : 160; // Bigger size for mobile download
+      
+      // Re-render QR codes at larger size for download
+      if (qr50String) {
+        const qr50Container = clone.querySelector('#qr50-container');
+        if (qr50Container) {
+          qr50Container.innerHTML = "";
+          const qrCode = new QRCodeStyling({
+            width: qrDownloadSize,
+            height: qrDownloadSize,
+            type: "svg",
+            data: qr50String,
+            image: "https://zeenorides.com/zeenopay_logo.svg",
+            dotsOptions: { color: "#39b6ff", type: "extra-rounded" },
+            backgroundOptions: { color: "" },
+            imageOptions: {
+              crossOrigin: "anonymous",
+              imageSize: 0.5,
+              margin: 0,
+              hideBackgroundDots: false,
+            },
+          });
+          qrCode.append(qr50Container);
+        }
+      }
+  
+      if (qr25String) {
+        const qr25Container = clone.querySelector('#qr25-container');
+        if (qr25Container) {
+          qr25Container.innerHTML = "";
+          const qrCode = new QRCodeStyling({
+            width: qrDownloadSize,
+            height: qrDownloadSize,
+            type: "svg",
+            data: qr25String,
+            image: "https://zeenorides.com/zeenopay_logo.svg",
+            dotsOptions: { color: "#39b6ff", type: "extra-rounded" },
+            backgroundOptions: { color: "" },
+            imageOptions: {
+              crossOrigin: "anonymous",
+              imageSize: 0.5,
+              margin: 0,
+              hideBackgroundDots: false,
+            },
+          });
+          qrCode.append(qr25Container);
+        }
+      }
   
       document.body.appendChild(clone);
   
-      // Wait for clone to render
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // Give time for rendering
   
-      // Capture the clone with html2canvas
       const canvas = await html2canvas(clone, {
-        scale: 2,
-        width: A4_WIDTH_PX,
-        height: A4_HEIGHT_PX,
+        scale: 2, // Higher scale for better quality
+        width: 794,
+        height: 1123,
         useCORS: true,
-        backgroundColor: "#FFF", // ✅ Ensures white background
+        backgroundColor: "#FFF",
+        logging: true,
+        allowTaint: true
       });
   
-      // Remove the clone
       document.body.removeChild(clone);
   
-      // Convert canvas to JPG and download
-      const imageData = canvas.toDataURL("image/jpeg", 0.95);
+      const imageData = canvas.toDataURL("image/jpeg", 1.0); // Highest quality
       const link = document.createElement("a");
       link.href = imageData;
       link.download = `${contestant.name}-Voting-Card.jpg`;
@@ -167,15 +248,13 @@ const VotingCard = ({ contestant, event, onClose }) => {
       setLoadingJPG(false);
     }
   };
-  
+
   return (
-    <div className="fixed inset-0 mt-20 flex items-center justify-center bg-customDarkBlue bg-opacity-10 z-50">
-      {/* Scrollable container for A4 content */}
-      <div className="relative w-full h-full overflow-auto p-4">
-        {/* A4-sized content (will scroll if too large for screen) */}
+    <div className="fixed inset-0 flex items-center justify-center bg-customDarkBlue bg-opacity-50 z-50 overflow-auto">
+      <div className="relative md:mt-[550px] w-full h-full flex items-center justify-center p-2">
         <div
           ref={pageRef}
-          className="mx-auto bg-white shadow-2xl"
+          className="bg-white shadow-2xl mx-aut"
           style={{
             width: `${A4_WIDTH_PX}px`,
             minHeight: `${A4_HEIGHT_PX}px`,
@@ -183,11 +262,14 @@ const VotingCard = ({ contestant, event, onClose }) => {
             backgroundSize: "cover",
             backgroundPosition: "center",
             backgroundRepeat: "no-repeat",
+            transform: `scale(${scaleFactor})`,
+            transformOrigin: "center",
           }}
         >
           <button
             onClick={onClose}
-            className="absolute text-white px-2 py-1 rounded-full text-xs z-50"
+            className="absolute top-2 right-2 text-white px-2 py-1 rounded-full text-xs z-50"
+            style={{ fontSize: `${12 / scaleFactor}px` }}
           >
             ✕
           </button>
@@ -198,11 +280,20 @@ const VotingCard = ({ contestant, event, onClose }) => {
               <img
                 src="/assets/image 35.png"
                 alt="Zeenopay Logo"
-                className="h-20 w-auto"
+                style={{ height: `${80 * scaleFactor}px` }}
+                className="w-auto"
               />
               <div className="text-right">
-                <p className="text-sm font-medium">Organized By:</p>
-                <p className="text-center text-sm">
+                <p
+                  className="text-sm font-medium"
+                  style={{ fontSize: `${14 * scaleFactor}px` }}
+                >
+                  Organized By:
+                </p>
+                <p
+                  className="text-center text-sm"
+                  style={{ fontSize: `${14 * scaleFactor}px` }}
+                >
                   {event.org !== "N/A" ? event.org : "No bio available"}
                 </p>
               </div>
@@ -214,11 +305,21 @@ const VotingCard = ({ contestant, event, onClose }) => {
                 <img
                   src={eventImageBase64}
                   alt="Event"
-                  className="w-24 h-24 border-2 object-cover"
+                  style={{
+                    width: `${96 * scaleFactor}px`,
+                    height: `${96 * scaleFactor}px`,
+                  }}
+                  className="border-2 object-cover"
                 />
               ) : (
-                <div className="w-24 h-24 border-2 flex items-center justify-center">
-                  Loading event image...
+                <div
+                  style={{
+                    width: `${96 * scaleFactor}px`,
+                    height: `${96 * scaleFactor}px`,
+                  }}
+                  className="border-2 flex items-center justify-center"
+                >
+                  Loading...
                 </div>
               )}
             </div>
@@ -229,22 +330,41 @@ const VotingCard = ({ contestant, event, onClose }) => {
                 <img
                   src={contestantImageBase64}
                   alt="Contestant"
-                  className="w-60 h-60 rounded-full border-4 border-blue-600 object-cover"
+                  style={{
+                    width: `${200 * scaleFactor}px`,
+                    height: `${200 * scaleFactor}px`,
+                  }}
+                  className="rounded-full border-4 border-blue-600 object-cover"
                 />
               ) : (
-                <div className="w-60 h-60 rounded-full border-4 border-blue-600 flex items-center justify-center">
-                  Loading contestant image...
+                <div
+                  style={{
+                    width: `${240 * scaleFactor}px`,
+                    height: `${240 * scaleFactor}px`,
+                  }}
+                  className="rounded-full border-4 border-blue-600 flex items-center justify-center"
+                >
+                  Loading...
                 </div>
               )}
 
-              {/* Contestant misc_kv Display - Positioned Properly */}
-              <div className="absolute top-[70%] right-[280px] transform translate-x-1/2 bg-black text-white px-3 py-1 rounded-full text-sm font-bold shadow-md">
+              <div
+                className="absolute transform translate-x-1/2 bg-black text-white px-3 py-1 rounded-full text-sm font-bold shadow-md"
+                style={{
+                  top: `${70 * scaleFactor}%`,
+                  right: `${280 * scaleFactor}px`,
+                  fontSize: `${14 * scaleFactor}px`,
+                }}
+              >
                 {contestant.misc_kv}
               </div>
             </div>
 
             {/* Contestant Name */}
-            <h2 className="text-center text-2xl font-bold mb-8">
+            <h2
+              className="text-center font-bold mb-8"
+              style={{ fontSize: `${24 * scaleFactor}px` }}
+            >
               {contestant.name}
             </h2>
 
@@ -252,8 +372,16 @@ const VotingCard = ({ contestant, event, onClose }) => {
             <div className="flex">
               {/* Voting Procedure */}
               <div className="w-1/2 pr-6">
-                <h3 className="font-bold text-lg mb-4">VOTING PROCEDURE</h3>
-                <ol className="list-decimal ml-4 space-y-2 text-sm">
+                <h3
+                  className="font-bold mb-4"
+                  style={{ fontSize: `${18 * scaleFactor}px` }}
+                >
+                  VOTING PROCEDURE
+                </h3>
+                <ol
+                  className="list-decimal ml-4 space-y-2"
+                  style={{ fontSize: `${8 * scaleFactor}px` }}
+                >
                   <li>Go to zeenopay.com</li>
                   <li>Find your event</li>
                   <li>Click Get Started</li>
@@ -268,27 +396,41 @@ const VotingCard = ({ contestant, event, onClose }) => {
               </div>
 
               {/* QR Codes */}
-              <div className="w-1/2 flex  gap-6">
-                <div className="text-center">
-                  <p className="text-lg font-bold mb-2">50 Votes</p>
+              <div className="w-1/2 flex md:gap-6">
+                <div className="text-center qr-container" id="qr50-container">
+                  <p
+                    className="font-bold mb-2"
+                    style={{ fontSize: `${14 * scaleFactor}px` }}
+                  >
+                    50 Votes
+                  </p>
                   <div ref={qr50Ref} className="mx-auto"></div>
                 </div>
-                <div className="text-center">
-                  <p className="text-lg font-bold mb-2">25 Votes</p>
+                <div className="text-center qr-container" id="qr25-container">
+                  <p
+                    className="font-bold mb-2"
+                    style={{ fontSize: `${14 * scaleFactor}px` }}
+                  >
+                    25 Votes
+                  </p>
                   <div ref={qr25Ref} className="mx-auto"></div>
                 </div>
               </div>
             </div>
 
             {/* Download Button */}
-            <div className="mt-8">
+            <div className="mt-80">
               <button
                 onClick={handleDownloadJPG}
-                className="w-full mt-60 bg-blue-600 text-white py-3 rounded-lg text-lg hover:bg-blue-700 flex justify-center items-center"
+                className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 flex justify-center items-center"
                 disabled={loading50 || loading25 || loadingJPG}
+                style={{
+                  marginTop: `${60 * scaleFactor}px`,
+                  fontSize: `${18 * scaleFactor}px`,
+                }}
               >
                 {loadingJPG ? (
-                  <div className="flex items-center ">
+                  <div className="flex items-center">
                     <svg
                       className="animate-spin h-5 w-5 mr-2 text-white"
                       viewBox="0 0 24 24"
@@ -314,7 +456,10 @@ const VotingCard = ({ contestant, event, onClose }) => {
                 )}
               </button>
               {error && (
-                <div className="text-red-500 text-center mt-2 text-sm">
+                <div
+                  className="text-red-500 text-center mt-2"
+                  style={{ fontSize: `${14 * scaleFactor}px` }}
+                >
                   Error: {error}. Please try again.
                 </div>
               )}
