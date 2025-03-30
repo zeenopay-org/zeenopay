@@ -236,7 +236,7 @@ const VotingComponent = () => {
                     <>
                       <img
                         className="h-6 w-10 sm:h-8 sm:w-14"
-                        src="/assets/vote-icon.png"
+                        src="https://res.cloudinary.com/dhah3xwej/image/upload/v1743356699/liyiglxohpv0lcgtrs2k.png"
                         alt="vote icon"
                       />
                       {option}

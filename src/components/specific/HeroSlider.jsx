@@ -1,24 +1,16 @@
 import React, { useState, useEffect, useRef } from "react";
 import "../../assets/css/HeroSlider.css";
-import Slider1 from "../../assets/Images/HeroSliderImages/Slider1.jpeg";
-import Slider2 from "../../assets/Images/HeroSliderImages/Slider2.jpeg";
-import Slider3 from "../../assets/Images/HeroSliderImages/Slider3.jpeg";
-import Slider4 from "../../assets/Images/HeroSliderImages/Slider4.jpeg";
-import Slider5 from "../../assets/Images/HeroSliderImages/Slider5.jpeg";
-import Slider6 from "../../assets/Images/HeroSliderImages/Slider6.jpeg";
-import Slider7 from "../../assets/Images/HeroSliderImages/Slider7.jpeg";
-import Slider8 from "../../assets/Images/HeroSliderImages/Slider8.jpeg";
 
 function HeroSlider() {
   const slides = [
-    { id: 1, icon: Slider1 },
-    { id: 2, icon: Slider2 },
-    { id: 3, icon: Slider3 },
-    { id: 4, icon: Slider4 },
-    { id: 5, icon: Slider5 },
-    { id: 6, icon: Slider6 },
-    { id: 7, icon: Slider7 },
-    { id: 8, icon: Slider8 },
+    { id: 1, icon: "https://res.cloudinary.com/dhah3xwej/image/upload/v1743355614/j3umfcdsqzrpgecg5h3g.jpg" },
+    { id: 2, icon: "https://res.cloudinary.com/dhah3xwej/image/upload/v1743355876/twpf6tcveyrnuref96j4.jpg" },
+    { id: 3, icon: "https://res.cloudinary.com/dhah3xwej/image/upload/v1743355885/p7hu0fa2uncaqhtg5w3v.jpg" },
+    { id: 4, icon: "https://res.cloudinary.com/dhah3xwej/image/upload/v1743355970/au3rplopigsj3uya5unt.jpg" },
+    { id: 5, icon: "https://res.cloudinary.com/dhah3xwej/image/upload/v1743356003/oadpbvezy0i2wimvhqjy.jpg" },
+    { id: 6, icon: "https://res.cloudinary.com/dhah3xwej/image/upload/v1743356042/cflahnt89riy4v16kwhu.jpg" },
+    { id: 7, icon: "https://res.cloudinary.com/dhah3xwej/image/upload/v1743356080/vuo3pgko0reuphuzjgns.jpg" },
+    { id: 8, icon: "https://res.cloudinary.com/dhah3xwej/image/upload/v1743356122/ya5mu8cxeskhytxkkhre.jpg" },
   ];
 
   const [currentSlide, setCurrentSlide] = useState(0);
