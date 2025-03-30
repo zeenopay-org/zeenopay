@@ -23,7 +23,7 @@ const PhoneInputWithCountrySelector = ({
     if (savedCurrency) {
       const parsedCurrency = JSON.parse(savedCurrency);
       setSelectedCountry(parsedCurrency);
-      console.log("pC: " + parsedCurrency?.cc);
+      // console.log("pC: " + parsedCurrency?.cc);
     } else {
       getPaymentCurrency();
     }

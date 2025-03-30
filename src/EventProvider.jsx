@@ -320,7 +320,6 @@ const EventProvider = ({ children }) => {
     try {
       setLoading(true);
       const response = await axios.get(`${BACKEND_URL2}/events/forms/${id}`);
-      console.log("form_id:", id);
       setForm(response.data);
       setLoading(false);
     } catch (error) {
@@ -345,7 +344,6 @@ const EventProvider = ({ children }) => {
         if (!response.ok) throw new Error("Failed to submit form");
 
         const data = await response.json();
-        console.log("✅ Form submitted successfully:", data);
         return data;
 
         // navigate("/registration/confirmation", {
@@ -471,8 +469,6 @@ const EventProvider = ({ children }) => {
     ) => {
       try {
         setLoading(true);
-        console.log("This is event ID: " + eventId);
-        // console.log("This is intent: " + currency);
         const requestBody = {
           intent_id: intentId,
           amount: amount,
@@ -487,8 +483,6 @@ const EventProvider = ({ children }) => {
           currency: currency,
           action_id: actionId || "null",
         };
-        console.log(requestBody);
-        console.log("requestBody :", requestBody);
 
         const response = await axios.post(
           `${BACKEND_URL2}/payments/${partner}/pay/`,
@@ -564,15 +558,12 @@ const EventProvider = ({ children }) => {
       return;
     }
 
-    console.log("Starting PhonePe transaction in", mode, "mode.");
-
     if (!window.PhonePeCheckout || !window.PhonePeCheckout.transact) {
       console.error("PhonePeCheckout script not loaded yet.");
       return;
     }
-
     updateCSP(true);
-
+    
     if (mode === "REDIRECT") {
       console.log("Redirecting to:", tokenUrl);
       window.PhonePeCheckout.transact({ tokenUrl: tokenUrl });

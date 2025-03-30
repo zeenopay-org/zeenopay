@@ -31,8 +31,6 @@ const CustomDropdown = ({
 
   const [id, setID] = useState("");
   const handleSelect = (value, id) => {
-    console.log("Selected Value:", value); // Debugging
-    console.log("Selected ID:", id); // Debugging
     handleOnChangeDropDown(value);
     setSelectedOption(value);
     setID(id);

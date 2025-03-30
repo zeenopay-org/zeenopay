@@ -17,7 +17,7 @@ export default function EventRegistrationForm({ fields, formId }) {
   const [inputFocused, setInputFocused] = useState({});
   const [imageUrl, setImageUrl] = useState("");
   const [progress, setProgress] = useState(0);
-  const { submitRegistrationForm , isSubmitting} = useContext(EventContext);
+  const { submitRegistrationForm, isSubmitting } = useContext(EventContext);
   const [formData, setFormData] = useState({
     image: "",
     name: "",
@@ -35,10 +35,12 @@ export default function EventRegistrationForm({ fields, formId }) {
     source: "",
     dateOfBirth: "",
     video: null,
+    schoolName: "",
   });
 
   const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(true);
+  // console.log("fields", fields);
 
   useEffect(() => {
     setTimeout(() => {
@@ -147,9 +149,13 @@ export default function EventRegistrationForm({ fields, formId }) {
   const weightQuestion = fields.questions?.find(
     (q) => q.title === "Weight(in kg)"
   );
-
+ 
   const whyWantToParticipateQuestion = fields.questions?.find(
     (q) => q.title === "Why do you want to participate in this event?"
+  );
+
+  const schoolNmaeQuestion = fields.questions?.find(
+    (q) => q.title === "What is your school name?"
   );
 
   const validateForm = () => {
@@ -159,6 +165,12 @@ export default function EventRegistrationForm({ fields, formId }) {
       if (heightQuestion?.isRequired && !formData.height)
         errors.height = "This field is required";
     }
+
+    if (weightQuestion?.isRequired && !formData.weight)
+      errors.weight = "This field is required";
+
+    if (schoolNmaeQuestion?.isRequired && !formData.schoolName.trim())
+      errors.schoolName = "This field is required";
 
     if (nameQuestion?.isRequired && !formData.name.trim()) {
       errors.name = "This field is required";
@@ -218,17 +230,21 @@ export default function EventRegistrationForm({ fields, formId }) {
 
   const handleSave = async () => {
     if (!validateForm()) return;
-    console.log("formID", formId);
 
-   const data = await submitRegistrationForm(formId, formData, amount);
-   const action_id = data.action_id
-   console.log(action_id+" this is acton id")
-   if (data){
-    console.log("hi hellow", data);
-    navigate("/registration/confirmation", {
-      state: { ...formData, form_id: formId, amount: amount, action_id: action_id },
-    });
-   }
+    const data = await submitRegistrationForm(formId, formData, amount);
+    const action_id = data.action_id;
+    console.log(action_id + " this is acton id");
+    if (data) {
+      console.log("hi hellow", data);
+      navigate("/registration/confirmation", {
+        state: {
+          ...formData,
+          form_id: formId,
+          amount: amount,
+          action_id: action_id,
+        },
+      });
+    }
   };
 
   const handleDropdownChange = (value) => {
@@ -450,6 +466,37 @@ export default function EventRegistrationForm({ fields, formId }) {
                   </>
                 )}
 
+                {/* {weight} */}
+                {weightQuestion?.isVisible && (
+                  <div className="relative">
+                    <input
+                      type="number"
+                      name="weight"
+                      value={formData.weight}
+                      onChange={handleInputChange}
+                      onFocus={() => handleFocus("weight")}
+                      onBlur={() => handleBlur("weight")}
+                      className="mt-1 p-3 w-full bg-customDarkBlue border border-gray-600 rounded-md text-white placeholder-transparent focus:outline-none focus:border-blue-500 peer"
+                      placeholder="weight"
+                    />
+                    <label
+                      htmlFor="weight"
+                      className={`absolute left-3 bg-customDarkBlue px-2 text-gray-400 text-base transition-all
+                      ${
+                        formData.weight || inputFocused.weight
+                          ? "top-0 -translate-y-1/2 text-blue-500 text-sm"
+                          : "top-1/2 -translate-y-1/2"
+                      }`}
+                    >
+                      weight
+                    </label>
+                    {errors.weight && (
+                      <span className="text-red-500 text-sm">
+                        {errors.weight}
+                      </span>
+                    )}
+                  </div>
+                )}
                 {/* Permanent Address Field */}
                 {PermanentAddQuestion?.isVisible && (
                   <div className="relative">
@@ -542,6 +589,38 @@ export default function EventRegistrationForm({ fields, formId }) {
                     >
                       Temporary Address
                     </label>
+                  </div>
+                )}
+
+                {/* {for the school} */}
+                {schoolNmaeQuestion?.isVisible && (
+                  <div className="relative">
+                    <input
+                      type="text"
+                      name="schoolName"
+                      value={formData.schoolName}
+                      onChange={handleInputChange}
+                      onFocus={() => handleFocus("schoolName")}
+                      onBlur={() => handleBlur("schoolName")}
+                      className="mt-1 p-3 w-full bg-customDarkBlue border border-gray-600 rounded-md text-white placeholder-transparent focus:outline-none focus:border-blue-500 peer"
+                      placeholder="Temporary Address"
+                    />
+                    <label
+                      htmlFor="schoolName"
+                      className={`absolute left-3 bg-customDarkBlue px-2 text-gray-400 text-base transition-all
+                      ${
+                        formData.schoolName|| inputFocused.schoolName
+                          ? "top-0 -translate-y-1/2 text-blue-500 text-sm"
+                          : "top-1/2 -translate-y-1/2"
+                      }`}
+                    >
+                      School Name
+                    </label>
+                    {errors.schoolName && (
+                      <span className="text-red-500 text-sm">
+                        {errors.schoolName}
+                      </span>
+                    )}
                   </div>
                 )}
 

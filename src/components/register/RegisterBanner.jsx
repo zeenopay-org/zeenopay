@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Calendar, Clock, MapPin, DollarSign } from "lucide-react";
+import { Calendar, Clock, MapPin} from "lucide-react";
 import { EventContext } from "../../EventProvider";
 
 function Register({ fields }) {
