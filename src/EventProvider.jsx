@@ -73,7 +73,6 @@ const EventProvider = ({ children }) => {
       if (!qrUrl) throw new Error("Missing 'goto' field in API response.");
 
       let transactionID = qrUrl.split("/").pop();
-      // console.log("transactionId:", transactionID);
 
       const response2 = await axios.get(`${BACKEND_URL2}${qrUrl}`);
       const QR = response2.data.qr_string;
@@ -221,7 +220,7 @@ const EventProvider = ({ children }) => {
       if (["CANCELED"].includes(state.toUpperCase())) {
         setPaymentStatus("❌ Payment Canceled");
       } else if (state.toUpperCase() === "SCANNED") {
-        setPaymentStatus("📲 QR Code Scanned");
+        setPaymentStatus("SCANNED");
       } else if (state.toUpperCase() !== "SUCCESS") {
         setPaymentStatus("⏳ Payment Pending...");
       }
@@ -430,7 +429,6 @@ const EventProvider = ({ children }) => {
       const url1 = response.data;
       setPaymentCurrency(url1);
       // Save to localStorage
-      console.log("url1",url1);
       localStorage.setItem("paymentCurrency", JSON.stringify(response.data));
       setLoading(false);
   
@@ -518,7 +516,7 @@ const EventProvider = ({ children }) => {
       }
     },
     []
-  );
+  ); 
 
   const redirectToFoneAndPrabhuPay = (url) => {
     if (url) {

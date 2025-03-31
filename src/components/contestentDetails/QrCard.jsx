@@ -43,68 +43,68 @@ export default function QrCode({ handleX, qrid }) {
   });
 
   const [hasValue, setHasValue] = useState(!!formData.votes);
-  const [inputFocused, setInputFocused] = useState(false);
   const [showQRModal, setShowQRModal] = useState(false);
-  const [qrCodeUrl, setQrCodeUrl] = useState("");
   const [selectedCountry, setSelectedCountry] = useState(null);
-  const [drop, setDrop] = useState(false);
   const [errors, setErrors] = useState({});
   const [showConfirm, setShowConfirm] = useState(false);
   const [showSpinner, setShowSpinner] = useState(false); // State to control spinner visibility
   const [qrString, setQrString] = useState("");
-
   const handleButtonClick = () => {
     inputRef.current.focus();
   };
   //  this useEffect for the countdown timer
-useEffect(() => {
-  let timer;
-  if (showQRModal && formData.qrType === "One Time Use QR") {
-    timer = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-  }
-  return () => {
-    if (timer) clearInterval(timer);
-  };
-}, [showQRModal, formData.qrType]);
-
-// Simplified redirect effect
-useEffect(() => {
-  if (countdown === 0 && showQRModal && formData.qrType === "One Time Use QR") {
-    const redirect = async () => {
-      // Close modal first
-      await new Promise(resolve => {
-        setShowQRModal(false);
-        resolve();
-      });
-      
-      // Then navigate
-      navigate("/failure", { 
-        state: { 
-          message: "QR Code expired",
-          contestant,
-          amount: calculatedAmount
-        } 
-      });
+  useEffect(() => {
+    let timer;
+    if (showQRModal && formData.qrType === "One Time Use QR") {
+      timer = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => {
+      if (timer) clearInterval(timer);
     };
-    
-    redirect();
-  }
-}, [countdown, showQRModal, formData.qrType, navigate]);
+  }, [showQRModal, formData.qrType]);
 
-// Reset countdown when modal closes
-useEffect(() => {
-  if (!showQRModal) {
-    setCountdown(360);
-  }
-}, [showQRModal]);
+  // Simplified redirect effect
+  useEffect(() => {
+    if (
+      countdown === 0 &&
+      showQRModal &&
+      formData.qrType === "One Time Use QR"
+    ) {
+      const redirect = async () => {
+        // Close modal first
+        await new Promise((resolve) => {
+          setShowQRModal(false);
+          resolve();
+        });
+
+        // Then navigate
+        navigate("/failure", {
+          state: {
+            message: "QR Code expired",
+            contestant,
+            amount: calculatedAmount,
+          },
+        });
+      };
+
+      redirect();
+    }
+  }, [countdown, showQRModal, formData.qrType, navigate]);
+
+  // Reset countdown when modal closes
+  useEffect(() => {
+    if (!showQRModal) {
+      setCountdown(360);
+    }
+  }, [showQRModal]);
 
   // Format the time (mm:ss)
   const formatTime = (seconds) => {
@@ -137,7 +137,7 @@ useEffect(() => {
         localStorage.removeItem("paymentStatus");
       });
     }
-  }, [paymentStatus]);
+  }, [paymentStatus, navigate, transactionId, contestant]);
 
   const validateForm = () => {
     let newErrors = {};
@@ -611,6 +611,12 @@ useEffect(() => {
                   setShowConfirm(false);
                 }}
               />
+            )}
+
+            {paymentStatus === "SCANNED" && (
+              <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-80">
+                <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+              </div>
             )}
           </div>
         )}
