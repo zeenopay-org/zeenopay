@@ -12,6 +12,17 @@ function EventDetails() {
   const [passingId, setPassingId] = useState("");
   const [finalDate, setFinalDate] = useState("");
   const [temp, setTemp] = useState(null);
+  
+   useEffect(() => {
+      setTimeout(() => {
+        try {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        } catch (err) {
+          window.scrollTo(0, 0);
+        }
+      }, 100);
+    }, []);
+    
 
   useEffect(() => {
     setPassingId(id);
