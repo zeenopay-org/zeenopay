@@ -60,7 +60,6 @@ function EventDetails() {
 
   // handle voteNow button click
   const handleClick = (id, passingId) => {
-    // handleScrollToTop();
     navigate(`/contestant-details/${id}`, { state: { passingId } });
   };
 

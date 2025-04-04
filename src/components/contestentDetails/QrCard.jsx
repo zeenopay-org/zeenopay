@@ -2,12 +2,10 @@ import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { EventContext } from "../../EventProvider";
 import countryCodes from "./countryCodes";
-// import PhoneInputWithCountrySelector from "../ReusableInputField/PhoneInputWithCountrySelector";
 import ConfirmCancelPopup from "../confirmCanclePupup/ConfirmCancelPopup";
 import { motion } from "framer-motion";
 import ElegantSpinner from "../confirmCanclePupup/ElegantSpinner.jsx";
 import QRCodeStyling from "qr-code-styling";
-import { QRCodeCanvas } from "qrcode.react";
 
 export default function QrCode({ handleX, qrid }) {
   const { id: paramId } = useParams();
@@ -52,6 +50,18 @@ export default function QrCode({ handleX, qrid }) {
   const handleButtonClick = () => {
     inputRef.current.focus();
   };
+
+  // this useEffect is for the scroll to top
+  useEffect(() => {
+    setTimeout(() => {
+      try {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } catch (err) {
+        window.scrollTo(0, 0);
+      }
+    }, 100);
+  }, []);
+
   //  this useEffect for the countdown timer
   useEffect(() => {
     let timer;
