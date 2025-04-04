@@ -39,7 +39,6 @@ function EventDetails() {
     getEvent(id);
   }, [getEvent, id]);
 
-  
   useEffect(() => {
     const savedEvent = localStorage.getItem("event");
 
@@ -59,15 +58,15 @@ function EventDetails() {
     return <p className="text-center text-red-500">Event not found!</p>;
   }
 
-
-  // handle voteNow button click 
+  // handle voteNow button click
   const handleClick = (id, passingId) => {
-    handleScrollToTop();
+    // handleScrollToTop();
     navigate(`/contestant-details/${id}`, { state: { passingId } });
   };
 
   // open QR form (for nepal only)
   const handleQR = (id) => {
+    handleScrollToTop();
     handleScrollToTop();
     setQrId(id); // Set the qrId
     setPop(true);
@@ -78,18 +77,15 @@ function EventDetails() {
   };
   const handleScrollToTop = () => {
     console.log("Scrolling to top via a function handleScrollToTop");
-  
+
     const scrollElement =
       document.scrollingElement || document.documentElement || document.body;
-  
+
     scrollElement.scrollTo({
       top: 0,
       behavior: "smooth",
     });
   };
-  
-  
-
 
   return (
     <div className="bg-customBlue max-w-full py-8 px-4 flex flex-col items-center pb-20">
@@ -131,18 +127,18 @@ function EventDetails() {
             event.title
           )}
         </h1>
-        <p className="text-white mt-2 text-center text-sm md:text-lg">
+        <div className="text-white mt-2 text-center text-sm md:text-lg">
           {loading ? (
             <div className="h-4 w-1/4 bg-gray-300 animate-pulse"></div>
           ) : currentDate > eventFinalDate ? (
-            "Voting Close!"
+            <p>Voting Close!</p>
           ) : (
             <>
               <CountdownTimer endTime={finalDate} />
-              Voting Open.
+              <p>Voting Open.</p>
             </>
           )}
-        </p>
+        </div>
 
         <div
           className={` w-full ${pop ? "blur-md pointer-events-none" : ""} grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-5 w-full max-w-[90%]`}

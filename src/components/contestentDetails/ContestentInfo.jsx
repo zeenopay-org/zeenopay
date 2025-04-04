@@ -82,6 +82,18 @@ export default function VotingComponent() {
   const [showCard, setShowCard] = useState(false);
 
   useEffect(() => {}, [formData]);
+  useEffect(() => {
+    // iPhone Safari sometimes needs a slight delay
+    setTimeout(() => {
+      try {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } catch (err) {
+        // fallback if smooth scroll not supported
+        window.scrollTo(0, 0);
+      }
+    }, 100); // 100ms delay
+  }, []);
+  
 
   useEffect(() => {
     getPaymentPartner();

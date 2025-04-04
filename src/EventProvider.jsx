@@ -2,10 +2,7 @@ import { createContext, useCallback, useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { io } from "socket.io-client"; // Import WebSocket client
 import QRCodeStyling from "qr-code-styling";
-import { LogIn } from "lucide-react";
-// import { Navigate, useNavigate } from "react-router-dom";
-
-// import QRCode from "qrcode.react";
+// import { LogIn } from "lucide-react";
 
 const EventContext = createContext();
 
