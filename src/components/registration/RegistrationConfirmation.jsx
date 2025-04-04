@@ -5,7 +5,6 @@ import { motion } from "framer-motion";
 import ConfirmCancelPopup from "../confirmCanclePupup/ConfirmCancelPopup.jsx";
 import ElegantSpinner from "../confirmCanclePupup/ElegantSpinner.jsx";
 import QRCodeStyling from "qr-code-styling";
-import { Currency } from "lucide-react";
 
 function RegistrationConfirmation() {
   const location = useLocation();
@@ -32,7 +31,7 @@ function RegistrationConfirmation() {
     paymentStatus,
     transactionId,
     setTransactionId,
-    getForm,
+    // getForm,
   } = useContext(EventContext);
 
   useEffect(() => {
@@ -116,7 +115,7 @@ function RegistrationConfirmation() {
         localStorage.removeItem("paymentStatus");
       });
     }
-  }, [paymentStatus]);
+  }, [paymentStatus, navigate, transactionId]);
 
   const handleCOD = (action_id, amount) => {
     try {
@@ -149,19 +148,19 @@ function RegistrationConfirmation() {
   const handlePayment = async (e) => {
     e.preventDefault();
     const {
-      image,
+      // image,
       name,
-      gender,
-      permanentAddress,
-      temporaryAddress,
-      guardianName,
+      // gender,
+      // permanentAddress,
+      // temporaryAddress,
+      // guardianName,
       contactNumber,
-      optionalNumber,
+      // optionalNumber,
       email,
-      reason,
-      source,
-      dateOfBirth,
-      video,
+      // reason,
+      // source,
+      // dateOfBirth,
+      // video,
       amount,
       form_id,
       action_id,
@@ -188,9 +187,9 @@ function RegistrationConfirmation() {
     const eventId = form_id;
 
     let currency;
-    if (paymentParnter.cc == "in") {
+    if (paymentParnter.cc === "in") {
       currency = "INR";
-    } else if (paymentParnter.cc == "np") {
+    } else if (paymentParnter.cc === "np") {
       currency = "NPR";
     }
     const intent = "F";

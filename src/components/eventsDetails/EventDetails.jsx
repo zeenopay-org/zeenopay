@@ -39,6 +39,7 @@ function EventDetails() {
     getEvent(id);
   }, [getEvent, id]);
 
+  
   useEffect(() => {
     const savedEvent = localStorage.getItem("event");
 
@@ -51,14 +52,6 @@ function EventDetails() {
     }
   }, [passingId, getEvent]);
 
-  // useEffect(() => {
-  //   console.log("Updated qrId:", qrId);
-  // }, [qrId]);
-
-  // useEffect(() => {
-  //   console.log("Updated pop state:", pop);
-  // }, [pop]);
-
   const eventFinalDate = new Date(event.finaldate);
   const currentDate = new Date();
 
@@ -66,22 +59,16 @@ function EventDetails() {
     return <p className="text-center text-red-500">Event not found!</p>;
   }
 
-  const handleClick = (id, passingId) => {
-    console.log("Scrolling to top...");
-    navigate(`/contestant-details/${id}`, { state: { passingId } });
 
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
+  // handle voteNow button click 
+  const handleClick = (id, passingId) => {
+    handleScrollToTop();
+    navigate(`/contestant-details/${id}`, { state: { passingId } });
   };
 
+  // open QR form (for nepal only)
   const handleQR = (id) => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-
+    handleScrollToTop();
     setQrId(id); // Set the qrId
     setPop(true);
   };
@@ -89,6 +76,20 @@ function EventDetails() {
     console.log("handleX clicked");
     setPop(false);
   };
+  const handleScrollToTop = () => {
+    console.log("Scrolling to top via a function handleScrollToTop");
+  
+    const scrollElement =
+      document.scrollingElement || document.documentElement || document.body;
+  
+    scrollElement.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+  
+  
+
 
   return (
     <div className="bg-customBlue max-w-full py-8 px-4 flex flex-col items-center pb-20">
@@ -186,7 +187,7 @@ function EventDetails() {
                   <h2 className="text-base md:text-lg text-white font-semibold mb-4">
                     {contestant.name}
                   </h2>
-                  {paymentCurrency?.cc?.toLowerCase() === "np" ? (
+                  {paymentCurrency?.cc?.toLowerCase() === "in" ? (
                     <div className="flex justify-between w-full gap-6">
                       <button
                         className="bg-[#003A75]  w-[55%] text-white px-4 py-2 rounded-3xl font-medium hover:bg-gray-600"
