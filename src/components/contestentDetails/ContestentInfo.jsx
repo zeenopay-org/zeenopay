@@ -385,7 +385,7 @@ export default function VotingComponent() {
                       <>
                         <button
                           onClick={handleQrClick}
-                          className="w-56 md:w-64 mt-6 ml-2 py-3 border border-white text-white text-[7px] rounded-lg hover:bg-white hover:text-[#0A1128] transition duration-300"
+                          className="w-56 md:w-64 mt-6 ml-2 py-3 border border-white text-white text-[12px] rounded-lg hover:bg-white hover:text-[#0A1128] transition duration-300"
                         >
                           Generate QR to Vote
                         </button>
