@@ -7,6 +7,8 @@ import PhoneInputWithCountrySelector from "../ReusableInputField/PhoneInputWithC
 import CustomDropdown from "../ReusableInputField/CustomDropdown.jsx";
 import { uploadToS3 } from "../middleware/AwsUploader.jsx";
 import { EventContext } from "../../EventProvider.jsx";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 export default function EventRegistrationForm({ fields, formId }) {
   const amount = fields.formFee;
@@ -712,35 +714,15 @@ export default function EventRegistrationForm({ fields, formId }) {
                 )}
 
                 {/* Date of Birth Field */}
-                <div className="relative w-full">
-                  <input
-                    type="date"
-                    id="dateOfBirth"
-                    name="dateOfBirth"
-                    value={formData.dateOfBirth}
-                    onChange={handleInputChange}
-                    onFocus={() => handleFocus("dateOfBirth")}
-                    onBlur={() => handleBlur("dateOfBirth")}
-                    className="peer mt-1 px-3 py-2.5 sm:py-3 w-full bg-customDarkBlue border border-gray-600 rounded-md text-white placeholder-transparent focus:outline-none focus:border-blue-500 text-sm sm:text-base min-h-[44px]"
-                    placeholder="Date of Birth"
-                  />
-                  <label
-                    htmlFor="dateOfBirth"
-                    className={`absolute left-3 px-3 py-2 text-gray-400  bg-customDarkBlue transition-all duration-200
-      ${
-        formData.dateOfBirth || inputFocused.dateOfBirth
-          ? "top-0 -translate-y-1/2 text-blue-500 text-xs"
-          : "top-1/2 -translate-y-1/2 text-sm"
-      }`}
-                  >
-                    Date of Birth
-                  </label>
-                  {errors.dateOfBirth && (
-                    <span className="text-red-500 text-sm mt-1 block">
-                      {errors.dateOfBirth}
-                    </span>
-                  )}
-                </div>
+                <DatePicker
+                  selected={formData.dateOfBirth}
+                  onChange={(date) =>
+                    setFormData({ ...formData, dateOfBirth: date })
+                  }
+                  dateFormat="dd MMM yyyy"
+                  className="mt-1 px-3 py-2.5 w-full bg-customDarkBlue border border-gray-600 rounded-md text-white text-sm sm:text-base min-h-[44px]"
+                  placeholderText="Select Date of Birth"
+                />
 
                 {/* Video Upload Field */}
 
