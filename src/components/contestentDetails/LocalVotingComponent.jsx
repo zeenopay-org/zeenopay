@@ -41,12 +41,12 @@ const LocalVotingComponent = ({ formData, setFormData }) => {
 
   const handleBlur = () => {
     let value = Number(formData.votes);
-    if (isNaN(value) || value < 10) value = 1;
+    if (isNaN(value) || value < 10) value = 10;
 
     setFormData((prev) => ({
       ...prev,
       votes: value,
-      amount: value * 1,
+      amount: value * 10,
     }));
   };
 
