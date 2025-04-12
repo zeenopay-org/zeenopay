@@ -157,7 +157,7 @@ export default function QrCode({ handleX, qrid }) {
     return Object.keys(newErrors).length === 0;
   };
 
-  const votePrice = 10;
+  const votePrice = 1;
   const voteOptions = [25, 50, 100, 500, 1000, 2500];
 
   useEffect(() => {
@@ -202,7 +202,7 @@ export default function QrCode({ handleX, qrid }) {
       const { votes, qrType } = formData;
       const eventID = contestant.event;
 
-      if (votes < 10) {
+      if (votes < 1) {
         alert("All fields are required, and votes should be at least 10.");
         return;
       }
