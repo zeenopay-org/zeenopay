@@ -7,6 +7,16 @@ import ElegantSpinner from "../confirmCanclePupup/ElegantSpinner.jsx";
 import QRCodeStyling from "qr-code-styling";
 
 function RegistrationConfirmation() {
+  useEffect(() => {
+        setTimeout(() => {
+          try {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          } catch (err) {
+            window.scrollTo(0, 0);
+          }
+        }, 100);
+      }, []);
+      
   const location = useLocation();
   const state = location.state;
   // Ensures state is never undefined

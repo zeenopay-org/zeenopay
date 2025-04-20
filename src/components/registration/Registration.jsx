@@ -8,6 +8,16 @@ function Registration() {
   const { forms, getAllForms } = useContext(EventContext);
 
   useEffect(() => {
+        setTimeout(() => {
+          try {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          } catch (err) {
+            window.scrollTo(0, 0);
+          }
+        }, 100);
+      }, []);
+
+  useEffect(() => {
     getAllForms();
   }, [getAllForms]);
 

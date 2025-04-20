@@ -11,6 +11,15 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
 export default function EventRegistrationForm({ fields, formId }) {
+  useEffect(() => {
+        setTimeout(() => {
+          try {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          } catch (err) {
+            window.scrollTo(0, 0);
+          }
+        }, 100);
+      }, []);
   const amount = fields.formFee;
 
   // console.log("Received fromId:", formId);
