@@ -581,6 +581,7 @@ export default function QrCode({ handleX, qrid }) {
                           )}
                         </div>
                       )}
+                      <p className="text-[10px] text-red-500">Note: Please do not close this screen untill the vote is success.</p>
                       <div className="flex items-center justify-center mt-2 space-x-2">
                         <p className="text-red-500 ml-4 font-semibold">
                           Powered by

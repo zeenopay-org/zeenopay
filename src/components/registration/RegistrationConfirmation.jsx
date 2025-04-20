@@ -131,7 +131,7 @@ function RegistrationConfirmation() {
       console.log("codDataString:", codDataString);
 
       // Set the QR string state which will trigger the QR code generation
-      setQrString({ QR: codDataString });
+      // setQrString({ QR: codDataString });
 
       // Show the QR modal
       setShowQRModal(true);
@@ -574,7 +574,7 @@ function RegistrationConfirmation() {
             <div className="flex justify-between items-center bg-customBlue p-3 rounded-t-lg">
               <h2 className="text-sm font-semibold text-white">
                 {payment.method === "COD"
-                  ? "Payment Due - Scan at Venue"
+                  ? "Payment Due - Pay Later"
                   : "Scan & Pay via Banking Apps, Esewa, Khalti, and all major wallets"}
               </h2>
               <button
@@ -588,30 +588,33 @@ function RegistrationConfirmation() {
               <div className="bg-customDarkBlue pl-3 rounded-lg">
                 <div ref={qrRef}></div>
                 {payment.method !== "COD" && (
-                  <div className=" flex justify-center mt-2 text-center">
-                    <p className="text-sm text-white">
-                      {countdown > 0 ? "QR expires in:" : "QR has expired!"}
-                    </p>
-                    {countdown > 0 ? (
-                      <p
-                        className={`text-lg ml-1 -mt-1 font-bold ${
-                          countdown <= 60 ? "text-red-500" : "text-green-500"
-                        }`}
-                      >
-                        {formatTime(countdown)}
+                  <>
+                    <div className=" flex justify-center mt-2 text-center">
+                      <p className="text-sm text-white">
+                        {countdown > 0 ? "QR expires in:" : "QR has expired!"}
                       </p>
-                    ) : (
-                      <p className="text-lg font-bold text-red-500">
-                        Redirecting...
-                      </p>
-                    )}
-                  </div>
+                      {countdown > 0 ? (
+                        <p
+                          className={`text-lg ml-1 -mt-1 font-bold ${
+                            countdown <= 60 ? "text-red-500" : "text-green-500"
+                          }`}
+                        >
+                          {formatTime(countdown)}
+                        </p>
+                      ) : (
+                        <p className="text-lg font-bold text-red-500">
+                          Redirecting...
+                        </p>
+                      )}
+                    </div>
+                    <p className="text-[10px] text-red-500">Note: Please do not close this screen untill the vote is success.</p>
+                  </>
                 )}
 
                 {payment.method === "COD" && (
                   <p className="text-white mt-2">
-                    Please present this QR code at the venue to complete your
-                    payment
+                    <span className="text-red-500"> NOTE:</span> YOUR FORM HAS BEEN SUBMITTED. 
+                    You Can Pay The Registration Fee at The Auditions Venue.
                   </p>
                 )}
                 {payment.method !== "COD" && (

@@ -232,15 +232,20 @@ export default function EventRegistrationForm({ fields, formId }) {
 
   const handleSave = async () => {
     if (!validateForm()) return;
-
-    const data = await submitRegistrationForm(formId, formData, amount);
+  
+    // Convert date to string before navigation
+    const confirmationData = {
+      ...formData,
+      dateOfBirth: formData.dateOfBirth ? formData.dateOfBirth.toISOString() : null
+    };
+  
+    const data = await submitRegistrationForm(formId, confirmationData, amount);
     const action_id = data.action_id;
-    console.log(action_id + " this is acton id");
+    
     if (data) {
-      console.log("hi hellow", data);
       navigate("/registration/confirmation", {
         state: {
-          ...formData,
+          ...confirmationData,
           form_id: formId,
           amount: amount,
           action_id: action_id,
@@ -715,13 +720,19 @@ export default function EventRegistrationForm({ fields, formId }) {
 
                 {/* Date of Birth Field */}
                 <DatePicker
-                  selected={formData.dateOfBirth}
+                  selected={
+                    formData.dateOfBirth ? new Date(formData.dateOfBirth) : null
+                  }
                   onChange={(date) =>
                     setFormData({ ...formData, dateOfBirth: date })
                   }
                   dateFormat="dd MMM yyyy"
                   className="mt-1 px-3 py-2.5 w-full bg-customDarkBlue border border-gray-600 rounded-md text-white text-sm sm:text-base min-h-[44px]"
                   placeholderText="Select Date of Birth"
+                  showYearDropdown
+                  dropdownMode="select"
+                  yearDropdownItemNumber={100}
+                  scrollableYearDropdown
                 />
 
                 {/* Video Upload Field */}
