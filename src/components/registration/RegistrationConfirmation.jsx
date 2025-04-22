@@ -5,18 +5,37 @@ import { motion } from "framer-motion";
 import ConfirmCancelPopup from "../confirmCanclePupup/ConfirmCancelPopup.jsx";
 import ElegantSpinner from "../confirmCanclePupup/ElegantSpinner.jsx";
 import QRCodeStyling from "qr-code-styling";
+import { FaInfoCircle, FaCreditCard } from "react-icons/fa";
+
+import {
+  FaUser,
+  FaBirthdayCake,
+  FaTransgender,
+  FaRulerVertical,
+  FaWeight,
+  FaSchool,
+  FaHome,
+  FaPhone,
+  FaEnvelope,
+  FaUserFriends,
+  FaMoneyBill,
+  FaRegQuestionCircle,
+  FaBullhorn,
+  FaMapMarkerAlt,
+  FaUserCircle,
+} from "react-icons/fa";
 
 function RegistrationConfirmation() {
   useEffect(() => {
-        setTimeout(() => {
-          try {
-            window.scrollTo({ top: 0, behavior: "smooth" });
-          } catch (err) {
-            window.scrollTo(0, 0);
-          }
-        }, 100);
-      }, []);
-      
+    setTimeout(() => {
+      try {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } catch (err) {
+        window.scrollTo(0, 0);
+      }
+    }, 100);
+  }, []);
+
   const location = useLocation();
   const state = location.state;
   // Ensures state is never undefined
@@ -158,7 +177,7 @@ function RegistrationConfirmation() {
   const handlePayment = async (e) => {
     e.preventDefault();
     const {
-      // image,
+      image,
       name,
       // gender,
       // permanentAddress,
@@ -319,130 +338,163 @@ function RegistrationConfirmation() {
     }
     return paymentParnter?.partner || [];
   };
+  console.log("state:", state?.image);
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
 
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return "";
+
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+
+    return `${day}/${month}/${year}`;
+  };
+
+  const DOB = formatDate(state?.dateOfBirth);
   const paymentPartners = getPaymentPartners();
+  const iconStyle = { color: "#FFAA33", marginRight: "8px" };
 
   return (
     <div className=" w-full bg-customBlue ">
-      <div className="flex justify-center items-center  pt-11 pb-6 px-6">
-        <div className="bg-customDarkBlue w-[900px] flex flex-col gap-3  text-gray-400 p-12 ">
-          <div className="flex justify-center items-center">
-            <h1 className="text-2xl font-semibold mb-6">Filled Informations</h1>
+      <div className="flex justify-center items-center pt-11 pb-6 px-6">
+        <div className="flex justify-center items-center pt-11 pb-6 px-6">
+          <div className="flex justify-center items-center pt-11 pb-6 px-6">
+            <div className="bg-customDarkBlue w-full max-w-[1000px] flex flex-col md:flex-row text-gray-400 p-6 md:p-10 rounded-lg gap-8">
+              {/* Image section - will appear first on mobile, and on right on desktop */}
+              {state?.image && (
+                <div className="flex justify-center order-first md:order-last md:w-[300px]">
+                  <img
+                    src={state.image}
+                    alt="User"
+                    className="w-52 h-52 md:w-[260px] md:h-[260px] object-cover rounded-xl border-2 border-[#FFAA33]"
+                  />
+                </div>
+              )}
+
+              {/* Text Fields section - will appear second on mobile, and on left on desktop */}
+              <div className="flex-1 flex flex-col gap-3">
+                <div className="flex justify-center  md:justify-center">
+                  <FaInfoCircle className="text-[#FFAA33]  mt-2 mr-2" />
+                  <h1 className="text-2xl font-semibold mb-4">
+                    Filled Informations
+                  </h1>
+                </div>
+
+                {state?.name && (
+                  <p>
+                    <FaUser className="inline mr-2 text-[#FFAA33]" />
+                    <strong>Name:</strong> {state?.name}
+                  </p>
+                )}
+                {state?.age && (
+                  <p>
+                    <FaBirthdayCake className="inline mr-2 text-[#FFAA33]" />
+                    <strong>Age:</strong> {state?.age}
+                  </p>
+                )}
+                {state?.amount && (
+                  <p>
+                    <FaMoneyBill className="inline mr-2 text-[#FFAA33]" />
+                    <strong>Amount:</strong> {state?.amount}
+                  </p>
+                )}
+                {state?.dateOfBirth && (
+                  <p>
+                    <FaBirthdayCake className="inline mr-2 text-[#FFAA33]" />
+                    <strong>Date of Birth:</strong> {DOB}
+                  </p>
+                )}
+                {state?.gender && (
+                  <p>
+                    <FaTransgender className="inline mr-2 text-[#FFAA33]" />
+                    <strong>Gender:</strong> {state?.gender}
+                  </p>
+                )}
+                {state?.height && (
+                  <p>
+                    <FaRulerVertical className="inline mr-2 text-[#FFAA33]" />
+                    <strong>Height:</strong> {state?.height}
+                  </p>
+                )}
+                {state?.weight && (
+                  <p>
+                    <FaWeight className="inline mr-2 text-[#FFAA33]" />
+                    <strong>Weight:</strong> {state?.weight}
+                  </p>
+                )}
+                {state?.schoolName && (
+                  <p>
+                    <FaSchool className="inline mr-2 text-[#FFAA33]" />
+                    <strong>School Name:</strong> {state?.schoolName}
+                  </p>
+                )}
+                {state?.permanentAddress && (
+                  <p>
+                    <FaHome className="inline mr-2 text-[#FFAA33]" />
+                    <strong>Permanent Address:</strong>{" "}
+                    {state?.permanentAddress}
+                  </p>
+                )}
+                {state?.temporaryAddress && (
+                  <p>
+                    <FaHome className="inline mr-2 text-[#FFAA33]" />
+                    <strong>Temporary Address:</strong>{" "}
+                    {state?.temporaryAddress}
+                  </p>
+                )}
+                {state?.guardianName && (
+                  <p>
+                    <FaUserFriends className="inline mr-2 text-[#FFAA33]" />
+                    <strong>Guardian's Name:</strong> {state?.guardianName}
+                  </p>
+                )}
+                {state?.contactNumber && (
+                  <p>
+                    <FaPhone className="inline mr-2 text-[#FFAA33]" />
+                    <strong>Contact Number:</strong> {state?.contactNumber}
+                  </p>
+                )}
+                {state?.optionalNumber && (
+                  <p>
+                    <FaPhone className="inline mr-2 text-[#FFAA33]" />
+                    <strong>Optional Contact Number:</strong>{" "}
+                    {state?.optionalNumber}
+                  </p>
+                )}
+                {state?.email && (
+                  <p>
+                    <FaEnvelope className="inline mr-2 text-[#FFAA33]" />
+                    <strong>Email:</strong> {state?.email}
+                  </p>
+                )}
+                {state?.reason && (
+                  <p>
+                    <FaRegQuestionCircle className="inline mr-2 text-[#FFAA33]" />
+                    <strong>Why do you want to participate?</strong>{" "}
+                    {state?.reason}
+                  </p>
+                )}
+                {state?.source && (
+                  <p>
+                    <FaBullhorn className="inline mr-2 text-[#FFAA33]" />
+                    <strong>How did you hear about this event?</strong>{" "}
+                    {state?.source}
+                  </p>
+                )}
+              </div>
+            </div>
           </div>
-
-          {/* for name */}
-          {state?.name && (
-            <p>
-              <strong>Name: </strong> {state?.name || "N/A"}
-            </p>
-          )}
-
-          {/* age */}
-          {state?.age && (
-            <p>
-              <strong>Age: </strong> {state?.age || "N/A"}
-            </p>
-          )}
-
-          {/* amount */}
-          {state?.amount && (
-            <p>
-              <strong>Amount: </strong> {state?.amount || "N/A"}
-            </p>
-          )}
-
-          {state?.dateOfBirth && (
-            <p>
-              <strong>Date of Birth: </strong> {state?.dateOfBirth || "N/A"}
-            </p>
-          )}
-
-          {/* for gender */}
-          {state?.gender && (
-            <p>
-              <strong>Gender: </strong> {state?.gender || "N/A"}
-            </p>
-          )}
-
-          {/* for height */}
-          {state?.height && (
-            <p>
-              <strong>Height: </strong> {state?.height || "N/A"}
-            </p>
-          )}
-
-          {/* for weight */}
-          {state?.weight && (
-            <p>
-              <strong>Weight: </strong> {state?.weight || "N/A"}
-            </p>
-          )}
-
-          {state?.schoolName && (
-            <p>
-              <strong>School Name: </strong> {state?.schoolName || "N/A"}
-            </p>
-          )}
-
-          {state?.permanentAddress && (
-            <p>
-              <strong>Permanent Address:</strong>{" "}
-              {state?.permanentAddress || "N/A"}
-            </p>
-          )}
-
-          {state?.temporaryAddress && (
-            <p>
-              <strong>Temporary Address:</strong>{" "}
-              {state?.temporaryAddress || "N/A"}
-            </p>
-          )}
-
-          {state?.guardianName && (
-            <p>
-              <strong>Guardian's Name:</strong> {state?.guardianName || "N/A"}
-            </p>
-          )}
-
-          {state?.contactNumber && (
-            <p>
-              <strong>Contact Number:</strong> {state?.contactNumber || "N/A"}
-            </p>
-          )}
-
-          {state?.optionalNumber && (
-            <p>
-              <strong>Optional Contact Number:</strong>{" "}
-              {state?.optionalNumber || "N/A"}
-            </p>
-          )}
-
-          {state?.email && (
-            <p>
-              <strong>Email:</strong> {state?.email || "N/A"}
-            </p>
-          )}
-
-          {state?.reason && (
-            <p>
-              <strong>Why do you want to participate?</strong>{" "}
-              {state?.reason || "N/A"}
-            </p>
-          )}
-
-          {state?.source && (
-            <p>
-              <strong>How did you hear about this event?</strong>{" "}
-              {state?.source || "N/A"}
-            </p>
-          )}
         </div>
       </div>
+
       <div className="flex justify-center items-center pb-6 px-6">
         <div className="bg-customDarkBlue w-[900px] flex flex-col gap-3 text-gray-400 p-12">
-          <div className="flex justify-center items-center">
-            <h1 className="text-2xl font-semibold mb-6">Payment Options:</h1>
-          </div>
+          <h1 className="text-2xl font-semibold mb-6 flex items-center gap-2">
+            <FaCreditCard className="text-green-500" /> {/* Credit card icon */}
+            Payment Options:
+          </h1>{" "}
           {/* Payment Options */}
           <div className="flex flex-col gap-3">
             {paymentParnter?.cc === "np" ? (
@@ -617,14 +669,18 @@ function RegistrationConfirmation() {
                         </p>
                       )}
                     </div>
-                    <p className="text-[10px] text-red-500">Note: Please do not close this screen untill the vote is success.</p>
+                    <p className="text-[10px] text-red-500">
+                      Note: Please do not close this screen untill the vote is
+                      success.
+                    </p>
                   </>
                 )}
 
                 {payment.method === "COD" && (
                   <p className="text-white mt-2">
-                    <span className="text-red-500"> NOTE:</span> YOUR FORM HAS BEEN SUBMITTED. 
-                    You Can Pay The Registration Fee at The Auditions Venue.
+                    <span className="text-red-500"> NOTE:</span> YOUR FORM HAS
+                    BEEN SUBMITTED. You Can Pay The Registration Fee at The
+                    Auditions Venue.
                   </p>
                 )}
                 {payment.method !== "COD" && (

@@ -3,16 +3,16 @@ import "../../assets/css/HeroSlider.css";
 
 function HeroSlider() {
   const slides = [
-    { id: 1, icon: "https://res.cloudinary.com/dhah3xwej/image/upload/v1743355614/j3umfcdsqzrpgecg5h3g.jpg" },
-    { id: 2, icon: "https://res.cloudinary.com/dhah3xwej/image/upload/v1743355876/twpf6tcveyrnuref96j4.jpg" },
-    { id: 3, icon: "https://res.cloudinary.com/dhah3xwej/image/upload/v1743355885/p7hu0fa2uncaqhtg5w3v.jpg" },
-    { id: 4, icon: "https://res.cloudinary.com/dhah3xwej/image/upload/v1743355970/au3rplopigsj3uya5unt.jpg" },
-    { id: 5, icon: "https://res.cloudinary.com/dhah3xwej/image/upload/v1743356003/oadpbvezy0i2wimvhqjy.jpg" },
-    { id: 6, icon: "https://res.cloudinary.com/dhah3xwej/image/upload/v1743356042/cflahnt89riy4v16kwhu.jpg" },
-    { id: 7, icon: "https://res.cloudinary.com/dhah3xwej/image/upload/v1743356080/vuo3pgko0reuphuzjgns.jpg" },
-    { id: 8, icon: "https://res.cloudinary.com/dhah3xwej/image/upload/v1743356122/ya5mu8cxeskhytxkkhre.jpg" },
+    { id: 1, icon: "https://media.zeenopay.com/WhatsApp%20Image%202025-04-23%20at%2001.23.17.jpeg" },
+    { id: 2, icon: "https://media.zeenopay.com/WhatsApp%20Image%202025-04-23%20at%2001.23.18%20(1).jpeg" },
+    { id: 3, icon: "https://media.zeenopay.com/WhatsApp%20Image%202025-04-23%20at%2001.23.18%20(2).jpeg" },
+    { id: 4, icon: "https://media.zeenopay.com/WhatsApp%20Image%202025-04-23%20at%2001.23.20.jpeg" },
+    { id: 5, icon: "https://media.zeenopay.com/WhatsApp%20Image%202025-04-23%20at%2001.23.19.jpeg" },
+    { id: 6, icon: "https://media.zeenopay.com/WhatsApp%20Image%202025-04-23%20at%2001.23.19%20(2).jpeg" },
+    { id: 7, icon: "https://media.zeenopay.com/WhatsApp%20Image%202025-04-23%20at%2001.23.19%20(1).jpeg" },
+    { id: 8, icon: "https://media.zeenopay.com/WhatsApp%20Image%202025-04-23%20at%2001.23.18.jpeg" },
   ];
-
+  
   const [currentSlide, setCurrentSlide] = useState(0);
   const [loading, setLoading] = useState(true);
   const touchStartX = useRef(0);

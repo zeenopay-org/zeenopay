@@ -1,45 +1,45 @@
-import React, { useState, useEffect, useContext } from "react";
-import { Calendar, Clock, MapPin} from "lucide-react";
+import React, { useState, useEffect, useContext, useCallback } from "react";
+import { Calendar, Clock, MapPin } from "lucide-react";
+import { FiBookmark } from "react-icons/fi"; 
 import { EventContext } from "../../EventProvider";
+
+const SkeletonLoader = React.memo(() => (
+  <div className="animate-pulse space-y-4">
+    <div className="h-8 bg-gray-700 rounded w-2/3 mx-auto"></div>
+    <div className="h-4 bg-gray-700 rounded w-3/4 mx-auto"></div>
+    <div className="h-4 bg-gray-700 rounded w-5/6 mx-auto"></div>
+    <div className="h-4 bg-gray-700 rounded w-4/6 mx-auto"></div>
+  </div>
+));
+
+const SkeletonImageLoader = React.memo(() => (
+  <div className="animate-pulse h-full w-full bg-gray-700 rounded"></div>
+));
 
 function Register({ fields }) {
   const [loading, setLoading] = useState(true);
-  const { form} = useContext(EventContext);
+  const { form } = useContext(EventContext);
 
   useEffect(() => {
-    setTimeout(() => {
-      setLoading(false); 
-    }, 2000);
-  }, []);
+    if (form) {
+      setLoading(false);
+    }
+  }, [form]);
 
-
-  const formatTime = (isoString) => {
-    if (!isoString) return null; // Return null if empty
+  const formatTime = useCallback((isoString) => {
+    if (!isoString) return null;
     const date = new Date(isoString);
     return isNaN(date.getTime())
-      ? null // Hide invalid dates
+      ? null
       : date.toLocaleTimeString("en-US", {
           hour: "2-digit",
           minute: "2-digit",
-          hour12: true, // Use false for 24-hour format
+          hour12: true,
         });
-  };
-
-  const SkeletonLoader = () => (
-    <div className="animate-pulse space-y-4">
-      <div className="h-8 bg-gray-700 rounded w-2/3 mx-auto"></div>
-      <div className="h-4 bg-gray-700 rounded w-3/4 mx-auto"></div>
-      <div className="h-4 bg-gray-700 rounded w-5/6 mx-auto"></div>
-      <div className="h-4 bg-gray-700 rounded w-4/6 mx-auto"></div>
-    </div>
-  );
-
-  const SkeletonImageLoader = () => (
-    <div className="animate-pulse h-full w-full bg-gray-700 rounded"></div>
-  );
+  }, []);
 
   if (!form && !loading) {
-    return <div>Event not found!</div>;
+    return <div className="text-white text-center p-8">Event not found!</div>;
   }
 
   return (
@@ -50,7 +50,11 @@ function Register({ fields }) {
             <SkeletonLoader />
           ) : (
             <>
-              {form.title && <h2 className="lg:text-xl sm:text-s font-bold">{form.title}</h2>}
+              {form.title && (
+                <h2 className="lg:text-xl sm:text-s font-bold flex items-center gap-2">
+                  <FiBookmark className="text-yellow-400" /> {form.title}
+                </h2>
+              )}
               <div className="flex flex-col gap-2">
                 {fields.formDate && (
                   <div className="flex items-center mb-3">
@@ -75,8 +79,7 @@ function Register({ fields }) {
 
                 {fields.formFee && (
                   <div className="flex items-center">
-                    {/* <DollarSign className="w-5 h-5 mr-2 text-gray-300" /> */}
-                    <p className="text-xl font-semibold">Rs {fields.formFee}</p>
+                    <p className="text-xl ">Rs {fields.formFee}</p>
                   </div>
                 )}
               </div>
@@ -84,7 +87,7 @@ function Register({ fields }) {
           )}
         </div>
 
-        <div className="w-full md:w-3/5">
+        <div className="w-full md:w-3/5 min-h-[250px]">
           {loading ? (
             <SkeletonImageLoader />
           ) : (
@@ -92,6 +95,7 @@ function Register({ fields }) {
               <img
                 src={form.img}
                 alt={form.title}
+                loading="lazy"
                 className="w-full h-auto object-cover md:h-[80%] lg:h-full sm:h-[70%]"
               />
             )

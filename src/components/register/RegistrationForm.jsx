@@ -21,8 +21,6 @@ export default function EventRegistrationForm({ fields, formId }) {
         }, 100);
       }, []);
   const amount = fields.formFee;
-
-  // console.log("Received fromId:", formId);
   const navigate = useNavigate();
   const [errors, setErrors] = useState({});
   const [inputFocused, setInputFocused] = useState({});
@@ -56,8 +54,8 @@ export default function EventRegistrationForm({ fields, formId }) {
   useEffect(() => {
     setTimeout(() => {
       setLoading(false);
-    }, 2000);
-  }, []);
+    }, 500);
+  }, [fields]);
 
   useEffect(() => {
     if (imageUrl) {
@@ -123,6 +121,7 @@ export default function EventRegistrationForm({ fields, formId }) {
       setFormData((prev) => ({ ...prev, video: file }));
     }
   };
+  console.log("formData", formData);
 
   const imageQuestion = fields.questions?.find((q) => q.type === "image");
   const radioQuestion = fields.questions?.find((q) => q.type === "radio");
@@ -165,7 +164,7 @@ export default function EventRegistrationForm({ fields, formId }) {
     (q) => q.title === "Why do you want to participate in this event?"
   );
 
-  const schoolNmaeQuestion = fields.questions?.find(
+  const schoolNameQuestion = fields.questions?.find(
     (q) => q.title === "What is your school name?"
   );
 
@@ -180,7 +179,7 @@ export default function EventRegistrationForm({ fields, formId }) {
     if (weightQuestion?.isRequired && !formData.weight)
       errors.weight = "This field is required";
 
-    if (schoolNmaeQuestion?.isRequired && !formData.schoolName.trim())
+    if (schoolNameQuestion?.isRequired && !formData.schoolName.trim())
       errors.schoolName = "This field is required";
 
     if (nameQuestion?.isRequired && !formData.name.trim()) {
@@ -308,7 +307,7 @@ export default function EventRegistrationForm({ fields, formId }) {
 
   return (
     <div className="bg-customBlue text-center pb-20">
-      <div className="pb-10 pt-20">
+      <div className="pb-10 pt-10">
         <h1 className="font-semibold text-4xl text-white">Registration</h1>
       </div>
       <div className="flex bg-customBlue justify-center items-center p-4 md:min-h-screen">
@@ -356,7 +355,9 @@ export default function EventRegistrationForm({ fields, formId }) {
                       <label className="absolute bottom-0 right-0 bg-blue-900 p-2 rounded-full cursor-pointer transition-transform duration-300 hover:scale-110">
                         <Pencil size={16} color="white" />
                       </label>
+              
                     </div>
+                    <p className="text-white text-xs">Note: Upload Close Up Photo <br /> (Face should be clearly visible)</p>
                   </div>
                 )}
               </div>
@@ -609,7 +610,7 @@ export default function EventRegistrationForm({ fields, formId }) {
                 )}
 
                 {/* {for the school} */}
-                {schoolNmaeQuestion?.isVisible && (
+                {schoolNameQuestion?.isVisible && (
                   <div className="relative">
                     <input
                       type="text"
