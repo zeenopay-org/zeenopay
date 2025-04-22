@@ -319,7 +319,7 @@ export default function EventRegistrationForm({ fields, formId }) {
               <div className="flex justify-center mb-16">
                 {imageQuestion?.isVisible && (
                   <div className="flex flex-col items-center space-y-2">
-                    <span className="text-white text-lg font-semibold">
+                    <span className="text-white text-lg ">
                       Image
                     </span>
                     <div className="relative">
@@ -357,7 +357,7 @@ export default function EventRegistrationForm({ fields, formId }) {
                       </label>
               
                     </div>
-                    <p className="text-white text-xs">Note: Upload Close Up Photo <br /> (Face should be clearly visible)</p>
+                    <p className="text-white text-[9px]">Note: Upload Close Up Photo <br /> (Face should be clearly visible)</p>
                   </div>
                 )}
               </div>
