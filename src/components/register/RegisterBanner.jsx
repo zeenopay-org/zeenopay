@@ -43,13 +43,17 @@ function Register({ fields }) {
   }
 
   return (
-    <div className="bg-customBlue p-4 pt-10 w-full flex items-center justify-center">
+    <div>
+<div className="bg-customBlue p-4 pt-10 w-full flex items-center justify-center">
+
       <div className="flex bg-customDarkBlue flex-col-reverse md:flex-row w-full max-w-6xl md:mx-auto text-white rounded-lg overflow-hidden shadow-lg">
+        
         <div className="p-6 md:p-4 lg:p-8 flex gap-6 flex-col justify-center w-full md:w-2/3">
           {loading ? (
             <SkeletonLoader />
           ) : (
             <>
+            
               {form.title && (
                 <h2 className="lg:text-xl sm:text-s font-bold flex items-center gap-2">
                   <FiBookmark className="text-yellow-400" /> {form.title}
@@ -103,6 +107,8 @@ function Register({ fields }) {
         </div>
       </div>
     </div>
+    </div>
+    
   );
 }
 

@@ -358,10 +358,10 @@ function RegistrationConfirmation() {
 
   return (
     <div className=" w-full bg-customBlue ">
-      <div className="flex justify-center items-center pt-11 pb-6 px-6">
-        <div className="flex justify-center items-center pt-11 pb-6 px-6">
-          <div className="flex justify-center items-center pt-11 pb-6 px-6">
-            <div className="bg-customDarkBlue w-full max-w-[1000px] flex flex-col md:flex-row text-gray-400 p-6 md:p-10 rounded-lg gap-8">
+      <div className="flex justify-center items-center pt-11 pb-6 px-2">
+        <div className="flex justify-center items-center ">
+          <div className="flex justify-center items-center p-2 pt-2 pb-2">
+            <div className="bg-customDarkBlue  flex flex-col md:flex-row text-gray-400 p-6 md:p-10 rounded-lg gap-4">
               {/* Image section - will appear first on mobile, and on right on desktop */}
               {state?.image && (
                 <div className="flex justify-center order-first md:order-last md:w-[300px]">
@@ -383,101 +383,101 @@ function RegistrationConfirmation() {
                 </div>
 
                 {state?.name && (
-                  <p>
-                    <FaUser className="inline mr-2 text-[#FFAA33]" />
+                  <p className="text-xs md:text-lg">
+                    <FaUser className="inline mr-2 text-[#FFAA33] " />
                     <strong>Name:</strong> {state?.name}
                   </p>
                 )}
                 {state?.age && (
-                  <p>
+                  <p className="text-xs md:text-lg">
                     <FaBirthdayCake className="inline mr-2 text-[#FFAA33]" />
                     <strong>Age:</strong> {state?.age}
                   </p>
                 )}
                 {state?.amount && (
-                  <p>
+                  <p className="text-xs md:text-lg">
                     <FaMoneyBill className="inline mr-2 text-[#FFAA33]" />
                     <strong>Amount:</strong> {state?.amount}
                   </p>
                 )}
                 {state?.dateOfBirth && (
-                  <p>
+                  <p className="text-xs md:text-lg">
                     <FaBirthdayCake className="inline mr-2 text-[#FFAA33]" />
                     <strong>Date of Birth:</strong> {DOB}
                   </p>
                 )}
                 {state?.gender && (
-                  <p>
+                  <p className="text-xs md:text-lg">
                     <FaTransgender className="inline mr-2 text-[#FFAA33]" />
                     <strong>Gender:</strong> {state?.gender}
                   </p>
                 )}
                 {state?.height && (
-                  <p>
+                  <p className="text-xs md:text-lg">
                     <FaRulerVertical className="inline mr-2 text-[#FFAA33]" />
                     <strong>Height:</strong> {state?.height}
                   </p>
                 )}
                 {state?.weight && (
-                  <p>
+                  <p className="text-xs md:text-lg">
                     <FaWeight className="inline mr-2 text-[#FFAA33]" />
                     <strong>Weight:</strong> {state?.weight}
                   </p>
                 )}
                 {state?.schoolName && (
-                  <p>
+                  <p className="text-xs md:text-lg">
                     <FaSchool className="inline mr-2 text-[#FFAA33]" />
                     <strong>School Name:</strong> {state?.schoolName}
                   </p>
                 )}
                 {state?.permanentAddress && (
-                  <p>
+                  <p className="text-xs md:text-lg">
                     <FaHome className="inline mr-2 text-[#FFAA33]" />
                     <strong>Permanent Address:</strong>{" "}
                     {state?.permanentAddress}
                   </p>
                 )}
                 {state?.temporaryAddress && (
-                  <p>
+                  <p className="text-xs md:text-lg">
                     <FaHome className="inline mr-2 text-[#FFAA33]" />
                     <strong>Temporary Address:</strong>{" "}
                     {state?.temporaryAddress}
                   </p>
                 )}
                 {state?.guardianName && (
-                  <p>
+                  <p className="text-xs md:text-lg">
                     <FaUserFriends className="inline mr-2 text-[#FFAA33]" />
                     <strong>Guardian's Name:</strong> {state?.guardianName}
                   </p>
                 )}
                 {state?.contactNumber && (
-                  <p>
+                  <p className="text-xs md:text-lg">
                     <FaPhone className="inline mr-2 text-[#FFAA33]" />
                     <strong>Contact Number:</strong> {state?.contactNumber}
                   </p>
                 )}
                 {state?.optionalNumber && (
-                  <p>
+                  <p className="text-xs md:text-lg">
                     <FaPhone className="inline mr-2 text-[#FFAA33]" />
                     <strong>Optional Contact Number:</strong>{" "}
                     {state?.optionalNumber}
                   </p>
                 )}
                 {state?.email && (
-                  <p>
+                  <p className="text-xs md:text-lg">
                     <FaEnvelope className="inline mr-2 text-[#FFAA33]" />
                     <strong>Email:</strong> {state?.email}
                   </p>
                 )}
                 {state?.reason && (
-                  <p>
+                  <p className="text-xs md:text-lg">
                     <FaRegQuestionCircle className="inline mr-2 text-[#FFAA33]" />
                     <strong>Why do you want to participate?</strong>{" "}
                     {state?.reason}
                   </p>
                 )}
                 {state?.source && (
-                  <p>
+                  <p className="text-xs md:text-lg">
                     <FaBullhorn className="inline mr-2 text-[#FFAA33]" />
                     <strong>How did you hear about this event?</strong>{" "}
                     {state?.source}
@@ -490,7 +490,7 @@ function RegistrationConfirmation() {
       </div>
 
       <div className="flex justify-center items-center pb-6 px-6">
-        <div className="bg-customDarkBlue w-[900px] flex flex-col gap-3 text-gray-400 p-12">
+        <div className="bg-customDarkBlue w-[900px] flex flex-col gap-3 text-gray-400 p-5">
           <h1 className="text-2xl font-semibold mb-6 flex items-center gap-2">
             <FaCreditCard className="text-green-500" /> {/* Credit card icon */}
             Payment Options:

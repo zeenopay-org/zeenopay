@@ -307,9 +307,7 @@ export default function EventRegistrationForm({ fields, formId }) {
 
   return (
     <div className="bg-customBlue text-center pb-20">
-      <div className="pb-10 pt-10">
-        <h1 className="font-semibold text-4xl text-white">Registration</h1>
-      </div>
+      
       <div className="flex bg-customBlue justify-center items-center p-4 md:min-h-screen">
         <div className="bg-customDarkBlue w-full max-w-6xl p-8 rounded-lg shadow-2xl">
           {loading ? (
