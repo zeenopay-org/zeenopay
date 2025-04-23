@@ -333,7 +333,12 @@ function RegistrationConfirmation() {
         esewa: "eSewa",
         khalti: "khalti",
         qr: "Through QR",
-        COD: "Pay Later (Payment can be done at the auditions venue)",
+        COD: (
+          <>
+            Pay Later <br />
+            (Payment can be done at the auditions venue)
+          </>
+        ),
       };
     }
     return paymentParnter?.partner || [];
@@ -501,10 +506,10 @@ function RegistrationConfirmation() {
               Object.entries(paymentPartners).map(([key, value], index) => (
                 <label
                   key={index}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer transition-all ${
+                  className={`flex items-center gap-3 px-4 py-2 rounded-lg cursor-pointer transition-all ${
                     payment.method === key
-                      ? "bg-blue-800 text-white shadow-lg"
-                      : "bg-transparent hover:bg-blue-900"
+                      ? "bg-blue-800 text-white text-sm md:text-lg shadow-lg"
+                      : "bg-transparent  text-xs md:text-lg hover:bg-blue-900"
                   }`}
                 >
                   <input
@@ -523,7 +528,7 @@ function RegistrationConfirmation() {
                     }`}
                   >
                     {payment.method === key && (
-                      <div className="w-[10px] h-[10px] bg-gray-400 rounded-full"></div>
+                      <div className="w-[10px] h-[10px]  bg-gray-400 rounded-full"></div>
                     )}
                   </div>
                   {value}
@@ -670,7 +675,7 @@ function RegistrationConfirmation() {
                       )}
                     </div>
                     <p className="text-[10px] text-red-500">
-                      Note: Please do not close this screen untill the vote is
+                      Note: Please do not close this screen untill the registration is
                       success.
                     </p>
                   </>
@@ -708,7 +713,7 @@ function RegistrationConfirmation() {
             </div>
             <p className="text-xs mt-4">
               <span className="text-red-500"> NOTE:</span> I hereby accept the
-              Terms of Services and acknowledge that payments done for voting
+              Terms of Services and acknowledge that payments done for registration
               are non-refundable.
             </p>
           </div>
