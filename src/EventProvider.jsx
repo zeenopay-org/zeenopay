@@ -22,6 +22,7 @@ const EventProvider = ({ children }) => {
   const [paymentUrl, setPaymentUrl] = useState("");
   const [transactionStatus, setTransactionStatus] = useState("");
   const [paymentIframeUrl, setPaymentIframeUrl] = useState(null);
+  const [pollingActive, setPollingActive] = useState(false);
   const [wsUrl, setWsURL] = useState("");
 
   const [qrString, setQrString] = useState("");
@@ -79,9 +80,9 @@ const EventProvider = ({ children }) => {
 
       setQrString(QR);
       setQrLoading(false);
-      setWsURL(trace); // Save WebSocket URL
+      setWsURL(trace);  
       setTransactionId(transactionID);
-      checkPaymentStatus(transactionID, trace);
+      // checkPaymentStatus(transactionID, trace);
 
       return { QR, transactionID, trace }; // Return relevant data
     } catch (error) {
@@ -90,52 +91,50 @@ const EventProvider = ({ children }) => {
     }
   }, []);
 
-  // const DynamicQrPolling = useCallback(async (transactionID) => {
-  //   try {
-  //     const response = await axios.get(
-  //       `${BACKEND_URL2}/payments/qr/verify/${transactionID}`,
-  //       {
-  //         // headers: {
-  //         //   'X-Client' : 'zeenoClient/3.0'
-  //         // }
-  //       }
-  //     );
+  const DynamicQrPolling = useCallback(async (transactionID) => {
+    try {
+      const response = await axios.get(
+        `${BACKEND_URL2}/payments/qr/verify/${transactionID}`,
+        {
+          // headers: {
+          //   'X-Client' : 'zeenoClient/3.0'
+          // }
+        }
+      );
 
-  //     console.log(`${BACKEND_URL2}/payments/qr/verify/${transactionID}`);
-  //     console.log("Response Data:", response.data);
+      setPaymentStatus(response.data.paymentStatus);
 
-  //     setPaymentStatus(response.data.paymentStatus);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching QR verification:", error);
+    }
+  }, []);
 
-  //     return response.data;
-  //   } catch (error) {
-  //     console.error("Error fetching QR verification:", error);
-  //   }
-  // }, []);
+  const startPolling = useCallback((transactionId) => {
+    setPollingActive(true);
 
-  // const startPolling = useCallback((transactionId) => {
-  //   setPollingActive(true);
+    const intervalId = setInterval(async () => {
+      const data = await DynamicQrPolling(transactionId);
+      const txid = data?.prn;
 
-  //   const intervalId = setInterval(async () => {
-  //     const data = await DynamicQrPolling(transactionId);
-  //     const txid = data?.prn;
+      if (data?.paymentStatus === "success") {
 
-  //     if (data?.paymentStatus === "success") {
+        clearInterval(intervalId);
+        setPollingActive(false);
+        console.log("Payment successful, stopping polling.");
+        setPaymentStatus("SUCCESS");
+        // window.location.href = `/qr-success?txid=${txid}`;
+      }
+    }, 1333);
 
-  //       clearInterval(intervalId);
-  //       setPollingActive(false);
-  //       console.log("Payment successful, stopping polling.");
-  //       window.location.href = `/qr-success?txid=${txid}`;
-  //     }
-  //   }, 1333);
+    return () => clearInterval(intervalId);
+  }, [DynamicQrPolling]);
 
-  //   return () => clearInterval(intervalId);
-  // }, [DynamicQrPolling]);
-
-  // useEffect(() => {
-  //   if (transactionId && !pollingActive) {
-  //     startPolling(transactionId);
-  //   }
-  // }, [transactionId, pollingActive, startPolling]);
+  useEffect(() => {
+    if (transactionId && !pollingActive) {
+      startPolling(transactionId);
+    }
+  }, [transactionId, pollingActive, startPolling]);
 
   // **************************************************************
   
@@ -175,114 +174,115 @@ const EventProvider = ({ children }) => {
   }, []);
 
   
-  const checkPaymentStatus = (txid, wsUrl) => {
-    if (!wsUrl) {
-      console.error("❌ WebSocket URL is missing.");
-      return;
-    }
+  // const checkPaymentStatus = (txid, wsUrl) => {
+  //   if (!wsUrl) {
+      // console.error("❌ WebSocket URL is missing.");
+  //     return;
+  //   }
   
-    const socket = io("wss://sio.zeenopay.com/", {
-      transports: ["websocket"],
-    });
+  //   const socket = io("wss://sio.zeenopay.com/", {
+  //     transports: ["websocket"],
+  //   });
   
-    socket.on("connect", () => {
-      console.log("✅ Connected to WebSocket for payment status.");
-      socket.send(`open:${txid}:${wsUrl}`);
-    });
+  //   socket.on("connect", () => {
+  //     console.log("✅ Connected to WebSocket for payment status.");
+  //     socket.send(`open:${txid}:${wsUrl}`);
+  //   });
   
-    socket.on("status", async (data) => {
-      console.log("🔄 Payment status update:", data);
+  //   socket.on("status", async (data) => {
+  //     console.log("🔄 Payment status update:", data);
   
-      if (!data) return;
+  //     if (!data) return;
   
-      const [state, transactionId] = data.split(":");
-      console.log("State: ", state);
+  //     const [state, transactionId] = data.split(":");
+  //     console.log("State: ", state);
   
-      if (transactionId === txid && state.toUpperCase() === "SUCCESS") {
-        try {
-          console.log("📡 Verifying payment with backend...");
-          const response = await axios.get(
-            `${BACKEND_URL2}/payments/qr/verify/${transactionId}`
-          );
-          // console.log("✅ Response Data:", response.data);
+  //     if (transactionId === txid && state.toUpperCase() === "SUCCESS") {
+  //       try {
+  //         console.log("📡 Verifying payment with backend...");
+  //         const response = await axios.get(
+  //           `${BACKEND_URL2}/payments/qr/verify/${transactionId}`
+  //         );
+  //         console.log("✅ Response Data:", response.data);
   
-          if (response.data.paymentStatus === "success") {
-            setPaymentStatus("SUCCESS"); //  Only update if backend confirms success
-          }
-        } catch (error) {
-          console.error("❌ Error verifying payment:", error);
-        }
-      }
+  //         if (response.data.paymentStatus === "success") {
+  //           // setPaymentStatus("SUCCESS"); //  Only update if backend confirms success
+  //         }
+  //       } catch (error) {
+  //         console.error("❌ Error verifying payment:", error);
+  //       }
+  //     }
   
-      if (["CANCELED"].includes(state.toUpperCase())) {
-        setPaymentStatus("❌ Payment Canceled");
-      } else if (state.toUpperCase() === "SCANNED") {
-        setPaymentStatus("SCANNED");
-      } else if (state.toUpperCase() !== "SUCCESS") {
-        setPaymentStatus("⏳ Payment Pending...");
-      }
+  //     if (["CANCELED"].includes(state.toUpperCase())) {
+  //       setPaymentStatus("❌ Payment Canceled");
+  //     } else if (state.toUpperCase() === "SCANNED") {
+  //       setPaymentStatus("SCANNED");
+  //     } else if (state.toUpperCase() !== "SUCCESS") {
+  //       setPaymentStatus("⏳ Payment Pending...");
+  //     }
   
-      if (["SUCCESS", "CANCELED"].includes(state.toUpperCase())) {
-        socket.disconnect();
-      }
-    });
+  //     if (["SUCCESS", "CANCELED"].includes(state.toUpperCase())) {
+  //       socket.disconnect();
+  //     }
+  //   });
   
-    socket.on("connect_error", (error) => {
-      console.error("❌ WebSocket connection error:", error);
-    });
+  //   socket.on("connect_error", (error) => {
+  //     console.error("❌ WebSocket connection error:", error);
+  //   });
   
-    socket.on("error", (error) => {
-      console.error("❌ WebSocket error:", error);
-    });
+  //   socket.on("error", (error) => {
+  //     console.error("❌ WebSocket error:", error);
+  //   });
   
-    return () => socket.disconnect();
-  };
+  //   return () => socket.disconnect();
+  // };
   
-  //  WebSocket Listener for Checking Payment Status
-  useEffect(() => {
-    if (!transactionId) return;
+  // //  WebSocket Listener for Checking Payment Status
+
+  // useEffect(() => {
+  //   if (!transactionId) return;
   
-    const socket = io("wss://api.zeenopay.com", { transports: ["websocket"] });
+  //   const socket = io("wss://api.zeenopay.com", { transports: ["websocket"] });
   
-    socket.on("connect", () => {
-      console.log("✅ Connected to WebSocket for payment status.");
-      console.log("🔄 Transaction ID:", transactionId);
-      socket.emit("check", transactionId);
-    });
+  //   socket.on("connect", () => {
+  //     console.log("✅ Connected to WebSocket for payment status.");
+  //     console.log("🔄 Transaction ID:", transactionId);
+  //     socket.emit("check", transactionId);
+  //   });
   
-    socket.on("status", (data) => {
-      console.log("🔄 Payment status update:", data);
+  //   socket.on("status", (data) => {
+  //     console.log("🔄 Payment status update:", data);
   
-      if (!data) return;
+  //     if (!data) return;
   
-      const [state, txid] = data.split(":");
+  //     const [state, txid] = data.split(":");
   
-      if (txid === transactionId && state.toUpperCase() === "SUCCESS") {
-        checkPaymentStatus(transactionId, "wss://api.zeenopay.com"); // Call function to verify success
-      }
+  //     if (txid === transactionId && state.toUpperCase() === "SUCCESS") {
+  //       checkPaymentStatus(transactionId, "wss://api.zeenopay.com"); // Call function to verify success
+  //     }
   
-      if (["CANCELED"].includes(state.toUpperCase())) {
-        setPaymentStatus(" Payment Canceled");
-      }
+  //     if (["CANCELED"].includes(state.toUpperCase())) {
+  //       setPaymentStatus(" Payment Canceled");
+  //     }
   
-      if (["SUCCESS", "CANCELED"].includes(state.toUpperCase())) {
-        socket.disconnect();
-      }
-    });
+  //     if (["SUCCESS", "CANCELED"].includes(state.toUpperCase())) {
+  //       socket.disconnect();
+  //     }
+  //   });
   
-    socket.on("connect_error", (error) => {
-      console.error("❌ WebSocket connection error:", error);
-    });
+  //   socket.on("connect_error", (error) => {
+  //     console.error("❌ WebSocket connection error:", error);
+  //   });
   
-    socket.on("error", (error) => {
-      console.error("❌ WebSocket error:", error);
-    });
+  //   socket.on("error", (error) => {
+  //     console.error("❌ WebSocket error:", error);
+  //   });
   
-    return () => {
-      console.log("🔌 Disconnecting WebSocket...");
-      socket.disconnect();
-    };
-  }, [transactionId]); // ✅ Runs only when transactionId changes
+  //   return () => {
+  //     console.log("🔌 Disconnecting WebSocket...");
+  //     socket.disconnect();
+  //   };
+  // }, [transactionId]); // ✅ Runs only when transactionId changes
   
   
 
@@ -610,7 +610,7 @@ const EventProvider = ({ children }) => {
         redirectToPaymentPage,
         redirectToFoneAndPrabhuPay,
         redirectToPhonePe,
-        checkPaymentStatus,
+        // checkPaymentStatus,
         transactionStatus,
         redirectToSuccessPage,
         paymentIframeUrl,

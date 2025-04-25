@@ -77,17 +77,13 @@ function EventDetails() {
   // open QR form (for nepal only)
   const handleQR = (id) => {
     handleScrollToTop();
-    handleScrollToTop();
     setQrId(id); // Set the qrId
     setPop(true);
   };
   const handleX = () => {
-    console.log("handleX clicked");
     setPop(false);
   };
   const handleScrollToTop = () => {
-    console.log("Scrolling to top via a function handleScrollToTop");
-
     const scrollElement =
       document.scrollingElement || document.documentElement || document.body;
 

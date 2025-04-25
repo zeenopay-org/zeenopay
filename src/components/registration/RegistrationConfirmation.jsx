@@ -343,7 +343,7 @@ function RegistrationConfirmation() {
     }
     return paymentParnter?.partner || [];
   };
-  console.log("state:", state?.image);
+
   const formatDate = (dateString) => {
     if (!dateString) return "";
 
