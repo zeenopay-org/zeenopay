@@ -82,25 +82,16 @@ function HeroSlider() {
               } else if (position !== 0) {
                 opacity = "opacity-0 hidden";
               }
-              const optimizedSrc = `${slide.icon}?format=webp`; 
+
               return (
                 <div
                   key={slide.id}
-                  className={`absolute w-full max-w-[800px] h-[250px] md:h-[360px] transition-all duration-500 ease-in-out flex justify-center items-center ${transform} ${opacity} ${zIndex}`
-                }
+                  className={`absolute w-full max-w-[800px] h-[250px] md:h-[360px] transition-all duration-500 ease-in-out flex justify-center items-center ${transform} ${opacity} ${zIndex}`}
                 >
-
                   <img
-                    src={optimizedSrc}
+                    src={slide.icon}
                     alt={`Slider ${slide.id}`}
                     className="w-[95%] md:w-full h-[90%] md:h-full max-w-[800px]  object-fit shadow-lg"
-                    style={
-                      window.innerWidth > 640 && window.innerWidth < 768
-                        ? { height: "250px" , marginTop: "40px", marginBottom: "40px"}
-                        : { height: "100%" }
-                    }
-                   
-                    loading="lazy"
                   />
                 </div>
               );
