@@ -52,7 +52,7 @@ function HeroSlider() {
 
   return (
     <div
-      className="slider-container bg-customBlue h-[250px] md:h-[500px] flex justify-center items-center px-4 sm:px-8 relative"
+      className="slider-container bg-customBlue h-[300px] md:h-[500px] flex justify-center items-center px-4 sm:px-8 relative"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
@@ -82,16 +82,25 @@ function HeroSlider() {
               } else if (position !== 0) {
                 opacity = "opacity-0 hidden";
               }
-
+              const optimizedSrc = `${slide.icon}?format=webp`; 
               return (
                 <div
                   key={slide.id}
-                  className={`absolute w-full max-w-[800px] h-[200px] md:h-[360px] transition-all duration-500 ease-in-out flex justify-center items-center ${transform} ${opacity} ${zIndex}`}
+                  className={`absolute w-full max-w-[800px] h-[250px] md:h-[360px] transition-all duration-500 ease-in-out flex justify-center items-center ${transform} ${opacity} ${zIndex}`
+                }
                 >
+
                   <img
-                    src={slide.icon}
+                    src={optimizedSrc}
                     alt={`Slider ${slide.id}`}
                     className="w-[95%] md:w-full h-[90%] md:h-full max-w-[800px]  object-fit shadow-lg"
+                    style={
+                      window.innerWidth > 640 && window.innerWidth < 768
+                        ? { height: "250px" , marginTop: "40px", marginBottom: "40px"}
+                        : { height: "100%" }
+                    }
+                   
+                    loading="lazy"
                   />
                 </div>
               );

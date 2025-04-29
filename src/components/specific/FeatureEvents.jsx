@@ -107,7 +107,7 @@ function FeatureEvents() {
                     className="bg-customDarkBlue text-white rounded-3xl shadow-lg overflow-hidden cursor-pointer flex flex-col"
                   >
                     <img
-                      src={event.img}
+                      src={event.img  ? `${event.img}?format=webp` : ""}
                       alt={event.title}
                       className="w-full p-2 rounded-3xl h-52 lg:h-60 md:h-68 object-cover"
                     />

@@ -68,7 +68,7 @@ function OngoingEvents() {
                 }}
               >
                 <img
-                  src={event.img}
+                  src={event.img ? `${event.img}?format=webp` : ""}
                   alt={event.title}
                   className="w-full p-2 rounded-3xl h-52 md:h-44 lg:h-44 object-cover"
                 />

@@ -110,7 +110,7 @@ function EventDetails() {
           ) : (
             <div className="relative flex flex-col w-full h-full items-center justify-center">
               <img
-                src={event.img}
+                src={event.img ? `${event.img}?format=webp` : ""}
                 alt={event.title}
                 className="w-full max-w-[90%] h-auto md:h-[500px] rounded-2xl mb-6"
                 loading="lazy"
@@ -118,7 +118,7 @@ function EventDetails() {
               />
               {event.misc_kv ? (
                 <img
-                  src={event.misc_kv}
+                  src={event.misc_kv ? `${event.misc_kv}?format=webp` : ""}
                   alt=""
                   className="absolute -bottom-10 md:-bottom-4 left-1/2 transform -translate-x-1/2 h-28 w-28 md:h-40 md:w-40 rounded-full border-4 border-white object-fit"
                 />
@@ -179,8 +179,8 @@ function EventDetails() {
                     </div>
                   ) : null}
                   <img
-                    src={contestant.avatar}
-                    alt={contestant.name}
+                    src={contestant.avatar ? `${contestant.avatar}?format=webp` : ""}
+                    alt={contestant.name }
                     onClick={() => handleClick(contestant.id)}
                     className="w-full h-60 lg:h-[300px] md:h-60 object-cover rounded-2xl mb-4"
                     loading="lazy"
