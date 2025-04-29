@@ -12,6 +12,7 @@ function EventDetails() {
   const [passingId, setPassingId] = useState("");
   const [finalDate, setFinalDate] = useState("");
   const [temp, setTemp] = useState(null);
+  const [eventImageLoaded, setEventImageLoaded] = useState(false); // 👈 NEW
 
   useEffect(() => {
     setTimeout(() => {
@@ -101,13 +102,22 @@ function EventDetails() {
           <div className="w-full max-w-[90%] h-auto md:h-[500px] bg-gray-300 animate-pulse rounded-2xl mb-6"></div>
         ) : (
           <div className="relative flex flex-col w-full h-full items-center justify-center">
+            {/* Skeleton before image load */}
+            {!eventImageLoaded && (
+              <div className="w-full max-w-[90%] h-auto md:h-[500px] bg-gray-700 animate-pulse rounded-2xl mb-6"></div>
+            )}
+
             <img
               src={event.img ? `${event.img}?format=webp` : ""}
               alt={event.title}
-              className="w-full max-w-[90%] h-auto md:h-[500px] rounded-2xl mb-6"
+              className={`w-full max-w-[90%] h-auto md:h-[500px] rounded-2xl mb-6 transition-opacity duration-700 ${
+                eventImageLoaded ? "opacity-100" : "opacity-0"
+              }`}
               loading="lazy"
-              onError={() => console.log("Avatar failed to load")}
+              onLoad={() => setEventImageLoaded(true)}
+              onError={() => console.log("Event image failed to load")}
             />
+
             {event.misc_kv && (
               <img
                 src={`${event.misc_kv}?format=webp`}
@@ -173,7 +183,6 @@ function EventDetails() {
                   </div>
                 )}
 
-                {/* ✅ Updated: Fade-in image block */}
                 <div className="relative w-full h-60 lg:h-[300px] md:h-60 overflow-hidden rounded-2xl mb-4 bg-gray-300">
                   <img
                     src={contestant.avatar ? `${contestant.avatar}?format=webp` : ""}

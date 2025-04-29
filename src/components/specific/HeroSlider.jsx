@@ -52,7 +52,7 @@ function HeroSlider() {
 
   return (
     <div
-      className="slider-container bg-customBlue h-[300px] md:h-[500px] flex justify-center items-center px-4 sm:px-8 relative"
+      className="slider-container bg-customBlue h-[300px] md:h-[500px] flex justify-center items-center px-4  relative"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
@@ -86,7 +86,7 @@ function HeroSlider() {
               return (
                 <div
                   key={slide.id}
-                  className={`absolute w-full max-w-[800px] h-[250px] md:h-[360px] transition-all duration-500 ease-in-out flex justify-center items-center ${transform} ${opacity} ${zIndex}`}
+                  className={`absolute w-full max-w-[800px] h-[240px] md:h-[360px] transition-all duration-500 ease-in-out flex justify-center items-center ${transform} ${opacity} ${zIndex}`}
                 >
                   <img
                     src={slide.icon}
