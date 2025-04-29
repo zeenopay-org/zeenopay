@@ -13,6 +13,13 @@ function EventDetails() {
   const [finalDate, setFinalDate] = useState("");
   const [temp, setTemp] = useState(null);
   const [eventImageLoaded, setEventImageLoaded] = useState(false); // 👈 NEW
+  const [skeletonDelay, setSkeletonDelay] = useState(true);
+
+useEffect(() => {
+  const timer = setTimeout(() => setSkeletonDelay(false), 500); 
+  return () => clearTimeout(timer);
+}, []);
+
 
   useEffect(() => {
     setTimeout(() => {
@@ -98,13 +105,14 @@ function EventDetails() {
       <div
         className={`w-full ${pop ? "blur-md pointer-events-none" : ""} flex justify-center items-center`}
       >
-        {loading ? (
-          <div className="w-full max-w-[90%] h-auto md:h-[500px] bg-gray-300 animate-pulse rounded-2xl mb-6"></div>
-        ) : (
+        {loading || skeletonDelay ? (
+             <div className="w-full max-w-[90%] h-[300px] sm:h-[250px] md:h-[500px] bg-gray-600 animate-pulse rounded-2xl mb-6"></div>
+            ) : (
           <div className="relative flex flex-col w-full h-full items-center justify-center">
             {/* Skeleton before image load */}
             {!eventImageLoaded && (
-              <div className="w-full max-w-[90%] h-auto md:h-[500px] bg-gray-700 animate-pulse rounded-2xl mb-6"></div>
+             <div className="w-full max-w-[90%] h-[200px] sm:h-[300px] md:h-[500px] bg-gray-300 animate-pulse rounded-2xl mb-6"></div>
+
             )}
 
             <img
