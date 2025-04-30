@@ -59,7 +59,7 @@ function HeroSlider() {
     >
       {loading ? (
         <div className="w-full max-w-7xl pt-8 md:p-2 flex justify-center items-center">
-          <div className="w-full max-w-[800px] h-[240px] md:h-[360px] bg-gray-700 animate-pulse rounded-xl"></div>
+          <div className="w-full max-w-[800px] h-[250px] md:h-[360px] bg-gray-700 animate-pulse rounded-xl"></div>
         </div>
       ) : (
         <div className="w-full max-w-7xl relative overflow-hidden h-full">
@@ -86,7 +86,8 @@ function HeroSlider() {
               return (
                 <div
                   key={slide.id}
-                  className={`absolute w-full max-w-[800px] h-[240px] md:h-[360px] transition-all duration-500 ease-in-out flex justify-center items-center ${transform} ${opacity} ${zIndex}`}
+                  className={`absolute w-full max-w-[800px] h-[230px] md:h-[360px] transition-all duration-500 ease-in-out flex justify-center items-center ${transform} ${opacity} ${zIndex}`}
+
                 >
                   <div className="w-full h-full flex justify-center items-center overflow-hidden rounded-xl shadow-lg">
                     <img
@@ -94,7 +95,7 @@ function HeroSlider() {
                       alt={`Slider ${slide.id}`}
                       width={800}
                       height={360}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-fit"
                       loading="lazy"
                     />
                   </div>
