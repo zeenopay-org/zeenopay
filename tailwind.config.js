@@ -1,4 +1,6 @@
 /** @type {import('tailwindcss').Config} */
+import react from '@vitejs/plugin-react'
+import { VitePWA } from 'vite-plugin-pwa'
 export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
