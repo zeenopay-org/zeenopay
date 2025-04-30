@@ -86,7 +86,28 @@ function HeroSlider() {
               return (
                 <div
                   key={slide.id}
-                  className={`absolute w-full max-w-[800px] h-[230px] md:h-[360px] transition-all duration-500 ease-in-out flex justify-center items-center ${transform} ${opacity} ${zIndex}`}
+                  className={`absolute w-full h-[200px] max-w-[800px] md:h-[360px] transition-all duration-500 ease-in-out flex justify-center items-center ${transform} ${opacity} ${zIndex}`}
+                  style={{
+                    height:
+                      window.innerWidth < 500
+                        ? "180px"
+                        : window.innerWidth < 570
+                        ? "210px"
+                        : window.innerWidth < 640
+                          ? "250px"
+                        : window.innerWidth < 768
+                          ? "260px"
+                          : "",
+                          // : window.innerWidth < 768
+                          //   ? "280px"
+                          //   : "360px",
+                    width:
+                      window.innerWidth < 500
+                        ? "100%"
+                        : window.innerWidth < 768
+                          ? "90%"
+                          : "100%",
+                  }}
 
                 >
                   <div className="w-full h-full flex justify-center items-center overflow-hidden rounded-xl shadow-lg">
