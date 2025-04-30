@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { EventContext } from "../../EventProvider";
 import QrCard from "../contestentDetails/QrCard.jsx";
 import CountdownTimer from "../contestentDetails/CountdownTimer.jsx";
-import { FiFilter } from "react-icons/fi"; // React Icon import
+import { FiFilter, FiChevronDown, FiX } from "react-icons/fi";
 
 function EventDetails() {
   const { id } = useParams();
@@ -15,6 +15,13 @@ function EventDetails() {
   const [temp, setTemp] = useState(null);
   const [skeletonDelay, setSkeletonDelay] = useState(true);
   const [sortOption, setSortOption] = useState("name");
+  const [showSortDropdown, setShowSortDropdown] = useState(false);
+  const [showFilterDropdown, setShowFilterDropdown] = useState(false);
+  const [activeFilters, setActiveFilters] = useState({
+    paid: false,
+    free: false,
+    verified: false
+  });
 
   useEffect(() => {
     const timer = setTimeout(() => setSkeletonDelay(false), 800);
@@ -95,6 +102,33 @@ function EventDetails() {
     scrollElement.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const toggleFilter = (filterName) => {
+    setActiveFilters(prev => ({
+      ...prev,
+      [filterName]: !prev[filterName]
+    }));
+  };
+
+  const clearAllFilters = () => {
+    setActiveFilters({
+      paid: false,
+      free: false,
+      verified: false
+    });
+  };
+
+  const filteredContestants = contestants.filter(contestant => {
+    if (!activeFilters.paid && !activeFilters.free && !activeFilters.verified) {
+      return true;
+    }
+    
+    return (
+      (activeFilters.paid && contestant.isPaid) ||
+      (activeFilters.free && !contestant.isPaid) ||
+      (activeFilters.verified && contestant.isVerified)
+    );
+  });
+
   return (
     <div className="bg-customBlue w-full min-h-screen flex flex-col items-center pb-20">
       <div className="w-full max-w-[1920px] px-4 py-8 md:-mt-20 flex flex-col items-center">
@@ -149,35 +183,103 @@ function EventDetails() {
           )}
         </div>
 
-        {/* Sort Buttons with Filter Icon */}
+        {/* Filter Section */}
         <div className="flex justify-between items-center mt-6 w-full max-w-[90%]">
-  <div className="flex gap-4 justify-start items-center">
-    {/* <FiFilter className="text-white text-2xl" title="Sort Filters" /> */}
-    <button
-      onClick={() => setSortOption("name")}
-      className={`px-4 py-2 rounded-full font-medium border transition duration-200 ${
-        sortOption === "name"
-          ? "bg-customSky text-white border-customSky"
-          : "bg-white text-black border-blue-600"
-      }`}
-    >
-      By Name
-    </button>
-    <button
-      onClick={() => setSortOption("misc_kv")}
-      className={`px-4 py-2 rounded-full font-medium border transition duration-200 ${
-        sortOption === "misc_kv"
-          ? "bg-customSky text-white border-blue-600"
-          : "bg-white text-black border-blue-600"
-      }`}
-    >
-     By Number
-    </button>
-  </div>
+          {/* Sort Dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => setShowSortDropdown(!showSortDropdown)}
+              className="flex items-center gap-2 px-4 py-2 bg-white text-black rounded-full font-medium border border-blue-600 transition duration-200"
+            >
+              <FiFilter className="text-lg" />
+              
+              <FiChevronDown className={`transition-transform duration-200 ${showSortDropdown ? 'rotate-180' : ''}`} />
+            </button>
+            
+            {showSortDropdown && (
+              <div className="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10">
+                <div 
+                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center justify-between"
+                  onClick={() => {
+                    setSortOption("name");
+                    setShowSortDropdown(false);
+                  }}
+                >
+                 Name
+                  {sortOption === "name" && <span className="text-blue-500">✓</span>}
+                </div>
+                <div 
+                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center justify-between"
+                  onClick={() => {
+                    setSortOption("misc_kv");
+                    setShowSortDropdown(false);
+                  }}
+                >
+                   Number
+                  {sortOption === "misc_kv" && <span className="text-blue-500">✓</span>}
+                </div>
+              </div>
+            )}
+          </div>
 
-  {/* Filter button positioned on the right */}
-</div>
 
+          {/* <div className="relative">
+            <button
+              onClick={() => setShowFilterDropdown(!showFilterDropdown)}
+              className="flex items-center gap-2 px-4 py-2 bg-white text-black rounded-full font-medium border border-blue-600 transition duration-200"
+            >
+              Filter
+              <FiChevronDown className={`transition-transform duration-200 ${showFilterDropdown ? 'rotate-180' : ''}`} />
+              {Object.values(activeFilters).some(Boolean) && (
+                <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-white text-xs flex items-center justify-center">
+                  {Object.values(activeFilters).filter(Boolean).length}
+                </span>
+              )}
+            </button>
+            
+            {showFilterDropdown && (
+              <div className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg z-10">
+                <div className="px-4 py-2 border-b border-gray-200 flex justify-between items-center">
+                  <span className="font-medium">Filters</span>
+                  <div className="flex items-center gap-2">
+                    {Object.values(activeFilters).some(Boolean) && (
+                      <button 
+                        onClick={clearAllFilters}
+                        className="text-xs text-blue-500 hover:text-blue-700"
+                      >
+                        Clear all
+                      </button>
+                    )}
+                    <button onClick={() => setShowFilterDropdown(false)}>
+                      <FiX className="text-gray-500" />
+                    </button>
+                  </div>
+                </div>
+                <div 
+                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center justify-between"
+                  onClick={() => toggleFilter('paid')}
+                >
+                  Paid Votes
+                  {activeFilters.paid && <span className="text-blue-500">✓</span>}
+                </div>
+                <div 
+                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center justify-between"
+                  onClick={() => toggleFilter('free')}
+                >
+                  Free Votes
+                  {activeFilters.free && <span className="text-blue-500">✓</span>}
+                </div>
+                <div 
+                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center justify-between"
+                  onClick={() => toggleFilter('verified')}
+                >
+                  Verified Only
+                  {activeFilters.verified && <span className="text-blue-500">✓</span>}
+                </div>
+              </div>
+            )}
+          </div> */}
+        </div>
 
         {/* Contestants Grid */}
         <div
@@ -199,14 +301,14 @@ function EventDetails() {
                     <div className="h-10 w-3/4 bg-gray-500 animate-pulse rounded-3xl"></div>
                   </div>
                 ))
-            : [...contestants]
+            : [...filteredContestants]
                 .sort((a, b) => {
                   if (sortOption === "name") {
                     const nameCompare = a.name.localeCompare(b.name);
                     if (nameCompare !== 0) return nameCompare;
                     return (a.misc_kv || 0) - (b.misc_kv || 0);
                   } else if (sortOption === "misc_kv") {
-                    return (a.misc_kv || 0) - (b.misc_kv || 0); // ascending
+                    return (a.misc_kv || 0) - (b.misc_kv || 0);
                   }
                   return 0;
                 })
