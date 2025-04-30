@@ -179,7 +179,7 @@ function EventDetails() {
               : contestants.map((contestant) => (
                   <div
                     key={contestant.id}
-                    className="relative bg-customDarkBlue rounded-2xl shadow-lg p-3 flex flex-col items-center text-center min-h-[320px]"
+                    className="relative bg-customDarkBlue rounded-2xl shadow-lg p-3 flex flex-col items-center text-center aspect-square min-h-[250px]"
                   >
                     {contestant.misc_kv && (
                       <div
@@ -191,7 +191,7 @@ function EventDetails() {
                         {contestant.misc_kv}
                       </div>
                     )}
-                    <div className="w-full h-60 lg:h-[300px] md:h-60 rounded-2xl mb-4 overflow-hidden">
+                    <div className="w-full h-full  rounded-2xl mb-4 overflow-hidden">
                       <img
                         src={contestant.avatar}
                         alt={contestant.name}

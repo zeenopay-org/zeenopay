@@ -12,7 +12,7 @@ function HeroSlider() {
     { id: 7, icon: "https://media.zeenopay.com/WhatsApp%20Image%202025-04-23%20at%2001.23.19%20(1).jpeg" },
     { id: 8, icon: "https://media.zeenopay.com/WhatsApp%20Image%202025-04-23%20at%2001.23.18.jpeg" },
   ];
-  
+
   const [currentSlide, setCurrentSlide] = useState(0);
   const [loading, setLoading] = useState(true);
   const touchStartX = useRef(0);
@@ -52,18 +52,18 @@ function HeroSlider() {
 
   return (
     <div
-      className="slider-container bg-customBlue h-[300px] md:h-[500px] flex justify-center items-center px-4  relative"
+      className="slider-container bg-customBlue h-[300px] md:h-[500px] flex justify-center items-center px-4 relative"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
       {loading ? (
-        <div className="w-full max-w-7xl pl-4 pt-8 md:p-2 flex justify-center items-center">
-          <div className="w-full max-w-[750px] h-[200px] md:h-[360px] bg-gray-700 animate-pulse rounded-xl"></div>
+        <div className="w-full max-w-7xl pt-8 md:p-2 flex justify-center items-center">
+          <div className="w-full max-w-[800px] h-[240px] md:h-[360px] bg-gray-700 animate-pulse rounded-xl"></div>
         </div>
       ) : (
         <div className="w-full max-w-7xl relative overflow-hidden h-full">
-          <div className="flex   justify-center items-center w-full h-full relative">
+          <div className="flex justify-center items-center w-full h-full relative">
             {slides.map((slide, index) => {
               const position =
                 (index - currentSlide + slides.length) % slides.length;
@@ -88,18 +88,23 @@ function HeroSlider() {
                   key={slide.id}
                   className={`absolute w-full max-w-[800px] h-[240px] md:h-[360px] transition-all duration-500 ease-in-out flex justify-center items-center ${transform} ${opacity} ${zIndex}`}
                 >
-                  <img
-                    src={slide.icon}
-                    alt={`Slider ${slide.id}`}
-                    className="w-[95%] md:w-full h-[90%] md:h-full max-w-[800px]  object-fit shadow-lg"
-                  />
+                  <div className="w-full h-full flex justify-center items-center overflow-hidden rounded-xl shadow-lg">
+                    <img
+                      src={slide.icon}
+                      alt={`Slider ${slide.id}`}
+                      width={800}
+                      height={360}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                  </div>
                 </div>
               );
             })}
           </div>
 
           {/* Dots */}
-          <div className="absolute bottom-[1px] md:bottom-6  w-full flex justify-center gap-2 md:gap-3 items-center z-10">
+          <div className="absolute bottom-2 md:bottom-6 w-full flex justify-center gap-2 md:gap-3 items-center z-10">
             {slides.map((_, index) => (
               <button
                 key={index}
