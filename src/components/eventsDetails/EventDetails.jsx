@@ -176,7 +176,9 @@ function EventDetails() {
                       <div className="h-10 w-3/4 bg-gray-500 animate-pulse rounded-3xl"></div>
                     </div>
                   ))
-              : contestants.map((contestant) => (
+              : [...contestants]
+              .sort((a, b) => a.name.localeCompare(b.name))
+              .map((contestant) => (
                   <div
                     key={contestant.id}
                     className="relative bg-customDarkBlue rounded-2xl shadow-lg p-3 flex flex-col items-center text-center aspect-square min-h-[250px]"
