@@ -107,7 +107,7 @@ function EventDetails() {
 
           <div className="relative w-full aspect-[16/9]  flex flex-col items-center justify-center mb-6">
             {loading || skeletonDelay ? (
-              <div className="w-full h-full bg-gray-600 animate-pulse rounded-2xl"></div>
+              <div className="w-[90%] h-[70%] bg-gray-600 animate-pulse rounded-2xl"></div>
             ) : (
               <>
                 <img
