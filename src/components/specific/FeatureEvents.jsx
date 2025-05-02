@@ -45,6 +45,7 @@ function FeatureEvents() {
     if (touchStart - touchEnd > threshold) handleNext();
     if (touchEnd - touchStart > threshold) handlePrev();
   };
+  console.log("testing testing")
 
   return (
     <div className="bg-customBlue pt-3 md:pt-[3px] px-4 sm:px-8 md:px-16 lg:px-32">
