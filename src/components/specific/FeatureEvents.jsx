@@ -50,7 +50,7 @@ function FeatureEvents() {
   return (
     <div className="bg-customBlue pt-3 md:pt-[3px] px-4 sm:px-8 md:px-16 lg:px-32">
       <h2 className="text-white text-2xl font-semibold justify-start text-center">
-        Featured Events
+        Featured Event
       </h2>
       <div
         className="relative overflow-hidden"
