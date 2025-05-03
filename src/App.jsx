@@ -3,6 +3,7 @@ import { Outlet } from "react-router-dom";
 import Footer from "./components/layout/Footer.jsx";
 import Header from "./components/layout/Header.jsx";
 import "./index.css"; 
+import WhatsAppButton from "./components/whatsapp/WhatsAppButton.jsx";
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -24,6 +25,10 @@ function App() {
         <>
           <Header />
           <Outlet />
+          <WhatsAppButton
+        phoneNumber="7042264981"
+        message="Hi! I need assistance."
+      />
           <Footer />
         </>
       )}

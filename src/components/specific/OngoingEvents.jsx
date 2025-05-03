@@ -22,7 +22,7 @@ function OngoingEvents() {
   };
 
   return (
-    <div className="bg-customBlue min-h-screen px-4 sm:px-8 md:px-16 lg:px-[148px] pb-12">
+    <div className="bg-customBlue px-4 sm:px-8 md:px-16 lg:px-[148px] ">
       <h2 className="text-white text-2xl font-semibold text-center mb-8">
         Ongoing Events
       </h2>
