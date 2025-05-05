@@ -61,7 +61,7 @@ function Registration() {
   return (
     <div className="bg-customBlue px-4 sm:px-8 md:px-16 lg:px-[148px] pb-12 pt-8">
       <h2 className="text-white text-2xl font-semibold text-center mb-8">
-     Ongoing Registration
+     Ongoing Registrations
       </h2>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

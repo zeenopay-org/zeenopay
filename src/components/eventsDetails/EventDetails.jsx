@@ -14,7 +14,7 @@ function EventDetails() {
   const [finalDate, setFinalDate] = useState("");
   const [temp, setTemp] = useState(null);
   const [skeletonDelay, setSkeletonDelay] = useState(true);
-  const [sortOption, setSortOption] = useState("name");
+  const [sortOption, setSortOption] = useState("number");
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const [activeFilters, setActiveFilters] = useState({
@@ -198,16 +198,7 @@ function EventDetails() {
             
             {showSortDropdown && (
               <div className="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10">
-                <div 
-                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center justify-between"
-                  onClick={() => {
-                    setSortOption("name");
-                    setShowSortDropdown(false);
-                  }}
-                >
-                 Name
-                  {sortOption === "name" && <span className="text-blue-500">✓</span>}
-                </div>
+               
                 <div 
                   className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center justify-between"
                   onClick={() => {
@@ -217,6 +208,16 @@ function EventDetails() {
                 >
                    Number
                   {sortOption === "misc_kv" && <span className="text-blue-500">✓</span>}
+                </div>
+                <div 
+                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center justify-between"
+                  onClick={() => {
+                    setSortOption("name");
+                    setShowSortDropdown(false);
+                  }}
+                >
+                 Name
+                  {sortOption === "name" && <span className="text-blue-500">✓</span>}
                 </div>
               </div>
             )}

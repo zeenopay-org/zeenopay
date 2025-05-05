@@ -24,7 +24,7 @@ function OngoingEvents() {
   return (
     <div className="bg-customBlue px-4 sm:px-8 md:px-16 lg:px-[148px] ">
       <h2 className="text-white text-2xl font-semibold text-center mb-8">
-        Ongoing Events
+        Ongoing Voting Events
       </h2>
 
       <motion.div
