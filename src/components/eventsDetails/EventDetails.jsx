@@ -222,64 +222,6 @@ function EventDetails() {
               </div>
             )}
           </div>
-
-
-          {/* <div className="relative">
-            <button
-              onClick={() => setShowFilterDropdown(!showFilterDropdown)}
-              className="flex items-center gap-2 px-4 py-2 bg-white text-black rounded-full font-medium border border-blue-600 transition duration-200"
-            >
-              Filter
-              <FiChevronDown className={`transition-transform duration-200 ${showFilterDropdown ? 'rotate-180' : ''}`} />
-              {Object.values(activeFilters).some(Boolean) && (
-                <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-white text-xs flex items-center justify-center">
-                  {Object.values(activeFilters).filter(Boolean).length}
-                </span>
-              )}
-            </button>
-            
-            {showFilterDropdown && (
-              <div className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg z-10">
-                <div className="px-4 py-2 border-b border-gray-200 flex justify-between items-center">
-                  <span className="font-medium">Filters</span>
-                  <div className="flex items-center gap-2">
-                    {Object.values(activeFilters).some(Boolean) && (
-                      <button 
-                        onClick={clearAllFilters}
-                        className="text-xs text-blue-500 hover:text-blue-700"
-                      >
-                        Clear all
-                      </button>
-                    )}
-                    <button onClick={() => setShowFilterDropdown(false)}>
-                      <FiX className="text-gray-500" />
-                    </button>
-                  </div>
-                </div>
-                <div 
-                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center justify-between"
-                  onClick={() => toggleFilter('paid')}
-                >
-                  Paid Votes
-                  {activeFilters.paid && <span className="text-blue-500">✓</span>}
-                </div>
-                <div 
-                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center justify-between"
-                  onClick={() => toggleFilter('free')}
-                >
-                  Free Votes
-                  {activeFilters.free && <span className="text-blue-500">✓</span>}
-                </div>
-                <div 
-                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center justify-between"
-                  onClick={() => toggleFilter('verified')}
-                >
-                  Verified Only
-                  {activeFilters.verified && <span className="text-blue-500">✓</span>}
-                </div>
-              </div>
-            )}
-          </div> */}
         </div>
 
         {/* Contestants Grid */}
