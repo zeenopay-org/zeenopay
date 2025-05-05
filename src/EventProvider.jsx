@@ -78,7 +78,7 @@ const EventProvider = ({ children }) => {
         const trace = response2.data.trace;
         console.log("Trace:", trace);
 
-        // const ws = new WebSocket(trace);
+        const ws = new WebSocket(trace);
 
         ws.onopen = () => {
           console.log("WebSocket connection established.");
@@ -201,6 +201,7 @@ const EventProvider = ({ children }) => {
       console.error("❌ WebSocket URL is missing.");
       return;
     }
+
     const socket = io("wss://sio.zeenopay.com/", {
       transports: ["websocket"],
     });
