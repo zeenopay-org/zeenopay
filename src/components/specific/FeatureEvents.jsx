@@ -14,6 +14,8 @@ function FeatureEvents() {
     getAllEvents();
   }, [getAllEvents]);
 
+  console.log("events", events);
+
   const handleCardClick = (id) => {
     navigate(`/events/${id}`);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -90,7 +92,7 @@ function FeatureEvents() {
                   </div>
                 </div>
               ))
-            : events.map((event, index) => (
+            : [...events].reverse().map((event, index) => (
                 <motion.div
                   key={event.id}
                   initial={{ opacity: 0, y: 30 }}

@@ -74,7 +74,7 @@ function Registration() {
               .map((_, index) => (
                 <SkeletonLoader key={index} /> // Skeleton placeholders
               ))
-          : forms.map((feature, index) => {
+            : [...forms].reverse().map((feature, index) => {
               const fields = JSON.parse(feature.fields); // Parse fields JSON string
 
               return (

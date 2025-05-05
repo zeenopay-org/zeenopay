@@ -51,7 +51,7 @@ function OngoingEvents() {
                 </div>
               </div>
             ))
-          : events.map((event, index) => (
+          : [...events].reverse().map((event, index) => (
               <motion.div
                 key={event.id}
                 className="bg-customDarkBlue text-white rounded-3xl shadow-md overflow-hidden flex flex-col cursor-pointer"

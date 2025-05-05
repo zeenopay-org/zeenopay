@@ -53,7 +53,7 @@ function EventList() {
             .map((_, index) => <div key={index}>{renderSkeletonLoader()}</div>)
         ) : (
           // Render actual event data if not loading
-          events.map((event, index) => (
+          [...events].reverse().map((event, index) => (
             <div
               key={index}
               onClick={() => handleCardClick(event.id)}

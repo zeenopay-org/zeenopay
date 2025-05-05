@@ -67,7 +67,7 @@ function Registration() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {loading
           ? Array.from({ length: 4 }).map((_, index) => <SkeletonLoader key={index} />)
-          : forms.map((feature, index) => {
+          : [...forms].reverse().map((feature, index) => {
               const fields = JSON.parse(feature.fields);
               return (
                 <div
