@@ -281,7 +281,7 @@ function EventDetails() {
                     <h2 className="text-base md:text-lg text-white font-semibold mb-4">
                       {contestant.name}
                     </h2>
-                    {paymentCurrency?.cc?.toLowerCase() === "np" ? (
+                    {paymentCurrency?.cc?.toLowerCase() === "nfnfvjkdjfkjfdvk" ? (
                       <div className="flex justify-between w-full gap-6">
                         <button
                           className="bg-[#003A75] w-[55%] text-white px-4 py-2 rounded-3xl font-medium hover:bg-gray-600"
