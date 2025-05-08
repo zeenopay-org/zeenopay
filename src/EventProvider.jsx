@@ -76,36 +76,13 @@ const EventProvider = ({ children }) => {
         const response2 = await axios.get(`${BACKEND_URL2}${qrUrl}`);
         const QR = response2.data.qr_string;
         const trace = response2.data.trace;
-        console.log("Trace:", trace);
-
-        const ws = new WebSocket(trace);
-
-        ws.onopen = () => {
-          console.log("WebSocket connection established.");
-        };
-        
-        ws.onmessage = (event) => {
-          console.log("Message received:", event.data);
-        };
-        
-        ws.onerror = (error) => {
-          console.error("WebSocket error:", error);
-        };
-        
-        ws.onclose = () => {
-          console.log("WebSocket connection closed.");
-        };
-        
-
         if (!QR) throw new Error("Missing 'qr_string' field in API response.");
-
         setQrString(QR);
         setQrLoading(false);
         setWsURL(trace);
         setTransactionId(transactionID);
-        checkPaymentStatus(transactionID, trace);
-
-        return { QR, transactionID, trace }; // Return relevant data
+        checkPaymentStatus(trace);
+        return { QR, transactionID, trace };
       } catch (error) {
         console.error("Error generating QR:", error);
         setQrLoading(false);
@@ -113,6 +90,36 @@ const EventProvider = ({ children }) => {
     },
     []
   );
+
+  const checkPaymentStatus = (traceUrl) => {
+    const ws = new WebSocket(traceUrl);
+    ws.onopen
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        const transactionStatus = JSON.parse(data.transactionStatus);
+        if (transactionStatus.message === "VERIFIED") {
+          setPaymentStatus("SCANNED");
+        } else if (transactionStatus.message === "RES000") {
+          setPaymentStatus("SUCCESS");
+          ws.close(); 
+        }
+      } catch (err) {
+        console.error("Failed to parse WebSocket message:", err);
+      }
+    };
+  
+    ws.onerror = (error) => {
+      console.error("WebSocket error:", error);
+    };
+  
+    ws.onclose = () => {
+      console.log("WebSocket connection closed.");
+    };
+  
+    return ws;
+  };
+  
 
   // const DynamicQrPolling = useCallback(async (transactionID) => {
   //   try {
@@ -195,116 +202,6 @@ const EventProvider = ({ children }) => {
       setQrLoading(false);
     }
   }, []);
-
-  const checkPaymentStatus = (txid, wsUrl) => {
-    if (!wsUrl) {
-      console.error("❌ WebSocket URL is missing.");
-      return;
-    }
-
-    const socket = io("wss://sio.zeenopay.com/", {
-      transports: ["websocket"],
-    });
-
-    socket.on("connect", () => {
-      console.log("✅ Connected to WebSocket for payment status.");
-      socket.send(`open:${txid}:${wsUrl}`);
-    });
-
-    socket.on("status", async (data) => {
-      console.log("🔄 Payment status update:", data);
-
-      if (!data) return;
-
-      const [state, transactionId] = data.split(":");
-      console.log("State: ", state);
-
-      if (transactionId === txid && state.toUpperCase() === "SUCCESS") {
-        try {
-          console.log("📡 Verifying payment with backend...");
-          const response = await axios.get(
-            `${BACKEND_URL2}/payments/qr/verify/${transactionId}`
-          );
-          console.log("✅ Response Data:", response.data);
-
-          if (response.data.paymentStatus === "success") {
-            // setPaymentStatus("SUCCESS"); //  Only update if backend confirms success
-          }
-        } catch (error) {
-          console.error("❌ Error verifying payment:", error);
-        }
-      }
-
-      if (["CANCELED"].includes(state.toUpperCase())) {
-        setPaymentStatus("❌ Payment Canceled");
-      } else if (state.toUpperCase() === "SCANNED") {
-        setPaymentStatus("SCANNED");
-      } else if (state.toUpperCase() !== "SUCCESS") {
-        setPaymentStatus("⏳ Payment Pending...");
-      }
-
-      if (["SUCCESS", "CANCELED"].includes(state.toUpperCase())) {
-        socket.disconnect();
-      }
-    });
-
-    socket.on("connect_error", (error) => {
-      console.error("❌ WebSocket connection error:", error);
-    });
-
-    socket.on("error", (error) => {
-      console.error("❌ WebSocket error:", error);
-    });
-
-    return () => socket.disconnect();
-  };
-
-  //  WebSocket Listener for Checking Payment Status
-
-  useEffect(() => {
-    if (!transactionId) return;
-
-    const socket = io("wss://api.zeenopay.com", { transports: ["websocket"] });
-
-    socket.on("connect", () => {
-      console.log("✅ Connected to WebSocket for payment status.");
-      console.log("🔄 Transaction ID:", transactionId);
-      socket.emit("check", transactionId);
-    });
-
-    socket.on("status", (data) => {
-      console.log("🔄 Payment status update:", data);
-
-      if (!data) return;
-
-      const [state, txid] = data.split(":");
-
-      if (txid === transactionId && state.toUpperCase() === "SUCCESS") {
-        checkPaymentStatus(transactionId, "wss://api.zeenopay.com");
-      }
-
-      if (["CANCELED"].includes(state.toUpperCase())) {
-        setPaymentStatus(" Payment Canceled");
-      }
-
-      if (["SUCCESS", "CANCELED"].includes(state.toUpperCase())) {
-        socket.disconnect();
-      }
-    });
-
-    socket.on("connect_error", (error) => {
-      console.error("❌ WebSocket connection error:", error);
-    });
-
-    socket.on("error", (error) => {
-      console.error("❌ WebSocket error:", error);
-    });
-
-    return () => {
-      console.log("🔌 Disconnecting WebSocket...");
-      socket.disconnect();
-    };
-  }, [transactionId]); // ✅ Runs only when transactionId changes
 
   // to get all the events
 
@@ -629,7 +526,7 @@ const EventProvider = ({ children }) => {
         redirectToPaymentPage,
         redirectToFoneAndPrabhuPay,
         redirectToPhonePe,
-        // checkPaymentStatus,
+        checkPaymentStatus,
         transactionStatus,
         redirectToSuccessPage,
         paymentIframeUrl,
