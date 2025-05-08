@@ -298,10 +298,10 @@ export default function QrCode({ handleX, qrid }) {
   );
 
   const options = [
-    // {
-    //   label: "One Time Use QR",
-    //   description: "Supports eSewa, Banking Apps & all other major wallets",
-    // },
+    {
+      label: "One Time Use QR",
+      description: "Supports eSewa, Banking Apps & all other major wallets",
+    },
     {
       label: "Multiple Time Use QR",
       description: "Supports Banking Apps only but can be used multiple times",
