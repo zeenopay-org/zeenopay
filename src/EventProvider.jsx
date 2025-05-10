@@ -81,7 +81,7 @@ const EventProvider = ({ children }) => {
         setQrLoading(false);
         setWsURL(trace);
         setTransactionId(transactionID);
-        checkPaymentStatus(trace);
+        checkPaymentStatus(trace, transactionID);
         return { QR, transactionID, trace };
       } catch (error) {
         console.error("Error generating QR:", error);
@@ -93,7 +93,7 @@ const EventProvider = ({ children }) => {
 
   let ws;
 
-  const checkPaymentStatus = (traceUrl) => {
+  const checkPaymentStatus = (traceUrl,transactionId) => {
     if (ws && ws.readyState !== WebSocket.CLOSED) {
       ws.close();
     }
@@ -109,9 +109,12 @@ const EventProvider = ({ children }) => {
         const data = JSON.parse(event.data);
         const transactionStatus = JSON.parse(data.transactionStatus);
         if (transactionStatus.message === "VERIFIED") {
+          console.log("Verifying dynamic QR status for transaction ID:", transactionId);  
+
           setPaymentStatus("SCANNED");
         } else if (transactionStatus.message === "RES000") {
-          setPaymentStatus("SUCCESS");
+          verifyDynamicQRStatus(transactionId);
+          // setPaymentStatus("SUCCESS");
           ws.close();
         }
       } catch (err) {
@@ -129,6 +132,23 @@ const EventProvider = ({ children }) => {
   
     return ws;
   };
+
+
+  // Function to verify the dynamic QR code status
+  const verifyDynamicQRStatus = useCallback(async (transactionID) => {
+    try {
+      console.log("Verifying dynamic QR status for transaction ID:", transactionID);  
+      const response = await axios.get(
+        `${BACKEND_URL2}/payments/qr/verify/${transactionID}`,
+      );
+
+      setPaymentStatus(response.data.paymentStatus);
+
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching QR verification:", error);
+    }
+  }, []);
   
   // Automatically reconnect when app becomes active again
   document.addEventListener("visibilitychange", () => {
@@ -140,24 +160,6 @@ const EventProvider = ({ children }) => {
   
   
 
-  // const DynamicQrPolling = useCallback(async (transactionID) => {
-  //   try {
-  //     const response = await axios.get(
-  //       `${BACKEND_URL2}/payments/qr/verify/${transactionID}`,
-  //       {
-  //         // headers: {
-  //         //   'X-Client' : 'zeenoClient/3.0'
-  //         // }
-  //       }
-  //     );
-
-  //     setPaymentStatus(response.data.paymentStatus);
-
-  //     return response.data;
-  //   } catch (error) {
-  //     console.error("Error fetching QR verification:", error);
-  //   }
-  // }, []);
 
   // const startPolling = useCallback((transactionId) => {
   //   setPollingActive(true);
