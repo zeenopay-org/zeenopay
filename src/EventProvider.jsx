@@ -81,7 +81,7 @@ const EventProvider = ({ children }) => {
         setQrLoading(false);
         setWsURL(trace);
         setTransactionId(transactionID);
-        checkPaymentStatus(trace);
+        // checkPaymentStatus(trace);
         return { QR, transactionID, trace };
       } catch (error) {
         console.error("Error generating QR:", error);
