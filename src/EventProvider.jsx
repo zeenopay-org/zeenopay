@@ -91,9 +91,19 @@ const EventProvider = ({ children }) => {
     []
   );
 
+  let ws;
+
   const checkPaymentStatus = (traceUrl) => {
-    const ws = new WebSocket(traceUrl);
-    ws.onopen
+    if (ws && ws.readyState !== WebSocket.CLOSED) {
+      ws.close();
+    }
+  
+    ws = new WebSocket(traceUrl);
+  
+    ws.onopen = () => {
+      console.log("WebSocket connected.");
+    };
+  
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
@@ -102,7 +112,7 @@ const EventProvider = ({ children }) => {
           setPaymentStatus("SCANNED");
         } else if (transactionStatus.message === "RES000") {
           setPaymentStatus("SUCCESS");
-          ws.close(); 
+          ws.close();
         }
       } catch (err) {
         console.error("Failed to parse WebSocket message:", err);
@@ -114,11 +124,20 @@ const EventProvider = ({ children }) => {
     };
   
     ws.onclose = () => {
-      console.log("WebSocket connection closed.");
+      console.log("WebSocket closed.");
     };
   
     return ws;
   };
+  
+  // Automatically reconnect when app becomes active again
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      console.log("App resumed — reconnecting WebSocket.");
+      checkPaymentStatus(traceUrl);
+    }
+  });
+  
   
 
   // const DynamicQrPolling = useCallback(async (transactionID) => {

@@ -25,10 +25,10 @@ function App() {
         <>
           <Header />
           <Outlet />
-          <WhatsAppButton
+          {/* <WhatsAppButton
         phoneNumber="13327774177"
         message="Hi! I need assistance."
-      />
+      /> */}
           <Footer />
         </>
       )}
