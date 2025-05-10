@@ -81,7 +81,7 @@ const EventProvider = ({ children }) => {
         setQrLoading(false);
         setWsURL(trace);
         setTransactionId(transactionID);
-        // checkPaymentStatus(trace);
+        checkPaymentStatus(trace);
         return { QR, transactionID, trace };
       } catch (error) {
         console.error("Error generating QR:", error);
@@ -123,9 +123,9 @@ const EventProvider = ({ children }) => {
       console.error("WebSocket error:", error);
     };
   
-    // ws.onclose = () => {
-    //   console.log("WebSocket closed.");
-    // };
+    ws.onclose = () => {
+      console.log("WebSocket closed.");
+    };
   
     return ws;
   };
