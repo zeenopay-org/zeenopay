@@ -123,9 +123,9 @@ const EventProvider = ({ children }) => {
       console.error("WebSocket error:", error);
     };
   
-    ws.onclose = () => {
-      console.log("WebSocket closed.");
-    };
+    // ws.onclose = () => {
+    //   console.log("WebSocket closed.");
+    // };
   
     return ws;
   };
