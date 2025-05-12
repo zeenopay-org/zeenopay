@@ -91,7 +91,7 @@ const EventProvider = ({ children }) => {
     []
   );
 
-  let ws;
+  // let ws;
 
   const checkPaymentStatus = (traceUrl,transactionId) => {
     if (ws && ws.readyState !== WebSocket.CLOSED) {
@@ -135,14 +135,14 @@ const EventProvider = ({ children }) => {
 
 
   // Function to verify the dynamic QR code status
+  
+
   const DynamicQrPolling = useCallback(async (transactionID) => {
     try {
       console.log("Verifying dynamic QR status for transaction ID:", transactionID);  
       const response = await axios.get(
         `${BACKEND_URL2}/payments/qr/verify/${transactionID}`,
       );
-      // console.log("Response from QR verification:", response.data);
-      
 
       const formattedStatus = response.data.paymentStatus.charAt(0).toUpperCase() + response.data.paymentStatus.slice(1);
       setPaymentStatus(formattedStatus);
