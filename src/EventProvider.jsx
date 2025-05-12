@@ -135,15 +135,18 @@ const EventProvider = ({ children }) => {
 
 
   // Function to verify the dynamic QR code status
-  const verifyDynamicQRStatus = useCallback(async (transactionID) => {
+  const DynamicQrPolling = useCallback(async (transactionID) => {
     try {
       console.log("Verifying dynamic QR status for transaction ID:", transactionID);  
       const response = await axios.get(
         `${BACKEND_URL2}/payments/qr/verify/${transactionID}`,
       );
+      // console.log("Response from QR verification:", response.data);
+      
 
-      setPaymentStatus(response.data.paymentStatus);
-
+      const formattedStatus = response.data.paymentStatus.charAt(0).toUpperCase() + response.data.paymentStatus.slice(1);
+      setPaymentStatus(formattedStatus);
+      
       return response.data;
     } catch (error) {
       console.error("Error fetching QR verification:", error);
@@ -161,31 +164,31 @@ const EventProvider = ({ children }) => {
   
 
 
-  // const startPolling = useCallback((transactionId) => {
-  //   setPollingActive(true);
+  const startPolling = useCallback((transactionId) => {
+    setPollingActive(true);
 
-  //   const intervalId = setInterval(async () => {
-  //     const data = await DynamicQrPolling(transactionId);
-  //     const txid = data?.prn;
+    const intervalId = setInterval(async () => {
+      const data = await DynamicQrPolling(transactionId);
+      const txid = data?.prn;
 
-  //     if (data?.paymentStatus === "success") {
+      if (data?.paymentStatus === "success") {
 
-  //       clearInterval(intervalId);
-  //       setPollingActive(false);
-  //       console.log("Payment successful, stopping polling.");
-  //       setPaymentStatus("SUCCESS");
-  //       // window.location.href = `/qr-success?txid=${txid}`;
-  //     }
-  //   }, 1333);
+        clearInterval(intervalId);
+        setPollingActive(false);
+        console.log("Payment successful, stopping polling.");
+        setPaymentStatus("SUCCESS");
+        // window.location.href = `/qr-success?txid=${txid}`;
+      }
+    }, 1333);
 
-  //   return () => clearInterval(intervalId);
-  // }, [DynamicQrPolling]);
+    return () => clearInterval(intervalId);
+  }, [DynamicQrPolling]);
 
-  // useEffect(() => {
-  //   if (transactionId && !pollingActive) {
-  //     startPolling(transactionId);
-  //   }
-  // }, [transactionId, pollingActive, startPolling]);
+  useEffect(() => {
+    if (transactionId && !pollingActive) {
+      startPolling(transactionId);
+    }
+  }, [transactionId, pollingActive, startPolling]);
 
   // **************************************************************
 
