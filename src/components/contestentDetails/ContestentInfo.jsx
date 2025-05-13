@@ -389,12 +389,12 @@ export default function VotingComponent() {
                         >
                           Generate QR to Vote
                         </button>
-                        <button
+                        {/* <button
                           onClick={handleVoteCard}
                           className="w-28 md:w-32 mt-6 ml-2 py-3 border border-white text-white text-[7px] rounded-lg hover:bg-white hover:text-[#0A1128] transition duration-300"
                         >
                           Show Vote Card
-                        </button>
+                        </button> */}
                       </>
                     )}
                   </div>
