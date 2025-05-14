@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 
 const LocalVotingComponent = ({ formData, setFormData }) => {
-  const votePrice = 10;
+  const votePrice = 1;
   const voteOptions = [25, 50, 100, 500, 1000, 2500];
 
   const [hasValue, setHasValue] = useState(false);
@@ -41,12 +41,12 @@ const LocalVotingComponent = ({ formData, setFormData }) => {
 
   const handleBlur = () => {
     let value = Number(formData.votes);
-    if (isNaN(value) || value < 10) value = 10;
+    if (isNaN(value) || value < 10) value = 1;
 
     setFormData((prev) => ({
       ...prev,
       votes: value,
-      amount: value * 10,
+      amount: value * 1,
     }));
   };
 
