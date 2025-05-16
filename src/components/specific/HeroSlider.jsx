@@ -14,13 +14,19 @@ function HeroSlider() {
   ];
 
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [loadedImages, setLoadedImages] = useState({});
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
 
+  // Preload images on component mount
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 200);
-    return () => clearTimeout(timer);
+    slides.forEach((slide) => {
+      const img = new Image();
+      img.src = slide.icon;
+      img.onload = () => {
+        setLoadedImages(prev => ({ ...prev, [slide.id]: true }));
+      };
+    });
   }, []);
 
   useEffect(() => {
@@ -50,6 +56,18 @@ function HeroSlider() {
     }
   };
 
+  const getSlideDimensions = () => {
+    if (typeof window === 'undefined') return { height: '360px', width: '100%' };
+    
+    if (window.innerWidth < 500) return { height: '180px', width: '100%' };
+    if (window.innerWidth < 570) return { height: '210px', width: '100%' };
+    if (window.innerWidth < 640) return { height: '250px', width: '100%' };
+    if (window.innerWidth < 768) return { height: '260px', width: '90%' };
+    return { height: '360px', width: '100%' };
+  };
+
+  const dimensions = getSlideDimensions();
+
   return (
     <div
       className="slider-container bg-customBlue h-[300px] md:h-[500px] flex justify-center items-center px-4 relative"
@@ -57,90 +75,70 @@ function HeroSlider() {
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      {loading ? (
-        <div className="w-full max-w-7xl pt-8 md:p-2 flex justify-center items-center">
-          <div className="w-full max-w-[800px] h-[250px] md:h-[360px] bg-gray-700 animate-pulse rounded-xl"></div>
-        </div>
-      ) : (
-        <div className="w-full max-w-7xl relative overflow-hidden h-full">
-          <div className="flex justify-center items-center w-full h-full relative">
-            {slides.map((slide, index) => {
-              const position =
-                (index - currentSlide + slides.length) % slides.length;
-              let zIndex = "z-10";
-              let transform = "scale-100 translate-x-0";
-              let opacity = "opacity-100";
+      <div className="w-full max-w-7xl relative overflow-hidden h-full">
+        <div className="flex justify-center items-center w-full h-full relative">
+          {slides.map((slide, index) => {
+            const position =
+              (index - currentSlide + slides.length) % slides.length;
+            let zIndex = "z-10";
+            let transform = "scale-100 translate-x-0";
+            let opacity = "opacity-100";
 
-              if (position === slides.length - 1) {
-                transform = "scale-75 translate-x-[-100%]";
-                opacity = "opacity-50";
-                zIndex = "z-0";
-              } else if (position === 1) {
-                transform = "scale-75 translate-x-[100%]";
-                opacity = "opacity-50";
-                zIndex = "z-0";
-              } else if (position !== 0) {
-                opacity = "opacity-0 hidden";
-              }
+            if (position === slides.length - 1) {
+              transform = "scale-75 translate-x-[-100%]";
+              opacity = "opacity-50";
+              zIndex = "z-0";
+            } else if (position === 1) {
+              transform = "scale-75 translate-x-[100%]";
+              opacity = "opacity-50";
+              zIndex = "z-0";
+            } else if (position !== 0) {
+              opacity = "opacity-0 hidden";
+            }
 
-              return (
-                <div
-                  key={slide.id}
-                  className={`absolute w-full h-[200px] max-w-[800px] md:h-[360px] transition-all duration-500 ease-in-out flex justify-center items-center ${transform} ${opacity} ${zIndex}`}
-                  style={{
-                    height:
-                      window.innerWidth < 500
-                        ? "180px"
-                        : window.innerWidth < 570
-                        ? "210px"
-                        : window.innerWidth < 640
-                          ? "250px"
-                        : window.innerWidth < 768
-                          ? "260px"
-                          : "",
-                          // : window.innerWidth < 768
-                          //   ? "280px"
-                          //   : "360px",
-                    width:
-                      window.innerWidth < 500
-                        ? "100%"
-                        : window.innerWidth < 768
-                          ? "90%"
-                          : "100%",
-                  }}
-
-                >
-                  <div className="w-full h-full flex justify-center items-center overflow-hidden rounded-xl shadow-lg">
+            return (
+              <div
+                key={slide.id}
+                className={`absolute w-full h-[200px] max-w-[800px] md:h-[360px] transition-all duration-500 ease-in-out flex justify-center items-center ${transform} ${opacity} ${zIndex}`}
+                style={{
+                  height: dimensions.height,
+                  width: dimensions.width,
+                }}
+              >
+                <div className="w-full h-full flex justify-center items-center overflow-hidden rounded-xl shadow-lg">
+                  {loadedImages[slide.id] ? (
                     <img
                       src={slide.icon}
                       alt={`Slider ${slide.id}`}
                       width={800}
                       height={360}
-                      className="w-full h-full object-fit"
-                      loading="lazy"
+                      className="w-full h-full object-cover"
+                      
                     />
-                  </div>
+                  ) : (
+                    <div className="w-full h-full bg-gray-700 animate-pulse rounded-xl"></div>
+                  )}
                 </div>
-              );
-            })}
-          </div>
-
-          {/* Dots */}
-          <div className="absolute bottom-2 md:bottom-6 w-full flex justify-center gap-2 md:gap-3 items-center z-10">
-            {slides.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => goToSlide(index)}
-                className={`w-2 h-2 md:w-3 md:h-3 transition-all duration-300 ease-in-out border border-gray-700 ${
-                  currentSlide === index
-                    ? "bg-white scale-150 w-10 rounded-xl shadow-lg"
-                    : "bg-gray-500 rounded-full"
-                }`}
-              />
-            ))}
-          </div>
+              </div>
+            );
+          })}
         </div>
-      )}
+
+        {/* Dots */}
+        <div className="absolute bottom-2 md:bottom-6 w-full flex justify-center gap-2 md:gap-3 items-center z-10">
+          {slides.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => goToSlide(index)}
+              className={`w-2 h-2 md:w-3 md:h-3 transition-all duration-300 ease-in-out border border-gray-700 ${
+                currentSlide === index
+                  ? "bg-white scale-150 w-10 rounded-xl shadow-lg"
+                  : "bg-gray-500 rounded-full"
+              }`}
+            />
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

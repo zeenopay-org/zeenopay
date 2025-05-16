@@ -9,10 +9,26 @@ function FeatureEvents() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
+  const [loadedImages, setLoadedImages] = useState({});
 
   useEffect(() => {
     getAllEvents();
   }, [getAllEvents]);
+
+  // Preload images when events change
+  useEffect(() => {
+    if (events.length > 0) {
+      events.forEach(event => {
+        if (event.img) {
+          const img = new Image();
+          img.src = `${event.img}?format=webp&width=800`;
+          img.onload = () => {
+            setLoadedImages(prev => ({ ...prev, [event.id]: true }));
+          };
+        }
+      });
+    }
+  }, [events]);
 
   const handleCardClick = (id) => {
     navigate(`/events/${id}`);
@@ -46,6 +62,14 @@ function FeatureEvents() {
     if (touchEnd - touchStart > threshold) handlePrev();
   };
 
+  // Get responsive image width based on screen size
+  const getImageWidth = () => {
+    if (typeof window === 'undefined') return 400;
+    if (window.innerWidth < 640) return 300; // Mobile
+    if (window.innerWidth < 768) return 350; // Tablet
+    return 400; // Desktop
+  };
+
   return (
     <div className="bg-customBlue pt-3 md:pt-[3px] px-4 sm:px-8 md:px-16 lg:px-32">
       <h2 className="text-white text-2xl font-semibold justify-start text-center">
@@ -74,8 +98,8 @@ function FeatureEvents() {
                     <div
                       className="w-full bg-gray-700 rounded-3xl"
                       style={{
-                        height: "208px", // Matches h-52
-                        aspectRatio: "4/3",
+                        paddingTop: "56.25%", 
+                        position: "relative"
                       }}
                     ></div>
                     <div className="p-4 flex flex-col flex-grow">
@@ -101,23 +125,36 @@ function FeatureEvents() {
                     onClick={() => handleCardClick(event.id)}
                     className="bg-customDarkBlue text-white rounded-3xl shadow-lg overflow-hidden cursor-pointer flex flex-col h-full"
                   >
-                    <div className="w-full relative">
-                      <img
-                        src={
-                          event.img
-                            ? `${event.img}?format=webp&width=400`
-                            : "/placeholder-event.jpg"
-                        }
-                        alt={event.title}
-                        className="w-full p-2 rounded-3xl h-52 lg:h-60 md:h-68 object-cover"
-                        width="400"
-                        height="300"
-                        loading="lazy"
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src = "/placeholder-event.jpg";
-                        }}
-                      />
+                    <div className="w-full p-2">
+                      <div className="w-full rounded-2xl overflow-hidden bg-gradient-to-b from-blue-900 to-black" style={{ paddingTop: "56.25%", position: "relative" }}> {/* 16:9 aspect ratio */}
+                        {loadedImages[event.id] ? (
+                          <>
+                            <img
+                              src={
+                                event.img
+                                  ? `${event.img}?format=webp&width=${getImageWidth() * 2}`
+                                  : "/placeholder-event.jpg"
+                              }
+                              alt={event.title}
+                              className="absolute top-0 left-0 w-full h-full rounded-2xl"
+                              style={{
+                                objectFit: 'cover',
+                                objectPosition: 'center'
+                              }}
+                              onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = "/placeholder-event.jpg";
+                              }}
+                            />
+                          
+                            <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-black/30 to-transparent pointer-events-none" />
+                          </>
+                        ) : (
+                          <div 
+                            className="absolute top-0 left-0 w-full h-full rounded-2xl bg-gray-700 animate-pulse"
+                          />
+                        )}
+                      </div>
                     </div>
                     <div className="pl-4 pr-4 flex flex-col flex-grow">
                       <h3 className="text-lg md:text-lg font-semibold line-clamp-2">

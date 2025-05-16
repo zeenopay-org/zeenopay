@@ -4,32 +4,32 @@ const nepalPartner = [
       {
         name: "esewa",
         id: 1,
-        image: "/assets/eSewa.png",
+        image: "https://media.zeenopay.com/ESEWA.PNG",
       },
       {
         name: "khalti",
         id: 2,
-        image: "/assets/khalti2.png",
+        image: "https://media.zeenopay.com/KHALTI.PNG",
       },
       {
         name: "khalti",
         id: 3,
-        image: "/assets/khalti.png",
+        image: "https://media.zeenopay.com/CONNECT_IPS.PNG",
       },
       {
         name: "fonepay",
         id: 4,
-        image: "/assets/mobileInternetBanking.png",
+        image: "https://media.zeenopay.com/iMobile_Banking.PNG",
       },
       {
         name: "prabhupay",
         id: 5,
-        image: "/assets/prabhuPay.png",
+        image: "https://media.zeenopay.com/PRABHU_PAY.PNG",
       },
       {
         name: "esewa",
         id: 6,
-        image: "/assets/imepay.png",
+        image: "https://media.zeenopay.com/IME_PAY.PNG",
       }
     ],
     cc: "np",
