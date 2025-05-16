@@ -34,7 +34,7 @@ function Footer() {
           </Link>
         </div>
 
-        {/* Policies */}
+        {/* Policiess */}
         <div className="flex flex-col items-center md:items-start gap-2 w-full md:w-auto">
           <Link to="#" className="text-center md:text-left">
             Privacy Policy
