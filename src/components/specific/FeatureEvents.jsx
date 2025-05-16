@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext, useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { EventContext } from "../../EventProvider";
@@ -10,9 +10,18 @@ function FeatureEvents() {
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
   const [loadedImages, setLoadedImages] = useState({});
+  const [autoSlide, setAutoSlide] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     getAllEvents();
+    // Check if mobile on initial render and on resize
+    const checkIfMobile = () => {
+      setIsMobile(window.innerWidth < 768); // 768px is typical tablet breakpoint
+    };
+    checkIfMobile();
+    window.addEventListener('resize', checkIfMobile);
+    return () => window.removeEventListener('resize', checkIfMobile);
   }, [getAllEvents]);
 
   // Preload images when events change
@@ -40,27 +49,56 @@ function FeatureEvents() {
     return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
   };
 
-  const handlePrev = () => {
-    setCurrentSlide((prev) => Math.max(0, prev - 1));
-  };
+  const shouldSlide = useCallback(() => {
+    // On mobile, slide if there's more than 1 card
+    if (isMobile) return events.length > 1;
+    // On desktop, only slide if there's 3 or more cards
+    return events.length >= 3;
+  }, [events.length, isMobile]);
 
-  const handleNext = () => {
-    setCurrentSlide((prev) => Math.min(events.length - 1, prev + 1));
-  };
+  const handlePrev = useCallback(() => {
+    if (!shouldSlide()) return;
+    setCurrentSlide((prev) => Math.max(0, prev - 1));
+    setAutoSlide(false);
+    setTimeout(() => setAutoSlide(true), 2000);
+  }, [shouldSlide]);
+
+  const handleNext = useCallback(() => {
+    if (!shouldSlide()) return;
+    setCurrentSlide((prev) => (prev >= events.length - 1 ? 0 : prev + 1));
+    setAutoSlide(false);
+    setTimeout(() => setAutoSlide(true), 2000);
+  }, [events.length, shouldSlide]);
 
   const handleTouchStart = (e) => {
+    if (!shouldSlide()) return;
     setTouchStart(e.targetTouches[0].clientX);
+    setAutoSlide(false);
   };
 
   const handleTouchMove = (e) => {
+    if (!shouldSlide()) return;
     setTouchEnd(e.targetTouches[0].clientX);
   };
 
   const handleTouchEnd = () => {
+    if (!shouldSlide()) return;
     const threshold = 50;
     if (touchStart - touchEnd > threshold) handleNext();
     if (touchEnd - touchStart > threshold) handlePrev();
+    setTimeout(() => setAutoSlide(true), 10000);
   };
+
+  // Auto-slide effect
+  useEffect(() => {
+    if (!autoSlide || !shouldSlide() || events.length <= 1) return;
+
+    const interval = setInterval(() => {
+      handleNext();
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [autoSlide, events.length, handleNext, shouldSlide]);
 
   // Get responsive image width based on screen size
   const getImageWidth = () => {
@@ -68,6 +106,12 @@ function FeatureEvents() {
     if (window.innerWidth < 640) return 300; // Mobile
     if (window.innerWidth < 768) return 350; // Tablet
     return 400; // Desktop
+  };
+
+  // Calculate the slide width based on screen size
+  const getSlideWidth = () => {
+    if (isMobile) return '100%';
+    return '33.33%'; // Show 3 cards on desktop
   };
 
   return (
@@ -84,8 +128,8 @@ function FeatureEvents() {
         <div
           className="flex transition-transform duration-500 ease-in-out ml-20 mr-20 mt-8 mb-10"
           style={{
-            transform: `translateX(-${currentSlide * 100}%)`,
-            marginLeft: currentSlide === 0 ? "0" : "16px",
+            transform: shouldSlide() ? `translateX(-${currentSlide * 100}%)` : 'translateX(0)',
+            marginLeft: (shouldSlide() && currentSlide === 0) ? "0" : "16px",
           }}
         >
           {loading
@@ -93,6 +137,7 @@ function FeatureEvents() {
                 <div
                   key={index}
                   className="flex-shrink-0 w-full sm:w-1/2 lg:w-1/3 px-4"
+                  style={{ width: getSlideWidth() }}
                 >
                   <div className="bg-customDarkBlue animate-pulse rounded-3xl shadow-lg flex flex-col h-full">
                     <div
@@ -119,14 +164,15 @@ function FeatureEvents() {
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, ease: "easeOut" }}
-                  className={`flex-shrink-0 w-full sm:w-1/2 lg:w-1/3 ml-4 ${index === 0 ? "ml-0" : ""}`}
+                  className={`flex-shrink-0 ${isMobile ? 'w-full' : 'w-1/3'} ml-4 ${index === 0 ? "ml-0" : ""}`}
+                  style={{ width: getSlideWidth() }}
                 >
                   <div
                     onClick={() => handleCardClick(event.id)}
                     className="bg-customDarkBlue text-white rounded-3xl shadow-lg overflow-hidden cursor-pointer flex flex-col h-full"
                   >
                     <div className="w-full p-2">
-                      <div className="w-full rounded-2xl overflow-hidden bg-gradient-to-b from-blue-900 to-black" style={{ paddingTop: "56.25%", position: "relative" }}> {/* 16:9 aspect ratio */}
+                      <div className="w-full rounded-2xl overflow-hidden bg-gradient-to-b from-blue-900 to-black" style={{ paddingTop: "56.25%", position: "relative" }}>
                         {loadedImages[event.id] ? (
                           <>
                             <img
@@ -157,7 +203,7 @@ function FeatureEvents() {
                       </div>
                     </div>
                     <div className="pl-4 pr-4 flex flex-col flex-grow">
-                      <h3 className="text-lg md:text-lg font-semibold line-clamp-2">
+                      <h3 className="text-sm md:text-[14px] font-semibold line-clamp-2">
                         {event.title}
                       </h3>
                       <p className="text-xs text-gray-300 mt-2 flex-grow line-clamp-2">
@@ -190,51 +236,54 @@ function FeatureEvents() {
                 </motion.div>
               ))}
         </div>
-        {/* Previous Arrow - only visible on lg and above */}
-        <button
-          onClick={handlePrev}
-          aria-label="Previous Slide"
-          className="hidden lg:flex absolute left-4 top-1/2 transform -translate-y-1/2 z-10 p-2 bg-[#003A75] text-white rounded-full hover:bg-[#005190] disabled:opacity-50"
-          disabled={currentSlide === 0}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 19l-7-7 7-7"
-            />
-          </svg>
-        </button>
+        {/* Navigation arrows - only show if shouldSlide() returns true */}
+        {shouldSlide() && (
+          <>
+            <button
+              onClick={handlePrev}
+              aria-label="Previous Slide"
+              className="hidden lg:flex absolute left-4 top-1/2 transform -translate-y-1/2 z-10 p-2 bg-[#003A75] text-white rounded-full hover:bg-[#005190] disabled:opacity-50"
+              disabled={currentSlide === 0}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+            </button>
 
-        {/* Next Arrow - only visible on lg and above */}
-        <button
-          onClick={handleNext}
-          aria-label="Next Slide"
-          className="hidden lg:flex absolute right-4 top-1/2 transform -translate-y-1/2 z-10 p-2 bg-[#003A75] text-white rounded-full hover:bg-[#005190] disabled:opacity-50"
-          disabled={currentSlide === events.length - 1}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 5l7 7-7 7"
-            />
-          </svg>
-        </button>
+            <button
+              onClick={handleNext}
+              aria-label="Next Slide"
+              className="hidden lg:flex absolute right-4 top-1/2 transform -translate-y-1/2 z-10 p-2 bg-[#003A75] text-white rounded-full hover:bg-[#005190] disabled:opacity-50"
+              disabled={currentSlide === events.length - 1}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </button>
+          </>
+        )}
       </div>
     </div>
   );

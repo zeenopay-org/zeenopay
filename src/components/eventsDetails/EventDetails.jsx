@@ -139,6 +139,7 @@ function EventDetails() {
             <div className="w-[90%] h-[70%] bg-gray-600 animate-pulse rounded-2xl"></div>
           ) : (
             <>
+            {/* Event Banner */}
               <img
                 src={event.img}
                 alt={event.title}

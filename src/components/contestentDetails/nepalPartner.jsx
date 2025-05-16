@@ -12,7 +12,7 @@ const nepalPartner = [
         image: "https://media.zeenopay.com/KHALTI.PNG",
       },
       {
-        name: "khalti",
+        name: "connectips",
         id: 3,
         image: "https://media.zeenopay.com/CONNECT_IPS.PNG",
       },

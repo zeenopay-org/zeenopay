@@ -80,8 +80,10 @@ export default function VotingComponent() {
   const [temp, setTemp] = useState(null);
   const [finalDate, setFinalDate] = useState("");
   const [showCard, setShowCard] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   useEffect(() => {}, [formData]);
+  
   useEffect(() => {
     setTimeout(() => {
       try {
@@ -92,14 +94,12 @@ export default function VotingComponent() {
     }, 100);
   }, []);
   
-
   useEffect(() => {
     getPaymentPartner();
   }, []);
 
   useEffect(() => {
     const savedEvent = localStorage.getItem("event");
-
     if (savedEvent) {
       const parsedEvent = JSON.parse(savedEvent);
       setTemp(parsedEvent);
@@ -125,7 +125,7 @@ export default function VotingComponent() {
     };
     fetchContestant();
   }, [getContestant, id]);
-  // Handle input field change
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
@@ -134,7 +134,6 @@ export default function VotingComponent() {
     }));
   };
 
-  // Handle form submission to initiate payment
   const handleProceedToPay = async (e) => {
     window.scrollTo({
       top: 0,
@@ -178,6 +177,7 @@ export default function VotingComponent() {
     } finally {
     }
   };
+
   if (loading && !pop && !generateQR) {
     return <SkeletonLoader />;
   }
@@ -197,9 +197,11 @@ export default function VotingComponent() {
       setShowCard(true);
     });
   };
+  
   const closeCard = () => {
     setShowCard(false);
   };
+  
   const handlePartnerChange = (value) => {
     setSelectedPartner(value);
   };
@@ -342,62 +344,50 @@ export default function VotingComponent() {
   const currentDate = new Date();
 
   return (
-    <div className="  min-h-screen flex flex-col items-center justify-center bg-customBlue text-white p-4 pt-[30px] pb-[66px]">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-customBlue text-white p-4 pt-[30px] pb-[66px]">
       {showCard && (
-        // <div className=" bg-black bg-opacity-50">
-        //   <div className="relative bg-white p-6 rounded-lg shadow-lg">
         <VotingCard contestant={contestant} event={event} onClose={closeCard} />
-        //   </div>
-        //  </div>
       )}
 
       {generateQR && <QrCard handleX={handleQrClick} qrid={contestant.id} />}
 
-      <div
-        className={`w-full ${generateQR ? "blur-md pointer-events-none" : ""}`}
-      >
+      <div className={`w-full ${generateQR ? "blur-md pointer-events-none" : ""}`}>
         {pop ? (
           <PaymentOption formData={formData} />
         ) : (
           <>
-            {/* *****************************profile Card**************** */}
-            <div>
-              <div className="relative flex flex-col justify-center items-center w-full">
+            {/* Optimized Banner Section - Modified to show image at original size without cropping */}
+            <div className="relative flex flex-col justify-center items-center w-full">
+              <div className="w-full max-w-[1300px] overflow-hidden rounded-2xl mb-6 bg-gray-800">
                 <img
                   src={temp?.img}
-                  className="md:w-[1300px] h-[250px] md:h-[400px] rounded-2xl mb-6"
+                  className={`w-full h-auto transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
                   alt="Event Banner"
+                  onLoad={() => setImageLoaded(true)}
+                  decoding="async"
+                  style={{ objectFit: 'contain' }}
                 />
+                {!imageLoaded && (
+                  <div className="absolute inset-0 bg-gray-700 animate-pulse"></div>
+                )}
+              </div>
 
-                <div>
-                  <div
-                    className="absolute bottom-[-130px] left-1/2 transform -translate-x-1/2
-  md:bottom-[-100px] md:left-20 md:translate-x-0
-  lg:bottom-[-150px] lg:left-20 lg:translate-x-0"
-                  >
-                    {contestant.shareable_link ? (
-                      <div className="relative top-16 md:-top-10 left-14 md:left-20 z-50">
-                        <CloudMessage />
-                      </div>
-                    ) : null}
-                    <ProfileCard />
-                    {(selectedCountry?.cc === "np")  && (
-                      <>
-                        <button
-                          onClick={handleQrClick}
-                          className="w-56 md:w-64 mt-6 ml-2 py-3 border border-white text-white text-[12px] rounded-lg hover:bg-white hover:text-[#0A1128] transition duration-300"
-                        >
-                          Generate QR to Vote
-                        </button>
-                         {/* <button
-                          onClick={handleVoteCard}
-                          className="w-28 md:w-32 mt-6 ml-2 py-3 border border-white text-white text-[7px] rounded-lg hover:bg-white hover:text-[#0A1128] transition duration-300"
-                        >
-                          Show Vote Card
-                        </button> */}
-                      </>
-                    )}
-                  </div>
+              <div>
+              <div className="absolute bottom-[-220px] left-1/2 transform -translate-x-1/2 md:bottom-[-100px] md:left-20 md:translate-x-0 lg:bottom-[-150px] lg:left-20 lg:translate-x-0">
+                  {contestant.shareable_link && (
+                    <div className="relative top-16 md:-top-10 left-14 md:left-20 z-50">
+                      <CloudMessage />
+                    </div>
+                  )}
+                  <ProfileCard />
+                  {selectedCountry?.cc === "np" && (
+                    <button
+                      onClick={handleQrClick}
+                      className="w-56 md:w-64 mt-6 ml-2 py-3 border border-white text-white text-[12px] rounded-lg hover:bg-white hover:text-[#0A1128] transition duration-300"
+                    >
+                      Generate QR to Vote
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -419,11 +409,9 @@ export default function VotingComponent() {
                 )}
               </p>
 
-              {/* Voting Options */}
               <div className="mt-6 text-center">
                 <h2 className="text-lg font-normal">Select Voting Options</h2>
-                {selectedCountry?.cc === "in" ||
-                selectedCountry?.cc === "np" ? (
+                {selectedCountry?.cc === "in" || selectedCountry?.cc === "np" ? (
                   <LocalVotingComponent
                     formData={formData}
                     setFormData={setFormData}
@@ -432,9 +420,7 @@ export default function VotingComponent() {
                   <InternationalVotingComponents />
                 )}
 
-                {/* Name, Phone & Email Input */}
                 <div className="mt-6 w-full flex flex-col gap-6">
-                  {/* ************************************ Input Name *********************************** */}
                   <div className="relative w-full">
                     <input
                       type="text"
@@ -447,15 +433,14 @@ export default function VotingComponent() {
                       onFocus={() => setInputFocused(true)}
                       onBlur={() => setInputFocused(false)}
                     />
-                    {/* Floating Label */}
                     <label
                       htmlFor="name"
                       className={`absolute left-3 bg-customBlue px-2 text-gray-400 text-base pointer-events-none transform transition-all duration-300 ease-in-out
-        ${
-          formData.name || inputFocused
-            ? "top-0 -translate-y-1/2 scale-90 text-blue-500 px-2"
-            : "top-1/2 -translate-y-1/2 scale-100"
-        }`}
+                        ${
+                          formData.name || inputFocused
+                            ? "top-0 -translate-y-1/2 scale-90 text-blue-500 px-2"
+                            : "top-1/2 -translate-y-1/2 scale-100"
+                        }`}
                     >
                       Name (Voter)
                     </label>
@@ -463,7 +448,6 @@ export default function VotingComponent() {
                       <p className="text-red-400 text-sm">{errors.name}</p>
                     )}
                   </div>
-                  {/* ********************************* Input Phone Number Search ************************************** */}
 
                   <PhoneInputWithCountrySelector
                     countryCodes={countryCodes}
@@ -491,12 +475,9 @@ export default function VotingComponent() {
                       </div>
                     )}
 
-                  {/* ******for Nepal Payment Selector********* */}
-
                   {selectedCountry?.cc === "np" && (
                     <>
-                      {/* Partner Dropdown */}
-                      <div className=" w-full max-w-[700px]">
+                      <div className="w-full max-w-[700px]">
                         <CustomDropdown
                           options={
                             nepalPartner?.[0]?.partner?.map((partner) => ({
@@ -527,7 +508,6 @@ export default function VotingComponent() {
                   )}
                 </div>
 
-                {/* ************************** Terms & Conditions ************************** */}
                 <div className="mt-4 bg-customDarkBlue p-2 rounded-lg flex items-center gap-2 text-gray-400 text-xs my-2">
                   <input
                     type="checkbox"
@@ -543,7 +523,6 @@ export default function VotingComponent() {
                 </div>
               </div>
 
-              {/* ********** Custom Proceed to pay Button ************** */}
               <div>
                 {selectedCountry?.cc === "in" ? (
                   <button
@@ -572,6 +551,7 @@ export default function VotingComponent() {
           </>
         )}
       </div>
+
       {paymentIframeUrl && (
         <motion.div
           className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-[9999]"
@@ -586,7 +566,6 @@ export default function VotingComponent() {
             exit={{ scale: 0.8, opacity: 0 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
           >
-            {/* Header with Close Button */}
             <div className="bg-customBlue p-4 flex justify-between items-center">
               <h2 className="text-white text-lg font-semibold">Payment</h2>
               <button
@@ -597,7 +576,6 @@ export default function VotingComponent() {
               </button>
             </div>
 
-            {/* Iframe */}
             <iframe
               src={paymentIframeUrl}
               className="w-full flex-grow"
@@ -611,7 +589,6 @@ export default function VotingComponent() {
             ></iframe>
           </motion.div>
 
-          {/* Confirmation Popup */}
           {showConfirm && (
             <ConfirmCancelPopup
               onClose={() => setShowConfirm(false)}

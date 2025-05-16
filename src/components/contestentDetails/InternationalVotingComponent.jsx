@@ -236,7 +236,7 @@ const VotingComponent = () => {
                     <>
                       <img
                         className="h-6 w-10 sm:h-8 sm:w-14"
-                        src="https://res.cloudinary.com/dhah3xwej/image/upload/v1743356699/liyiglxohpv0lcgtrs2k.png"
+                        src="https://media.zeenopay.com/VOTE_ICON.PNG"
                         alt="vote icon"
                       />
                       {option}
