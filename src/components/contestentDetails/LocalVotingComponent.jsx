@@ -60,7 +60,7 @@ const LocalVotingComponent = ({ formData, setFormData }) => {
         {voteOptions.map((option) => (
           <button
             key={option}
-            className="bg-customSky hover:bg-[#0081C6] text-white px-6 py-3 rounded-lg flex items-center justify-center gap-2 w-full sm:w-auto"
+            className="bg-customSky hover:bg-[#0081C6] font-bold text-white px-6 py-3 rounded-lg flex items-center justify-center gap-2 w-full sm:w-auto"
             onClick={() => handleVoteChange(option)}
           >
             <img className="h-8 w-14" src="https://media.zeenopay.com/VOTE_ICON.PNG" alt="" />

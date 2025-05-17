@@ -3,6 +3,19 @@ import { motion } from "framer-motion";
 
 export default function CloudMessage() {
   const [isVisible, setIsVisible] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    // Check screen size on mount and resize
+    const checkIfMobile = () => {
+      setIsMobile(window.innerWidth < 768); // 768px is typical tablet breakpoint
+    };
+    
+    checkIfMobile();
+    window.addEventListener('resize', checkIfMobile);
+    
+    return () => window.removeEventListener('resize', checkIfMobile);
+  }, []);
 
   useEffect(() => {
     // Initial delay before first appearance (3 seconds)
@@ -44,7 +57,7 @@ export default function CloudMessage() {
       className="absolute z-20 right-0"
       style={{
         top: '-10%',
-        marginRight: '-120px',
+        marginRight: isMobile ? '-60px' : '-120px',
         transform: 'translateY(-50%)'
       }}
     >
