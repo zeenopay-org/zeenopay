@@ -10,6 +10,7 @@ import {
   FaWhatsapp,
   FaCopy,
 } from "react-icons/fa";
+import CloudMessage from "./CloudMessage";
 
 function ProfileCard({ handleQrClick }) {
   const { contestant, loading, paymentCurrency, getPaymentCurrency } =
@@ -53,10 +54,9 @@ function ProfileCard({ handleQrClick }) {
     };
 
     if (isIframeVisible && videoUrl) {
-      // Only load the iframe if videoUrl is not empty
       loadYouTubeAPI();
     } else {
-      setIsIframeVisible(false); // If videoUrl is empty, hide the iframe
+      setIsIframeVisible(false);
     }
 
     return () => {
@@ -64,7 +64,7 @@ function ProfileCard({ handleQrClick }) {
         player.destroy();
       }
     };
-  }, [isIframeVisible, videoUrl]); // Depend on videoUrl as well
+  }, [isIframeVisible, videoUrl]);
 
   const copyToClipboard = async () => {
     try {
@@ -95,7 +95,8 @@ function ProfileCard({ handleQrClick }) {
   const autoplayEmbedUrl = embedUrl ? `${embedUrl}&autoplay=1` : null;
 
   return (
-    <div>
+    <div className="relative">
+      <CloudMessage />
       {loading ? (
         <div className="md:w-[270px] w-[240px] h-[280px] md:h-[342px] bg-gray-300 rounded-[16px] mx-auto animate-pulse"></div>
       ) : (
@@ -147,7 +148,6 @@ function ProfileCard({ handleQrClick }) {
                 </div>
               </div>
 
-              {/* Social Media & Copy Link */}
               <div className="flex gap-[10px] text-[14px] sm:text-[16px] justify-center">
                 <a
                   href={`https://www.facebook.com/sharer/sharer.php?u=${currentUrl}`}

@@ -7,7 +7,7 @@ const CountdownTimer = ({ endTime }) => {
       return {
         days: Math.floor(difference / (1000 * 60 * 60 * 24)),
         hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-        minutes: Math.floor((difference / 1000 * 60) % 60),
+        minutes: Math.floor((difference / 1000 / 60) % 60),
         seconds: Math.floor((difference / 1000) % 60),
       };
     }
@@ -34,21 +34,8 @@ const CountdownTimer = ({ endTime }) => {
     };
   }, [endTime]);
 
-  const getEmoji = (unit) => {
-    switch(unit) {
-      case 'days': return '';
-      case 'hours': return '';
-      case 'minutes': return '';
-      case 'seconds': return '';
-      default: return '';
-    }
-  };
-  
   const getLabel = (unit) => {
-    if (windowWidth < 360) {
-      // For very small screens, just use the first letter
-      return unit.charAt(0).toUpperCase();
-    }
+    // Always return full label
     return unit.charAt(0).toUpperCase() + unit.slice(1);
   };
 
@@ -64,12 +51,11 @@ const CountdownTimer = ({ endTime }) => {
             key={unit}
             className="countdown-item flex flex-col items-center"
           >
-            <div className="countdown-value relative w-10 h-10 xs:w-12 xs:h-12 sm:w-14 sm:h-14 md:w-20 md:h-20 bg-gradient-to-br from-indigo-600 to-purple-700 text-white font-bold text-xs xs:text-sm sm:text-lg md:text-3xl flex items-center justify-center rounded-lg xs:rounded-xl border border-indigo-400 xs:border-2 shadow-lg shadow-purple-900/50 overflow-hidden">
+            <div className="countdown-value relative w-12 h-12 xs:w-14 xs:h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 bg-gradient-to-br from-indigo-600 to-purple-700 text-white font-bold text-sm sm:text-lg md:text-3xl flex items-center justify-center rounded-lg xs:rounded-xl border border-indigo-400 xs:border-2 shadow-lg shadow-purple-900/50 overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-white/5"></div>
               <span className="relative z-10">{value}</span>
             </div>
-            <span className="mt-1 md:mt-2 text-3xs xs:text-2xs sm:text-xs md:text-sm font-medium flex items-center">
-              <span className="mr-0.5 xs:mr-1">{getEmoji(unit)}</span>
+            <span className="mt-1 md:mt-2 text-xs sm:text-xs md:text-sm font-medium flex items-center">
               <span className="text-gradient">{getLabel(unit)}</span>
             </span>
           </div>
@@ -111,7 +97,7 @@ const CountdownTimer = ({ endTime }) => {
           box-shadow: 0 10px 20px rgba(91, 33, 182, 0.4);
         }
         
-                  .text-gradient {
+        .text-gradient {
           background: linear-gradient(to right, #f7f7f7, #c5c5c5);
           -webkit-background-clip: text;
           background-clip: text;
@@ -129,15 +115,11 @@ const CountdownTimer = ({ endTime }) => {
             margin-top: 2rem;
             margin-bottom: 2rem;
           }
-        }
-        
-        /* Custom utility classes for extra-small text */
-        .text-3xs {
-          font-size: 0.5rem;
-        }
-        
-        .text-2xs {
-          font-size: 0.625rem;
+          
+          .countdown-value {
+            min-width: 3rem;
+            min-height: 3rem;
+          }
         }
       `}</style>
     </div>

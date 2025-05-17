@@ -2,39 +2,61 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
 export default function CloudMessage() {
-  const [isVisible, setIsVisible] = useState(true);
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    // Show the GIF initially
-    setIsVisible(true);
-    
-    // Set up the animation cycle
-    const interval = setInterval(() => {
-      // Show the GIF
+    // Initial delay before first appearance (3 seconds)
+    const initialDelay = setTimeout(() => {
       setIsVisible(true);
       
-      setTimeout(() => {
-        setIsVisible(false);
-      }, 5000); 
-      
-    }, 6000); 
+      // Start the cycle after initial appearance
+      startCycle();
+    }, 3000);
 
-    return () => clearInterval(interval);
+    const startCycle = () => {
+      // Show for 1 minute (60000ms), then hide for 30 seconds (30000ms)
+      const cycleInterval = setInterval(() => {
+        setIsVisible(true);
+        
+        const hideTimeout = setTimeout(() => {
+          setIsVisible(false);
+        }, 60000);
+        
+        return () => clearTimeout(hideTimeout);
+      }, 90000); 
+
+      return () => clearInterval(cycleInterval);
+    };
+
+    return () => {
+      clearTimeout(initialDelay);
+    };
   }, []);
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: isVisible ? 1 : 0, y: isVisible ? 0 : 0.6 }}
-      transition={{ duration: 0.8 }} 
-      className="ml-20 -mt-20 z-20"
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ 
+        opacity: isVisible ? 1 : 0, 
+        x: isVisible ? 0 : 20 
+      }}
+      transition={{ duration: 0.8 }}
+      className="absolute z-20 right-0"
+      style={{
+        top: '-10%',
+        marginRight: '-120px',
+        transform: 'translateY(-50%)'
+      }}
     >
-      {/* Cloud Image */}
-      <div className="z-20">
+      {/* Cloud Image with responsive sizing */}
+      <div className="z-20 relative">
         <img
           src="/assets/story_gif.GIF"
           alt="Cloud"
-          className="w-[200px] h-[100px]"
+          className="w-[180px] h-[90px] md:w-[250px] md:h-[120px]" 
+          style={{
+            filter: 'drop-shadow(5px 5px 5px rgba(0,0,0,0.3))'
+          }}
         />
       </div>
     </motion.div>

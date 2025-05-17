@@ -12,7 +12,7 @@ import CustomDropdown from "../ReusableInputField/CustomDropdown.jsx";
 import InternationalVotingComponents from "./InternationalVotingComponent.jsx";
 import LocalVotingComponent from "./LocalVotingComponent.jsx";
 import PhoneInputWithCountrySelector from "../ReusableInputField/PhoneInputWithCountrySelector.jsx";
-import CloudMessage from "./CloudMessage.jsx";
+// import CloudMessage from "./CloudMessage.jsx";
 import ConfirmCancelPopup from "../confirmCanclePupup/ConfirmCancelPopup.jsx";
 import CountdownTimer from "./CountdownTimer.jsx";
 import VotingCard from "../VoteCard/voteCard.jsx";
@@ -376,7 +376,7 @@ export default function VotingComponent() {
               <div className="absolute bottom-[-220px] left-1/2 transform -translate-x-1/2 md:bottom-[-100px] md:left-20 md:translate-x-0 lg:bottom-[-150px] lg:left-20 lg:translate-x-0">
                   {contestant.shareable_link && (
                     <div className="relative top-16 md:-top-10 left-14 md:left-20 z-50">
-                      <CloudMessage />
+                      {/* <CloudMessage /> */}
                     </div>
                   )}
                   <ProfileCard />
@@ -393,7 +393,7 @@ export default function VotingComponent() {
             </div>
 
             <div className="mt-52 md:mt-32 flex flex-col items-center justify-center">
-              <h1 className="text-xl md:text-2xl font-normal">{event.title}</h1>
+              {/* <h1 className="text-xl md:text-2xl font-normal">{event.title}</h1> */}
               <p className="text-white mt- text-center text-sm md:text-lg">
                 {loading ? (
                   <div className="h-4 w-1/4 bg-gray-300 animate-pulse"></div>

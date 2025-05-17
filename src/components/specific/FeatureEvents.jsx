@@ -15,16 +15,14 @@ function FeatureEvents() {
 
   useEffect(() => {
     getAllEvents();
-    // Check if mobile on initial render and on resize
     const checkIfMobile = () => {
-      setIsMobile(window.innerWidth < 768); // 768px is typical tablet breakpoint
+      setIsMobile(window.innerWidth < 768);
     };
     checkIfMobile();
     window.addEventListener('resize', checkIfMobile);
     return () => window.removeEventListener('resize', checkIfMobile);
   }, [getAllEvents]);
 
-  // Preload images when events change
   useEffect(() => {
     if (events.length > 0) {
       events.forEach(event => {
@@ -50,18 +48,18 @@ function FeatureEvents() {
   };
 
   const shouldSlide = useCallback(() => {
-    // On mobile, slide if there's more than 1 card
+    // Always slide on mobile if there's more than 1 card
     if (isMobile) return events.length > 1;
-    // On desktop, only slide if there's 3 or more cards
-    return events.length >= 3;
+    // On desktop, only slide if there's more than 3 cards
+    return events.length > 3;
   }, [events.length, isMobile]);
 
   const handlePrev = useCallback(() => {
     if (!shouldSlide()) return;
-    setCurrentSlide((prev) => Math.max(0, prev - 1));
+    setCurrentSlide((prev) => (prev === 0 ? events.length - 1 : prev - 1));
     setAutoSlide(false);
     setTimeout(() => setAutoSlide(true), 2000);
-  }, [shouldSlide]);
+  }, [events.length, shouldSlide]);
 
   const handleNext = useCallback(() => {
     if (!shouldSlide()) return;
@@ -89,29 +87,27 @@ function FeatureEvents() {
     setTimeout(() => setAutoSlide(true), 10000);
   };
 
-  // Auto-slide effect
+  // Auto-slide effect - runs every 2 seconds for both mobile and desktop
   useEffect(() => {
-    if (!autoSlide || !shouldSlide() || events.length <= 1) return;
+    if (!autoSlide || !shouldSlide()) return;
 
     const interval = setInterval(() => {
       handleNext();
     }, 2000);
 
     return () => clearInterval(interval);
-  }, [autoSlide, events.length, handleNext, shouldSlide]);
+  }, [autoSlide, handleNext, shouldSlide]);
 
-  // Get responsive image width based on screen size
   const getImageWidth = () => {
     if (typeof window === 'undefined') return 400;
-    if (window.innerWidth < 640) return 300; // Mobile
-    if (window.innerWidth < 768) return 350; // Tablet
-    return 400; // Desktop
+    if (window.innerWidth < 640) return 300;
+    if (window.innerWidth < 768) return 350;
+    return 400;
   };
 
-  // Calculate the slide width based on screen size
   const getSlideWidth = () => {
     if (isMobile) return '100%';
-    return '33.33%'; // Show 3 cards on desktop
+    return '33.33%';
   };
 
   return (
@@ -128,7 +124,7 @@ function FeatureEvents() {
         <div
           className="flex transition-transform duration-500 ease-in-out ml-20 mr-20 mt-8 mb-10"
           style={{
-            transform: shouldSlide() ? `translateX(-${currentSlide * 100}%)` : 'translateX(0)',
+            transform: `translateX(-${currentSlide * (isMobile ? 100 : 33.33)}%)`,
             marginLeft: (shouldSlide() && currentSlide === 0) ? "0" : "16px",
           }}
         >
@@ -164,7 +160,7 @@ function FeatureEvents() {
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, ease: "easeOut" }}
-                  className={`flex-shrink-0 ${isMobile ? 'w-full' : 'w-1/3'} ml-4 ${index === 0 ? "ml-0" : ""}`}
+                  className={`flex-shrink-0 ${isMobile ? 'w-full' : 'w-1/3'} px-4`}
                   style={{ width: getSlideWidth() }}
                 >
                   <div
@@ -192,7 +188,6 @@ function FeatureEvents() {
                                 e.target.src = "/placeholder-event.jpg";
                               }}
                             />
-                          
                             <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-black/30 to-transparent pointer-events-none" />
                           </>
                         ) : (
@@ -236,7 +231,6 @@ function FeatureEvents() {
                 </motion.div>
               ))}
         </div>
-        {/* Navigation arrows - only show if shouldSlide() returns true */}
         {shouldSlide() && (
           <>
             <button
@@ -265,7 +259,7 @@ function FeatureEvents() {
               onClick={handleNext}
               aria-label="Next Slide"
               className="hidden lg:flex absolute right-4 top-1/2 transform -translate-y-1/2 z-10 p-2 bg-[#003A75] text-white rounded-full hover:bg-[#005190] disabled:opacity-50"
-              disabled={currentSlide === events.length - 1}
+              disabled={isMobile ? currentSlide === events.length - 1 : currentSlide === Math.floor(events.length / 3)}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"

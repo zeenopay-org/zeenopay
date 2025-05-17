@@ -27,7 +27,7 @@ const nepalPartner = [
         image: "https://media.zeenopay.com/PRABHU_PAY.PNG",
       },
       {
-        name: "esewa",
+        name: "imepay",
         id: 6,
         image: "https://media.zeenopay.com/IME_PAY.PNG",
       }
