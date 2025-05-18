@@ -200,7 +200,7 @@ const EventProvider = ({ children }) => {
         {
           // API call to generate QR payment
           intent_id: intentId,
-          amount: amount,
+          amount: "0.00",
           name: "administrator",
           phone_no: "administrator",
           event_id: eventID,
