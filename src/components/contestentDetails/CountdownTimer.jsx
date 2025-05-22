@@ -1,7 +1,13 @@
 import { useEffect, useState } from "react";
 
 const CountdownTimer = ({ endTime }) => {
+  const [isClient, setIsClient] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(null);
+  const [windowWidth, setWindowWidth] = useState(0);
+
   const calculateTimeLeft = () => {
+    if (!endTime) return null;
+    
     const difference = new Date(endTime) - new Date();
     if (difference > 0) {
       return {
@@ -14,10 +20,10 @@ const CountdownTimer = ({ endTime }) => {
     return { days: 0, hours: 0, minutes: 0, seconds: 0 };
   };
 
-  const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
-  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 0);
-
   useEffect(() => {
+    setIsClient(true);
+    setWindowWidth(window.innerWidth);
+    
     const timer = setInterval(() => {
       setTimeLeft(calculateTimeLeft());
     }, 1000);
@@ -28,6 +34,9 @@ const CountdownTimer = ({ endTime }) => {
     
     window.addEventListener('resize', handleResize);
     
+    // Initial calculation
+    setTimeLeft(calculateTimeLeft());
+    
     return () => {
       clearInterval(timer);
       window.removeEventListener('resize', handleResize);
@@ -35,9 +44,12 @@ const CountdownTimer = ({ endTime }) => {
   }, [endTime]);
 
   const getLabel = (unit) => {
-    // Always return full label
     return unit.charAt(0).toUpperCase() + unit.slice(1);
   };
+
+  if (!isClient || timeLeft === null) {
+    return null; // or return a loading spinner
+  }
 
   return (
     <div className="countdown-container mt-8 mb-8 flex flex-col items-center text-white p-2 xs:p-3 md:p-6 rounded-lg xs:rounded-xl bg-gradient-to-br from-purple-900/40 to-blue-900/40 backdrop-blur-sm border border-purple-500/30 w-full max-w-full overflow-hidden">

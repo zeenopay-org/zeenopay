@@ -48,9 +48,7 @@ function FeatureEvents() {
   };
 
   const shouldSlide = useCallback(() => {
-    // Always slide on mobile if there's more than 1 card
     if (isMobile) return events.length > 1;
-    // On desktop, only slide if there's more than 3 cards
     return events.length > 3;
   }, [events.length, isMobile]);
 
@@ -87,7 +85,6 @@ function FeatureEvents() {
     setTimeout(() => setAutoSlide(true), 10000);
   };
 
-  // Auto-slide effect - runs every 2 seconds for both mobile and desktop
   useEffect(() => {
     if (!autoSlide || !shouldSlide()) return;
 
@@ -111,7 +108,7 @@ function FeatureEvents() {
   };
 
   return (
-    <div className="bg-customBlue pt-3 md:pt-[3px] px-4 sm:px-8 md:px-16 lg:px-32">
+    <div className="bg-customBlue pt-3 md:pt-[3px] px-4 sm:px-0 md:px-20 lg:px-40">
       <h2 className="text-white text-2xl font-semibold justify-start text-center">
         Featured Events
       </h2>
@@ -122,7 +119,7 @@ function FeatureEvents() {
         onTouchEnd={handleTouchEnd}
       >
         <div
-          className="flex transition-transform duration-500 ease-in-out ml-20 mr-20 mt-8 mb-10"
+          className="flex transition-transform duration-500 ease-in-out ml-0 mr-16 mt-8 mb-10"
           style={{
             transform: `translateX(-${currentSlide * (isMobile ? 100 : 33.33)}%)`,
             marginLeft: (shouldSlide() && currentSlide === 0) ? "0" : "16px",
