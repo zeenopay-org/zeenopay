@@ -8,7 +8,7 @@ export default function CloudMessage() {
   useEffect(() => {
     // Check screen size on mount and resize
     const checkIfMobile = () => {
-      setIsMobile(window.innerWidth < 768); // 768px is typical tablet breakpoint
+      setIsMobile(window.innerWidth < 768);
     };
 
     checkIfMobile();
