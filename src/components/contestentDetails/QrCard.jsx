@@ -12,7 +12,6 @@ export default function QrCode({ handleX, qrid }) {
   const id = qrid ? qrid : paramId;
   const inputRef = useRef(null);
   const qrRef = useRef(null);
-  // const qrCodeInstance = useRef(null);
   const [countdown, setCountdown] = useState(360);
   const navigate = useNavigate();
 
@@ -45,13 +44,14 @@ export default function QrCode({ handleX, qrid }) {
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [errors, setErrors] = useState({});
   const [showConfirm, setShowConfirm] = useState(false);
-  const [showSpinner, setShowSpinner] = useState(false); // State to control spinner visibility
+  const [showSpinner, setShowSpinner] = useState(false);
   const [qrString, setQrString] = useState("");
+  const [showVoteSelection, setShowVoteSelection] = useState(false);
+  
   const handleButtonClick = () => {
     inputRef.current.focus();
   };
 
-  // this useEffect is for the scroll to top
   useEffect(() => {
     setTimeout(() => {
       try {
@@ -62,7 +62,6 @@ export default function QrCode({ handleX, qrid }) {
     }, 100);
   }, []);
 
-  //  this useEffect for the countdown timer
   useEffect(() => {
     let timer;
     if (showQRModal && formData.qrType === "One Time Use QR") {
@@ -81,7 +80,6 @@ export default function QrCode({ handleX, qrid }) {
     };
   }, [showQRModal, formData.qrType]);
 
-  // Simplified redirect effect
   useEffect(() => {
     if (
       countdown === 0 &&
@@ -89,13 +87,10 @@ export default function QrCode({ handleX, qrid }) {
       formData.qrType === "One Time Use QR"
     ) {
       const redirect = async () => {
-        // Close modal first
         await new Promise((resolve) => {
           setShowQRModal(false);
           resolve();
         });
-
-        // Then navigate
         navigate("/failure", {
           state: {
             message: "QR Code expired",
@@ -104,19 +99,16 @@ export default function QrCode({ handleX, qrid }) {
           },
         });
       };
-
       redirect();
     }
   }, [countdown, showQRModal, formData.qrType, navigate]);
 
-  // Reset countdown when modal closes
   useEffect(() => {
     if (!showQRModal) {
       setCountdown(360);
     }
   }, [showQRModal]);
 
-  // Format the time (mm:ss)
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -136,7 +128,9 @@ export default function QrCode({ handleX, qrid }) {
     setFormData((prevData) => ({
       ...prevData,
       qrType: option,
+      votes: option === "Multiple Time Use QR" ? "0" : prevData.votes
     }));
+    setShowVoteSelection(option === "One Time Use QR");
   };
 
   useEffect(() => {
@@ -152,7 +146,9 @@ export default function QrCode({ handleX, qrid }) {
   const validateForm = () => {
     let newErrors = {};
     if (!formData.qrType) newErrors.qrType = "Please select a QR type.";
-
+    if (formData.qrType === "One Time Use QR" && (!formData.votes || formData.votes < 10)) {
+      newErrors.votes = "Minimum 10 votes required";
+    }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -202,15 +198,6 @@ export default function QrCode({ handleX, qrid }) {
       const { votes, qrType } = formData;
       const eventID = contestant.event;
 
-      if (votes < 10) {
-        alert("All fields are required, and votes should be at least 10.");
-        return;
-      }
-      if (!qrType) {
-        alert("Please select a QR type.");
-        return;
-      }
-
       setShowSpinner(true);
 
       const intentID = qrid;
@@ -233,7 +220,7 @@ export default function QrCode({ handleX, qrid }) {
       } else if (qrType === "Multiple Time Use QR") {
         paymentUrl = await generateStaticQr(
           intentID,
-          calculatedAmount,
+          0, // Amount is 0 for multiple use QR
           eventID
         );
         if (paymentUrl) {
@@ -251,11 +238,11 @@ export default function QrCode({ handleX, qrid }) {
     () => (formData.votes || 0) * votePrice,
     [formData.votes]
   );
+
   useEffect(() => {
     if (qrString && qrRef.current) {
       qrRef.current.innerHTML = "";
 
-      // Create a new QRCodeStyling instance
       const qrCode = new QRCodeStyling({
         width: 332,
         height: 332,
@@ -277,7 +264,6 @@ export default function QrCode({ handleX, qrid }) {
         },
       });
 
-      // Append QR code to the ref
       qrCode.append(qrRef.current);
     }
   }, [qrString]);
@@ -309,8 +295,8 @@ export default function QrCode({ handleX, qrid }) {
   ];
 
   return (
-    <div className="absolute top-[450px] md:w-auto w-[96%] md:top-1/2 lg:top-[400px] mt-28 bg-customDarkBlue shadow-lg shadow-cyan-500/50   left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-none z-20 flex items-center justify-center text-white rounded-2xl overflow-hidden p-6">
-      <div className="relative  flex items-center justify-center ">
+    <div className="absolute top-[450px] md:w-auto w-[96%] md:top-1/2 lg:top-[400px] mt-28 bg-customDarkBlue shadow-lg shadow-cyan-500/50 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-none z-20 flex items-center justify-center text-white rounded-2xl overflow-hidden p-6">
+      <div className="relative flex items-center justify-center">
         <div className="p-4 bg-customDarkBlue text-white rounded-2xl overflow-y-auto max-h-[105vh]">
           <div className="relative">
             <button
@@ -321,149 +307,165 @@ export default function QrCode({ handleX, qrid }) {
             </button>
           </div>
 
-          <div className=" mt-4 md:mt-4">
+          <div className="mt-4 md:mt-4">
             <h1 className="text-xl md:text-2xl font-bold text-center">
               {event.title}
             </h1>
-            <div className="mt-6 text-center">
-              <h2 className="text-lg font-normal">Select Voting Options</h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-2 mt-4">
-                {voteButtons}
-              </div>
-            </div>
-
-            <div className="flex items-center justify-center">
-              <button
-                onClick={handleButtonClick}
-                className="w-12 h-12 mt-4 flex items-center justify-center text-2xl text-white border border-gray-600  rounded-2xl"
-              >
-                +
-              </button>
-            </div>
-
-            <p className="mt-2 text-gray-400  text-xs md:text-sm text-center">
-              Min 10 votes & Max 15000 votes. One vote = Rs 10.0
-            </p>
-
-            <div className="flex flex-col items-center mt-6">
-              <div className="relative flex items-center w-full gap-2">
-                <button
-                  onClick={() => {
-                    handleVoteChange(formData.votes - 1);
-                    setHasValue(formData.votes - 1 > 0);
-                  }}
-                  className="w-12 h-12 flex items-center justify-center text-2xl text-white border border-gray-600 rounded-2xl transition"
+            
+            {/* QR Type Selection */}
+            <div className="space-y-4 bg-customDarkBlue p-4 rounded-lg mt-6">
+              <h2 className="text-lg font-normal text-center mb-4">Select QR Type</h2>
+              {options.map((option, index) => (
+                <motion.button
+                  key={index}
+                  className={`w-full flex flex-col items-start p-4 rounded-lg transition-all border ${
+                    formData.qrType === option.label 
+                      ? "border-blue-500 bg-blue-900 bg-opacity-20" 
+                      : "border-gray-700 hover:border-blue-400"
+                  }`}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => handleQrTypeChange(option.label)}
                 >
-                  -
-                </button>
+                  <div className="flex items-center space-x-3">
+                    <motion.span
+                      className={`w-4 h-4 border-2 flex items-center justify-center rounded-full ${
+                        formData.qrType === option.label 
+                          ? "border-blue-500" 
+                          : "border-gray-500"
+                      }`}
+                    >
+                      {formData.qrType === option.label && (
+                        <motion.span
+                          className="w-3 h-3 bg-blue-500 rounded-full"
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{ duration: 0.2 }}
+                        />
+                      )}
+                    </motion.span>
+                    <span
+                      className={`text-sm md:text-md font-semibold ${
+                        formData.qrType === option.label
+                          ? "text-white"
+                          : "text-gray-300"
+                      }`}
+                    >
+                      {option.label}
+                    </span>
+                  </div>
+                  <p className="text-xs md:text-sm text-gray-400 mt-1 ml-7">
+                    {option.description}
+                  </p>
+                </motion.button>
+              ))}
+              {errors?.qrType && (
+                <p className="text-red-400 text-sm mt-2">{errors.qrType}</p>
+              )}
+            </div>
 
-                {/* Input Wrapper */}
-                <div className="relative flex-grow">
-                  <input
-                    type="tel"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    ref={inputRef}
-                    className={`peer w-full h-12 bg-transparent text-white text-lg outline-none border border-gray-600 hover:border-blue-500 rounded-lg px-4 pt-5 pb-1 text-center
-      [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none
-      focus:border-blue-500 transition-all duration-300`}
-                    value={formData.votes}
-                    onChange={handleChange}
-                    onFocus={() => setHasValue(true)}
-                    onBlur={() => setHasValue(!!formData.votes)}
-                    min="10"
-                    max="15000"
-                    placeholder=" "
-                  />
-                  {/* Floating Label */}
-                  <label
-                    className={`absolute left-4 text-gray-400 text-lg pointer-events-none transition-all duration-300 
-      ${
-        hasValue || document.activeElement === inputRef.current
-          ? "top-0 -translate-y-1/2 scale-90 text-blue-500 bg-customDarkBlue px-2"
-          : "top-1/2 -translate-y-1/2 text-lg text-gray-400"
-      }`}
-                  >
-                    Enter your vote
-                  </label>
+            {/* Vote Selection (only shown for One Time Use QR) */}
+            {showVoteSelection && (
+              <>
+                <div className="mt-6 text-center">
+                  <h2 className="text-lg font-normal">Select Voting Options</h2>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-2 mt-4">
+                    {voteButtons}
+                  </div>
                 </div>
 
-                {/* Increment Button */}
-                <button
-                  onClick={() => {
-                    handleVoteChange(formData.votes + 10);
-                    setHasValue(true);
-                  }}
-                  className="w-12 h-12 flex items-center justify-center text-2xl text-white border border-gray-600 rounded-2xl transition"
-                >
-                  +
-                </button>
-              </div>
-
-              <p className="mt-4 text-normal text-gray-400">
-                Total amount:{" "}
-                <span className="text-blue-400 font-semibold">
-                  Rs {calculatedAmount}
-                </span>
-              </p>
-
-              <div className="space-y-4 bg-customDarkBlue p-4 rounded-lg">
-                {options.map((option, index) => (
-                  <motion.button
-                    key={index}
-                    className={`w-full flex flex-col items-start p-4 rounded-lg transition-all   text-lef"}
-          `}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => {
-                      setFormData((prevData) => ({
-                        ...prevData, // Spread the previous state
-                        qrType: option.label, // Update only qrType
-                      }));
-                      handleQrTypeChange(option.label);
-                    }}
+                <div className="flex items-center justify-center">
+                  <button
+                    onClick={handleButtonClick}
+                    className="w-12 h-12 mt-4 flex items-center justify-center text-2xl text-white border border-gray-600 rounded-2xl"
                   >
-                    <div className="flex items-center space-x-3">
-                      <motion.span
-                        className={`w-4 h-4 border-2 flex items-center justify-center rounded-full
-              `}
-                        whileHover={{ scale: 1.1 }}
-                      >
-                        {formData.qrType === option.label && (
-                          <motion.span
-                            className="w-3 h-3 bg-white rounded-full"
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            transition={{ duration: 0.2 }}
-                          />
-                        )}
-                      </motion.span>
-                      <span
-                        className={`text-sm md:text-md font-semibold ${
-                          formData.qrType === option.label
-                            ? "text-white"
-                            : "text-gray-300"
+                    +
+                  </button>
+                </div>
+
+                <p className="mt-2 text-gray-400 text-xs md:text-sm text-center">
+                  Min 10 votes & Max 15000 votes. One vote = Rs 10.0
+                </p>
+
+                <div className="flex flex-col items-center mt-6">
+                  <div className="relative flex items-center w-full gap-2">
+                    <button
+                      onClick={() => {
+                        handleVoteChange(formData.votes - 1);
+                        setHasValue(formData.votes - 1 > 0);
+                      }}
+                      className="w-12 h-12 flex items-center justify-center text-2xl text-white border border-gray-600 rounded-2xl transition"
+                    >
+                      -
+                    </button>
+
+                    <div className="relative flex-grow">
+                      <input
+                        type="tel"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        ref={inputRef}
+                        className={`peer w-full h-12 bg-transparent text-white text-lg outline-none border ${
+                          errors.votes ? "border-red-500" : "border-gray-600 hover:border-blue-500"
+                        } rounded-lg px-4 pt-5 pb-1 text-center
+                        [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none
+                        focus:border-blue-500 transition-all duration-300`}
+                        value={formData.votes}
+                        onChange={handleChange}
+                        onFocus={() => setHasValue(true)}
+                        onBlur={() => setHasValue(!!formData.votes)}
+                        min="10"
+                        max="15000"
+                        placeholder=" "
+                      />
+                      <label
+                        className={`absolute left-4 text-gray-400 text-lg pointer-events-none transition-all duration-300 
+                        ${
+                          hasValue || document.activeElement === inputRef.current
+                            ? "top-0 -translate-y-1/2 scale-90 text-blue-500 bg-customDarkBlue px-2"
+                            : "top-1/2 -translate-y-1/2 text-lg text-gray-400"
                         }`}
                       >
-                        {option.label}
-                      </span>
+                        Enter your vote
+                      </label>
                     </div>
-                    <p className="text-xs md:text-sm text-gray-400 mt-1">
-                      {option.description}
-                    </p>
-                  </motion.button>
-                ))}
-                {errors?.qrType && (
-                  <p className="text-red-400 text-sm">{errors.qrType}</p>
-                )}
-              </div>
-            </div>
 
-            <div className="flex item-center justify-center pb-16 ">
+                    <button
+                      onClick={() => {
+                        handleVoteChange(formData.votes + 10);
+                        setHasValue(true);
+                      }}
+                      className="w-12 h-12 flex items-center justify-center text-2xl text-white border border-gray-600 rounded-2xl transition"
+                    >
+                      +
+                    </button>
+                  </div>
+                  {errors.votes && (
+                    <p className="text-red-400 text-sm mt-2">{errors.votes}</p>
+                  )}
+
+                  {formData.qrType === "One Time Use QR" && (
+                    <p className="mt-4 text-normal text-gray-400">
+                      Total amount:{" "}
+                      <span className="text-blue-400 font-semibold">
+                        Rs {calculatedAmount}
+                      </span>
+                    </p>
+                  )}
+                </div>
+              </>
+            )}
+
+            <div className="flex item-center justify-center pb-16 mt-6">
               <button
-                className="mt-6 bg-white hover:bg-gray-300 text-sm text-purple-800 px-6 py-3 rounded-2xl w-28 flex justify-center items-center"
+                className={`mt-6 text-sm px-6 py-3 rounded-2xl w-28 flex justify-center items-center ${
+                  formData.qrType 
+                    ? "bg-white hover:bg-gray-300 text-purple-800"
+                    : "bg-gray-600 text-gray-400 cursor-not-allowed"
+                }`}
                 onClick={scrolltotop}
-                disabled={qrLoading || showSpinner} // Disable button when spinner is shown
+                disabled={!formData.qrType || qrLoading || showSpinner || 
+                  (formData.qrType === "One Time Use QR" && (!formData.votes || formData.votes < 10))}
               >
                 {qrLoading || showSpinner ? (
                   <motion.div
@@ -484,7 +486,6 @@ export default function QrCode({ handleX, qrid }) {
           </div>
         </div>
 
-        {/* Show the ElegantSpinner when showSpinner is true */}
         {showSpinner && (
           <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
             <ElegantSpinner />
@@ -494,10 +495,7 @@ export default function QrCode({ handleX, qrid }) {
         {showQRModal && (
           <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
             <div className="bg-customBlue p-6 rounded-lg -mt-12 md:mt-5 text-center w-[26rem] border border-gray-700 relative">
-              {/* Header with Close Button */}
-
               {formData.qrType === "Multiple Time Use QR" ? (
-                //static QR:show the Static QR code Image
                 <>
                   <div className="flex justify-between items-center bg-customBlue p-2 rounded-t-lg">
                     <h2 className="text-xs text-white">
@@ -521,9 +519,8 @@ export default function QrCode({ handleX, qrid }) {
                   </div>
 
                   <div className="bg-customDarkBlue p-4 rounded-lg">
-                    {/* Static QR: Generate QR Image from qr_string */}
                     <div className="bg-customDarkBlue p-4 rounded-lg flex flex-col items-center">
-                      <div ref={qrRef}></div> {/* qr_String pass */}
+                      <div ref={qrRef}></div>
                       <div className="flex items-center justify-center mt-2 space-x-2">
                         <p className="text-red-500 ml-4 font-semibold">
                           Powered by
@@ -538,10 +535,9 @@ export default function QrCode({ handleX, qrid }) {
                   </div>
                 </>
               ) : (
-                // Dynamic QR: Show the dynamic QR Code Image\
                 <>
                   <div className="flex justify-between items-center bg-customBlue p-2 rounded-t-lg">
-                    <h2 className="text-xs  font-semibold text-white">
+                    <h2 className="text-xs font-semibold text-white">
                       Scan & Pay via Banking Apps, Esewa, Khalti, and all major
                       wallets
                     </h2>
@@ -556,7 +552,6 @@ export default function QrCode({ handleX, qrid }) {
                   <div className="bg-customDarkBlue p-4 rounded-lg">
                     <div className="bg-customDarkBlue p-4 rounded-lg flex flex-col items-center">
                       <div ref={qrRef}></div>
-                      {/* Add countdown timer here */}
                       {formData.qrType === "One Time Use QR" && (
                         <div className="flex mt-2 text-center">
                           <p className="text-sm text-white">
@@ -581,7 +576,7 @@ export default function QrCode({ handleX, qrid }) {
                           )}
                         </div>
                       )}
-                      <p className="text-[10px] text-red-500">Note: Please do not close this screen untill the vote is success.</p>
+                      <p className="text-[10px] text-red-500">Note: Please do not close this screen until the vote is success.</p>
                       <div className="flex items-center justify-center mt-2 space-x-2">
                         <p className="text-red-500 ml-4 font-semibold">
                           Powered by
@@ -598,14 +593,16 @@ export default function QrCode({ handleX, qrid }) {
               )}
 
               {/* Total Amount Section */}
-              <div className="flex mt-2 text-white pt-4">
-                <p className="ml-6 text-sm md:text-md">TOTAL AMOUNT NPR.</p>
-                <div className="flex justify-end w-44">
-                  <span className="ml-10 bg-[#00255c] opacity-80 h-8 w-20 rounded-lg text-green-600 text-xl font-bold flex items-center justify-center">
-                    {calculatedAmount}
-                  </span>
+              {formData.qrType === "One Time Use QR" && (
+                <div className="flex mt-2 text-white pt-4">
+                  <p className="ml-6 text-sm md:text-md">TOTAL AMOUNT NPR.</p>
+                  <div className="flex justify-end w-44">
+                    <span className="ml-10 bg-[#00255c] opacity-80 h-8 w-20 rounded-lg text-green-600 text-xl font-bold flex items-center justify-center">
+                      {calculatedAmount}
+                    </span>
+                  </div>
                 </div>
-              </div>
+              )}
 
               <p className="text-xs mt-4">
                 <span className="text-red-500"> NOTE:</span> I hereby accept the
