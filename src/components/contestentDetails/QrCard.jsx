@@ -244,8 +244,8 @@ export default function QrCode({ handleX, qrid }) {
       qrRef.current.innerHTML = "";
 
       const qrCode = new QRCodeStyling({
-        width: 332,
-        height: 332,
+        width: 220,
+        height: 220,
         type: "svg",
         data: qrString.QR,
         image: "https://zeenorides.com/zeenopay_logo.svg",
@@ -493,75 +493,112 @@ export default function QrCode({ handleX, qrid }) {
         )}
 
         {showQRModal && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
-            <div className="bg-customBlue p-6 rounded-lg -mt-12 md:mt-5 text-center w-[26rem] border border-gray-700 relative">
+          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 p-6">
+            <div className="bg-customBlue rounded-lg text-center w-full max-w-sm border border-gray-700 relative">
               {formData.qrType === "Multiple Time Use QR" ? (
-                <>
-                  <div className="flex justify-between items-center bg-customBlue p-2 rounded-t-lg">
-                    <h2 className="text-xs text-white">
-                      <span className="font-semibold">
-                        Multiple Votes are accepted!
-                        <br />
-                      </span>
-                      You can use this QR code to vote multiple times until
-                      voting ends. Screenshot and share with your audiences!{" "}
-                      <br />
-                      <span className="text-[9px]">
-                        (Mobile Banking Apps only)
-                      </span>
-                    </h2>
+                <div className="flex flex-col bg-customBlue text-white">
+                  {/* Close Button */}
+                  <div className="absolute top-2 right-2 z-10">
                     <button
                       onClick={() => setShowConfirm(true)}
-                      className="text-white text-xl pl-4 hover:text-red-500 transition"
+                      className="text-white text-xl hover:text-red-500 transition leading-none"
                     >
                       ✕
                     </button>
                   </div>
 
-                  <div className="bg-customDarkBlue p-4 rounded-lg">
-                    <div className="bg-customDarkBlue p-4 rounded-lg flex flex-col items-center">
-                      <div ref={qrRef}></div>
-                      <div className="flex items-center justify-center mt-2 space-x-2">
-                        <p className="text-red-500 ml-4 font-semibold">
-                          Powered by
-                        </p>
-                        <img
-                          src="/assets/nepalpay.png"
-                          className="w-24 h-10"
-                          alt="FonePay Logo"
-                        />
-                      </div>
+                  {/* Header Section */}
+                  <div className="text-center pt-3 pb-2 px-3">
+                    <div className="bg-black bg-opacity-30 rounded-lg p-2 backdrop-blur-sm mb-2">
+                      <h1 className="text-sm font-bold mb-1 uppercase leading-tight text-white">
+                        {event?.title || "EVENT NAME HERE"}
+                      </h1>
+                      <h2 className="text-sm font-semibold uppercase leading-tight border-t border-gray-500 pt-1" style={{color: '#33ABF6'}}>
+                        VOTE TO: {contestant?.name || "CONTESTANT NAME HERE"}
+                      </h2>
+                    </div>
+                    <div className="text-xs leading-snug">
+                      <p className="mb-0.5">
+                        You can use this QR code to vote multiple times until
+                      </p>
+                      <p className="mb-0.5">
+                        voting ends. Screenshot and share with your audiences!
+                      </p>
+                      <p className="text-gray-300 text-xs">
+                        (Mobile Banking Apps only)
+                      </p>
                     </div>
                   </div>
-                </>
+
+                  {/* QR Code Section */}
+                  <div className="flex justify-center py-1">
+                    <div ref={qrRef}></div>
+                  </div>
+
+                  {/* Powered by section */}
+                  <div className="flex items-center justify-center space-x-2 mb-2">
+                    <p className="text-red-500 font-semibold text-xs">
+                      Powered by
+                    </p>
+                    <img
+                      src="/assets/nepalpay.png"
+                      className="w-16 h-6"
+                      alt="Nepal Pay Logo"
+                    />
+                  </div>
+
+                  {/* Bottom Information Section */}
+                  <div className="text-center px-3 pb-3 text-xs">
+                    <div className="bg-black bg-opacity-40 rounded-lg p-2 backdrop-blur-sm">
+                      <p className="mb-1 text-xs">
+                        <span className="font-bold text-red-500">Note:</span> Minimum Vote is 1 & have no any limits.
+                      </p>
+                      <p className="mb-1 text-xs">
+                        You can vote for as many times and as much amount you want.
+                      </p>
+                      <p className="mb-1 text-xs">
+                        <span className="font-semibold">One Vote = 10 Rs. | Amount Must Be divisible by 10.</span>
+                      </p>
+                      <p className="font-bold text-[10px] text-gray-300">
+                        TERMS & CONDITIONS APPLIED
+                      </p>
+                    </div>
+                  </div>
+                </div>
               ) : (
-                <>
-                  <div className="flex justify-between items-center bg-customBlue p-2 rounded-t-lg">
-                    <h2 className="text-xs font-semibold text-white">
-                      Scan & Pay via Banking Apps, Esewa, Khalti, and all major
-                      wallets
-                    </h2>
+                <div className="flex flex-col">
+                  {/* Header */}
+                  <div className="flex justify-between items-start bg-customBlue p-4 rounded-t-lg border-b border-gray-700">
+                    <div className="flex-1 pr-4">
+                      <h2 className="text-sm font-semibold text-white text-left">
+                        Scan & Pay via Banking Apps, Esewa, Khalti, and all major
+                        wallets
+                      </h2>
+                    </div>
                     <button
                       onClick={() => setShowConfirm(true)}
-                      className="text-white text-xl pl-4 hover:text-red-500 transition"
+                      className="text-white text-xl hover:text-red-500 transition flex-shrink-0"
                     >
                       ✕
                     </button>
                   </div>
 
-                  <div className="bg-customDarkBlue p-4 rounded-lg">
-                    <div className="bg-customDarkBlue p-4 rounded-lg flex flex-col items-center">
-                      <div ref={qrRef}></div>
+                  {/* QR Code Section */}
+                  <div className="bg-customDarkBlue p-6">
+                    <div className="flex flex-col items-center">
+                      <div ref={qrRef} className="mb-4"></div>
+                      
+                      {/* Countdown Timer */}
                       {formData.qrType === "One Time Use QR" && (
-                        <div className="flex mt-2 text-center">
-                          <p className="text-sm text-white">
+                        <div className="flex items-center justify-center mb-4 text-center">
+                          <p className="text-sm text-white mr-2">
                             {countdown > 0
                               ? "QR expires in:"
                               : "QR has expired!"}
                           </p>
                           {countdown > 0 ? (
                             <p
-                              className={`text-lg -mt-1 ml-1 font-bold ${
+                              className={`text-lg font-bold ${
                                 countdown <= 60
                                   ? "text-red-500"
                                   : "text-green-500"
@@ -576,9 +613,15 @@ export default function QrCode({ handleX, qrid }) {
                           )}
                         </div>
                       )}
-                      <p className="text-[10px] text-red-500">Note: Please do not close this screen until the vote is success.</p>
-                      <div className="flex items-center justify-center mt-2 space-x-2">
-                        <p className="text-red-500 ml-4 font-semibold">
+                      
+                      {/* Important Note */}
+                      <p className="text-xs text-red-500 mb-4 text-center">
+                        Note: Please do not close this screen until the vote is success.
+                      </p>
+                      
+                      {/* Powered by section */}
+                      <div className="flex items-center justify-center space-x-2">
+                        <p className="text-red-500 font-semibold text-sm">
                           Powered by
                         </p>
                         <img
@@ -589,26 +632,29 @@ export default function QrCode({ handleX, qrid }) {
                       </div>
                     </div>
                   </div>
-                </>
-              )}
 
-              {/* Total Amount Section */}
-              {formData.qrType === "One Time Use QR" && (
-                <div className="flex mt-2 text-white pt-4">
-                  <p className="ml-6 text-sm md:text-md">TOTAL AMOUNT NPR.</p>
-                  <div className="flex justify-end w-44">
-                    <span className="ml-10 bg-[#00255c] opacity-80 h-8 w-20 rounded-lg text-green-600 text-xl font-bold flex items-center justify-center">
-                      {calculatedAmount}
-                    </span>
+                  {/* Total Amount Section */}
+                  {formData.qrType === "One Time Use QR" && (
+                    <div className="bg-customBlue p-4 border-t border-gray-700">
+                      <div className="flex justify-between items-center text-white">
+                        <p className="text-sm md:text-md">TOTAL AMOUNT NPR.</p>
+                        <span className="bg-[#00255c] opacity-80 px-4 py-2 rounded-lg text-green-600 text-xl font-bold">
+                          {calculatedAmount}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Terms and conditions */}
+                  <div className="p-4 bg-customBlue rounded-b-lg">
+                    <p className="text-xs text-gray-300">
+                      <span className="text-red-500 font-semibold">NOTE:</span> I hereby accept the
+                      Terms of Services and acknowledge that payments done for voting
+                      are non-refundable.
+                    </p>
                   </div>
                 </div>
               )}
-
-              <p className="text-xs mt-4">
-                <span className="text-red-500"> NOTE:</span> I hereby accept the
-                Terms of Services and acknowledge that payments done for voting
-                are non-refundable.
-              </p>
             </div>
 
             {showConfirm && (

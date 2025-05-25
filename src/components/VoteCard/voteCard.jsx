@@ -5,58 +5,42 @@ import QRCodeStyling from "qr-code-styling";
 
 const VotingCard = ({ contestant, event, onClose }) => {
   const { generateStaticQr } = useContext(EventContext);
-  console.log("event:",event.title  )
   const pageRef = useRef();
-  const qr50Ref = useRef(null);
-  const qr25Ref = useRef(null);
+  const qrRef = useRef(null);
 
-  const [qr50String, setQr50String] = useState("");
-  const [qr25String, setQr25String] = useState("");
-  const [loading50, setLoading50] = useState(true);
-  const [loading25, setLoading25] = useState(true);
+  const [qrString, setQrString] = useState("");
+  const [loading, setLoading] = useState(true);
   const [loadingJPG, setLoadingJPG] = useState(false);
   const [eventImageBase64, setEventImageBase64] = useState("");
   const [contestantImageBase64, setContestantImageBase64] = useState("");
   const [error, setError] = useState(null);
 
-  // Responsive scaling factor (0.7 for mobile, 1 for desktop)
-  const isMobile = window.innerWidth < 768;
-  const scaleFactor = isMobile ? 0.65 : 1;
-  const A4_WIDTH_PX = 794 * scaleFactor;
-  const A4_HEIGHT_PX = 1123 * scaleFactor;
-
   useEffect(() => {
-    const fetchQRs = async () => {
+    const fetchQR = async () => {
       try {
-        setLoading50(true);
-        setLoading25(true);
-        const [qr50, qr25] = await Promise.all([
-          generateStaticQr(contestant.id, 500, event.id),
-          generateStaticQr(contestant.id, 250, event.id),
-        ]);
-        if (qr50?.QR) setQr50String(qr50.QR);
-        if (qr25?.QR) setQr25String(qr25.QR);
+        setLoading(true);
+        const qrData = await generateStaticQr(contestant.id, 0, event.id);
+        if (qrData?.QR) setQrString(qrData.QR);
       } catch (error) {
-        console.error("Error generating QR codes:", error);
+        console.error("Error generating QR code:", error);
       } finally {
-        setLoading50(false);
-        setLoading25(false);
+        setLoading(false);
       }
     };
-    fetchQRs();
+    fetchQR();
   }, [contestant.id, event.id, generateStaticQr]);
 
   const renderQRCode = (qrString, ref) => {
     if (qrString && ref.current) {
       ref.current.innerHTML = "";
       const qrCode = new QRCodeStyling({
-        width: 160 * scaleFactor,
-        height: 160 * scaleFactor,
+        width: 180,
+        height: 180,
         type: "svg",
         data: qrString,
         image: "https://zeenorides.com/zeenopay_logo.svg",
         dotsOptions: { color: "#39b6ff", type: "extra-rounded" },
-        backgroundOptions: { color: "black" },
+        backgroundOptions: { color: "#000" },
         imageOptions: {
           crossOrigin: "anonymous",
           imageSize: 0.5,
@@ -68,8 +52,7 @@ const VotingCard = ({ contestant, event, onClose }) => {
     }
   };
 
-  useEffect(() => renderQRCode(qr50String, qr50Ref), [qr50String, scaleFactor]);
-  useEffect(() => renderQRCode(qr25String, qr25Ref), [qr25String, scaleFactor]);
+  useEffect(() => renderQRCode(qrString, qrRef), [qrString]);
 
   const convertImageToBase64 = async (imgUrl, setBase64) => {
     try {
@@ -77,8 +60,7 @@ const VotingCard = ({ contestant, event, onClose }) => {
         mode: "cors",
         cache: "no-cache",
       });
-      if (!response.ok)
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const blob = await response.blob();
       return new Promise((resolve) => {
         const reader = new FileReader();
@@ -97,153 +79,36 @@ const VotingCard = ({ contestant, event, onClose }) => {
 
   useEffect(() => {
     if (event.misc_kv) convertImageToBase64(event.misc_kv, setEventImageBase64);
-    if (contestant.avatar)
-      convertImageToBase64(contestant.avatar, setContestantImageBase64);
+    if (contestant.avatar) convertImageToBase64(contestant.avatar, setContestantImageBase64);
   }, [event.misc_kv, contestant.avatar]);
 
   const handleDownloadJPG = async () => {
     setError(null);
     setLoadingJPG(true);
-  
+
     try {
       if (!pageRef.current) throw new Error("Page reference not available");
-      if (loading50 || loading25) throw new Error("QR codes still loading");
-  
+      if (loading) throw new Error("QR code still loading");
+
       const imagePromises = [];
       if (event.misc_kv && !eventImageBase64) {
-        imagePromises.push(
-          convertImageToBase64(event.misc_kv, setEventImageBase64)
-        );
+        imagePromises.push(convertImageToBase64(event.misc_kv, setEventImageBase64));
       }
       if (contestant.avatar && !contestantImageBase64) {
-        imagePromises.push(
-          convertImageToBase64(contestant.avatar, setContestantImageBase64)
-        );
+        imagePromises.push(convertImageToBase64(contestant.avatar, setContestantImageBase64));
       }
       await Promise.all(imagePromises);
-  
-      // Create a clone with original A4 dimensions
-      const originalElement = pageRef.current;
-      const clone = originalElement.cloneNode(true);
-      
-      // Remove any scaling transforms
-      clone.style.transform = 'none';
-      clone.style.width = '794px';
-      clone.style.height = '1123px';
-      clone.style.position = "absolute";
-      clone.style.left = "-9999px";
-      clone.style.overflow = "visible";
-      clone.style.backgroundColor = "#000";
-  
-      // Find and hide the download button in the clone
-      const downloadButton = clone.querySelector('button[onclick]');
-      if (downloadButton) {
-        downloadButton.style.display = 'none';
-      }
-  
-      // Also hide the error message if present
-      const errorDiv = clone.querySelector('.text-red-500');
-      if (errorDiv) {
-        errorDiv.style.display = 'none';
-      }
-  
-      // Function to scale all numeric style values
-      const scaleStyleValues = (element, factor) => {
-        if (!element || !element.style) return;
-        
-        const style = element.style;
-        const numericProperties = [
-          'width', 'height', 'fontSize', 'marginTop', 'marginBottom', 
-          'marginLeft', 'marginRight', 'paddingTop', 'paddingBottom',
-          'paddingLeft', 'paddingRight', 'top', 'right', 'bottom', 'left'
-        ];
-  
-        numericProperties.forEach(prop => {
-          if (style[prop]) {
-            const value = style[prop];
-            if (typeof value === 'string' && value.includes('px')) {
-              const numericValue = parseFloat(value);
-              style[prop] = `${numericValue * factor}px`;
-            }
-          }
-        });
-      };
-  
-      // Scale all elements in the clone
-      const elements = clone.querySelectorAll('*');
-      elements.forEach(el => {
-        scaleStyleValues(el, 1/scaleFactor);
-        if (el.style) {
-          el.style.color = "#FFF";
-        }
-      });
-  
-      // Re-render QR codes at full size
-      const qr50Container = clone.querySelector('#qr50-container');
-      const qr25Container = clone.querySelector('#qr25-container');
-      
-      if (qr50String && qr50Container) {
-        const qrDiv = qr50Container.querySelector('div');
-        if (qrDiv) {
-          qrDiv.innerHTML = "";
-          const qrCode = new QRCodeStyling({
-            width: 200,
-            height: 200,
-            type: "svg",
-            data: qr50String,
-            image: "https://zeenorides.com/zeenopay_logo.svg",
-            dotsOptions: { color: "#39b6ff", type: "extra-rounded" },
-            backgroundOptions: { color: "black" },
-            imageOptions: {
-              crossOrigin: "anonymous",
-              imageSize: 0.5,
-              margin: 0,
-              hideBackgroundDots: false,
-            },
-          });
-          qrCode.append(qrDiv);
-        }
-      }
-  
-      if (qr25String && qr25Container) {
-        const qrDiv = qr25Container.querySelector('div');
-        if (qrDiv) {
-          qrDiv.innerHTML = "";
-          const qrCode = new QRCodeStyling({
-            width: 200,
-            height: 200,
-            type: "svg",
-            data: qr25String,
-            image: "https://zeenorides.com/zeenopay_logo.svg",
-            dotsOptions: { color: "#39b6ff", type: "extra-rounded" },
-            backgroundOptions: { color: "black" },
-            imageOptions: {
-              crossOrigin: "anonymous",
-              imageSize: 0.5,
-              margin: 0,
-              hideBackgroundDots: false,
-            },
-          });
-          qrCode.append(qrDiv);
-        }
-      }
-  
-      document.body.appendChild(clone);
-  
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-  
-      const canvas = await html2canvas(clone, {
+
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      const canvas = await html2canvas(pageRef.current, {
         scale: 2,
-        width: 794,
-        height: 1123,
         useCORS: true,
-        backgroundColor: "#FFF",
-        logging: true,
-        allowTaint: true
+        backgroundColor: "#000B44",
+        logging: false,
+        allowTaint: true,
       });
-  
-      document.body.removeChild(clone);
-  
+
       const imageData = canvas.toDataURL("image/jpeg", 1.0);
       const link = document.createElement("a");
       link.href = imageData;
@@ -260,229 +125,189 @@ const VotingCard = ({ contestant, event, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-customDarkBlue bg-opacity-50 z-50 overflow-auto">
-      <div className="relative md:mt-[550px] w-full h-full flex items-center justify-center p-2">
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50 p-4">
+      <div className="relative w-full max-w-3xl mx-auto">
         <div
           ref={pageRef}
-          className="bg-white shadow-2xl mx-aut"
+          className="text-white rounded-xl shadow-2xl overflow-hidden relative"
           style={{
-            width: `${A4_WIDTH_PX}px`,
-            minHeight: `${A4_HEIGHT_PX}px`,
-            backgroundImage: "url('/assets/voting_bg.jpg')",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat",
-            transform: `scale(${scaleFactor})`,
-            transformOrigin: "center",
+            background: `
+              linear-gradient(135deg, 
+                #000B44 0%, 
+                #001a66 25%, 
+                #002d88 50%, 
+                #001966 75%, 
+                #000822 100%
+              ),
+              radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+              radial-gradient(circle at 80% 80%, rgba(99, 102, 241, 0.1) 0%, transparent 50%)
+            `,
           }}
         >
-          <button
-            onClick={onClose}
-            className="absolute top-2 right-2 text-white px-2 py-1 rounded-full text-xs z-50"
-            style={{ fontSize: `${12 / scaleFactor}px` }}
-          >
-            ✕
-          </button>
+          {/* Close Button - Hidden during download */}
+          {!loadingJPG && (
+            <button
+              onClick={onClose}
+              className="absolute top-4 right-4 text-white hover:text-red-400 text-2xl z-50 bg-black bg-opacity-30 rounded-full w-8 h-8 flex items-center justify-center transition-colors"
+            >
+              ✕
+            </button>
+          )}
 
-          <div className="p-6">
-            {/* Header */}
-            <div className="flex justify-between items-center mb-6">
-              <img
-                src="/assets/image 35.png"
-                alt="Zeenopay Logo"
-                style={{ height: `${80 * scaleFactor}px` }}
-                className="w-auto"
-              />
+          {/* Header Section */}
+          <div className="px-3 pt-3 pb-2 text-center border-b border-white/10">
+            <h1 className="text-lg font-bold mb-1 text-blue-200">Multiple Votes are accepted!</h1>
+            <p className="text-xs opacity-90 mb-1">
+              Use this QR code to vote multiple times. Screenshot and share!
+            </p>
+            <p className="text-xs opacity-80 bg-blue-900/30 px-2 py-1 rounded-full inline-block">
+              (Mobile Banking Apps only)
+            </p>
+          </div>
+
+          {/* Main Content */}
+          <div className="px-3 py-3">
+            {/* Top Section with Logo and Event Info */}
+            <div className="flex justify-between items-center mb-3 rounded-lg p-2">
+              <div className="flex items-center">
+                <img 
+                  src="https://media.zeenopay.com/ZEENOPAY_MAIN_LOGO_BLUE.PNG" 
+                  alt="zeenoPay Logo"
+                  className="w-18 h-14"
+                />
+              </div>
               <div className="text-right">
-                <p
-                  className="text-sm font-medium"
-                  style={{ fontSize: `${14 * scaleFactor}px` }}
-                >
-                  Organized By:
-                </p>
-                <p
-                  className="text-center text-sm"
-                  style={{ fontSize: `${14 * scaleFactor}px` }}
-                >
-                  {event.org !== "N/A" ? event.org : "No bio available"}
+                <p className="text-xs opacity-90">Event Organized By:</p>
+                <p className="text-xs font-bold text-blue-200">
+                  {event?.org !== "N/A" && event?.org ? event.org : "ABC EVENTS PVT LTD."}
                 </p>
               </div>
             </div>
 
-            {/* Event Image */}
-            <div className="flex justify-center mb-6">
-              {eventImageBase64 ? (
-                <img
-                  src={eventImageBase64}
-                  alt="Event"
-                  style={{
-                    width: `${96 * scaleFactor}px`,
-                    height: `${96 * scaleFactor}px`,
-                  }}
-                  className="border-2 object-cover"
-                />
-              ) : (
-                <div
-                  style={{
-                    width: `${96 * scaleFactor}px`,
-                    height: `${96 * scaleFactor}px`,
-                  }}
-                  className="border-2 flex items-center justify-center"
-                >
-                  Loading...
-                </div>
-              )}
-              
-            </div>
-            <h2
-              className="text-center font-bold mb-8"
-              style={{ fontSize: `${18 * scaleFactor}px` }}
-            >
-              {event.title}
-            </h2>
-            
-
-
-            {/* Contestant Image */}
-            <div className="relative flex justify-center mb-6">
-              {contestantImageBase64 ? (
-                <img
-                  src={contestantImageBase64}
-                  alt="Contestant"
-                  style={{
-                    width: `${200 * scaleFactor}px`,
-                    height: `${200 * scaleFactor}px`,
-                  }}
-                  className="rounded-full border-4 border-blue-600 object-cover"
-                />
-              ) : (
-                <div
-                  style={{
-                    width: `${240 * scaleFactor}px`,
-                    height: `${240 * scaleFactor}px`,
-                  }}
-                  className="rounded-full border-4 border-blue-600 flex items-center justify-center"
-                >
-                  Loading...
-                </div>
-              )}
-
-              <div
-                className="absolute transform translate-x-1/2 bg-black text-white px-3 py-1 rounded-full text-sm font-bold shadow-md"
-                style={{
-                  top: `${70 * scaleFactor}%`,
-                  right: `${280 * scaleFactor}px`,
-                  fontSize: `${14 * scaleFactor}px`,
-                }}
-              >
-                {contestant.misc_kv}
-              </div>
-            </div>
-
-            {/* Contestant Name */}
-            <h2
-              className="text-center font-bold mb-8"
-              style={{ fontSize: `${24 * scaleFactor}px` }}
-            >
-              {contestant.name}
-            </h2>
-
-            {/* Content Area */}
-            <div className="flex">
-              {/* Voting Procedure */}
-              <div className="w-1/2 pr-6">
-                <h3
-                  className="font-bold mb-4"
-                  style={{ fontSize: `${18 * scaleFactor}px` }}
-                >
-                  VOTING PROCEDURE
-                </h3>
-                <ol
-                  className="list-decimal ml-4 space-y-2"
-                  style={{ fontSize: `${10 * scaleFactor}px` }}
-                >
-                  <li>Go to zeenopay.com</li>
-                  <li>Find your event</li>
-                  <li>Click Get Started</li>
-                  <li>Select Vote Now</li>
-                  <li>Choose your contestant's voting number</li>
-                  <li>Enter your details</li>
-                  <li>Select your preferred payment method</li>
-                  <li>Log in and authenticate via OTP</li>
-                  <li>Wait for the Vote Success page</li>
-                  <li>Voting is available in Nepal, India, and abroad</li>
-                </ol>
-              </div>
-
-              {/* QR Codes */}
-              <div className="w-1/2 flex mr-10 md:mr-2 gap-4 md:gap-6">
-                <div className="text-center qr-container" id="qr50-container">
-                  <p
-                    className="font-bold mb-2"
-                    style={{ fontSize: `${14 * scaleFactor}px` }}
-                  >
-                    50 Votes
-                  </p>
-                  <div ref={qr50Ref} className="mx-auto"></div>
-                </div>
-                <div className="text-center qr-container" id="qr25-container">
-                  <p
-                    className="font-bold mb-2"
-                    style={{ fontSize: `${14 * scaleFactor}px` }}
-                  >
-                    25 Votes
-                  </p>
-                  <div ref={qr25Ref} className="mx-auto"></div>
-                </div>
-              </div>
-            </div>
-
-            {/* Download Button */}
-            <div className="mt-20 md:mt-64">
-              <button
-                onClick={handleDownloadJPG}
-                className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 flex justify-center items-center"
-                disabled={loading50 || loading25 || loadingJPG}
-                style={{
-                  marginTop: `${60 * scaleFactor}px`,
-                  fontSize: `${18 * scaleFactor}px`,
-                }}
-              >
-                {loadingJPG ? (
-                  <div className="flex items-center">
-                    <svg
-                      className="animate-spin h-5 w-5 mr-2 text-white"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="white"
-                        strokeWidth="4"
-                        fill="none"
-                      ></circle>
-                      <path
-                        d="M4 12a8 8 0 018-8"
-                        stroke="white"
-                        strokeWidth="4"
-                      ></path>
-                    </svg>
-                    Generating JPG...
-                  </div>
+            {/* Event Logo and Name */}
+            <div className="text-center mb-3">
+              <div className="inline-block bg-white rounded-full p-1 mb-1 shadow-lg">
+                {eventImageBase64 ? (
+                  <img
+                    src={eventImageBase64}
+                    alt="Event Logo"
+                    className="w-16 h-16 object-cover rounded-full"
+                  />
                 ) : (
-                  "Download Voting Card (JPG)"
+                  <div className="w-10 h-10 flex items-center justify-center text-black font-bold text-xs">
+                    EVENT<br />LOGO
+                  </div>
                 )}
-              </button>
-              {error && (
-                <div
-                  className="text-red-500 text-center mt-2"
-                  style={{ fontSize: `${14 * scaleFactor}px` }}
-                >
-                  Error: {error}. Please try again.
-                </div>
-              )}
+              </div>
+              <h2 className="text-lg font-bold uppercase text-white">
+                {event?.title || "EVENT NAME FALANO"}
+              </h2>
             </div>
+
+            {/* Main Content Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+              
+              {/* Left Column - Contestant and Voting Procedure */}
+              <div className="space-y-3">
+                {/* Contestant Info */}
+                <div className="bg-white/5 rounded-lg p-3">
+                  <div className="relative inline-block mb-2">
+                    {contestantImageBase64 ? (
+                      <img
+                        src={contestantImageBase64}
+                        alt="Contestant"
+                        className="w-28 h-26 object-cover rounded-lg border-2 border-white/30"
+                      />
+                    ) : (
+                      <div className="w-28 h-20 bg-gray-300 rounded-lg border-2 border-white/30 flex items-center justify-center text-gray-600 text-xs">
+                        Loading...
+                      </div>
+                    )}
+                    {contestant?.misc_kv && (
+                      <div className="absolute -bottom-1 -right-1 bg-white text-black px-2 py-0.5 rounded-full text-xs font-bold">
+                        {contestant.misc_kv}
+                      </div>
+                    )}
+                  </div>
+                  <h3 className="text-base font-bold text-white mb-1">
+                    {contestant?.name || "Keta Keti Ko Naam"}
+                  </h3>
+                  <div className="h-0.5 w-8 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full"></div>
+                </div>
+
+                {/* Voting Procedure */}
+                <div className="bg-black/40 rounded-lg p-3 border border-white/10">
+                  <h4 className="font-bold text-center mb-2 text-sm border-b border-white/20 pb-1 text-blue-200">
+                    VOTING PROCEDURE
+                  </h4>
+                  <ol className="text-xs space-y-0.5 list-decimal list-inside text-gray-200">
+                    <li>Go to <span className="font-semibold text-blue-300">zeenopay.com</span></li>
+                    <li>Find your event</li>
+                    <li>Click <span className="font-semibold text-green-300">Get Started</span></li>
+                    <li>Select <span className="font-semibold text-green-300">Vote Now</span></li>
+                    <li>Choose contestant's voting number</li>
+                    <li>Enter your details & payment method</li>
+                    <li>Login and authenticate via OTP</li>
+                    <li>Wait for Vote Success page</li>
+                    <li className="text-yellow-300 font-semibold">Available globally</li>
+                  </ol>
+                </div>
+              </div>
+
+              {/* Right Column - QR Code */}
+              <div className="flex flex-col items-center justify-center bg-white/5 rounded-lg p-3">
+                <div className="mb-3">
+                  <div className="text-center">
+                    <div ref={qrRef} className="flex justify-center mb-2 p-2 rounded-lg">
+                      {loading && (
+                        <div className="w-36 h-36 rounded-lg flex items-center justify-center">
+                          <span className="text-gray-500 text-xs">Loading QR...</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* QR Instructions */}
+                <div className="text-center">
+                  <h3 className="text-[12px] font-bold mb-1 text-blue-200">
+                    SCAN THIS QR CODE THROUGH
+                  </h3>
+                  <h4 className="text-[12px] font-bold mb-2 text-white">
+                    BANK ACCOUNT APP TO VOTE
+                  </h4>
+
+                  <div className="text-xs space-y-1 bg-black/30 rounded-lg p-2">
+                    <p>
+                      <span className="font-bold text-red-400">Note:</span> 
+                      <span className="text-gray-200"> Min vote is 1, no limits.</span>
+                    </p>
+                    <p className="text-gray-200">Vote multiple times with any amount.</p>
+                    <p className="font-bold text-yellow-300 text-[10px]">One Vote = 10 Rs.</p>
+                    <p className="font-bold text-white text-[10px]">Amount divisible by 10.</p>
+                    <p className="font-regular text-white text-[8px] mt-1 opacity-80">Terms & Conditions apply.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Download Button - Hidden during download */}
+            {!loadingJPG && (
+              <div className="mt-3 text-center border-t border-white/10 pt-3">
+                <button
+                  onClick={handleDownloadJPG}
+                  className="bg-white hover:from-blue-600 hover:to-purple-700 text-black font-bold py-2 px-6 rounded-full text-sm transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 uppercase"
+                  disabled={loading || loadingJPG}
+                >
+                  DOWNLOAD POSTER
+                </button>
+                {error && (
+                  <div className="text-red-300 text-xs mt-2 bg-red-900/20 px-3 py-1 rounded-lg inline-block">
+                    Error: {error}. Please try again.
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
