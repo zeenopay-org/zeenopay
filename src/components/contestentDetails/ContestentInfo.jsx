@@ -12,7 +12,7 @@ import CustomDropdown from "../ReusableInputField/CustomDropdown.jsx";
 import InternationalVotingComponents from "./InternationalVotingComponent.jsx";
 import LocalVotingComponent from "./LocalVotingComponent.jsx";
 import PhoneInputWithCountrySelector from "../ReusableInputField/PhoneInputWithCountrySelector.jsx";
-// import CloudMessage from "./CloudMessage.jsx";
+import CloudMessage from "./CloudMessage.jsx";
 import ConfirmCancelPopup from "../confirmCanclePupup/ConfirmCancelPopup.jsx";
 import CountdownTimer from "./CountdownTimer.jsx";
 import VotingCard from "../VoteCard/voteCard.jsx";
@@ -83,7 +83,7 @@ export default function VotingComponent() {
   const [imageLoaded, setImageLoaded] = useState(false);
 
   useEffect(() => {}, [formData]);
-  
+
   useEffect(() => {
     setTimeout(() => {
       try {
@@ -93,7 +93,7 @@ export default function VotingComponent() {
       }
     }, 100);
   }, []);
-  
+
   useEffect(() => {
     getPaymentPartner();
   }, []);
@@ -197,11 +197,11 @@ export default function VotingComponent() {
       setShowCard(true);
     });
   };
-  
+
   const closeCard = () => {
     setShowCard(false);
   };
-  
+
   const handlePartnerChange = (value) => {
     setSelectedPartner(value);
   };
@@ -351,32 +351,29 @@ export default function VotingComponent() {
 
       {generateQR && <QrCard handleX={handleQrClick} qrid={contestant.id} />}
 
-      <div className={`w-full ${generateQR ? "blur-md pointer-events-none" : ""}`}>
+      <div
+        className={`w-full ${generateQR ? "blur-md pointer-events-none" : ""}`}
+      >
         {pop ? (
           <PaymentOption formData={formData} />
         ) : (
           <>
-            {/* Optimized Banner Section - Modified to show image at original size without cropping */}
             <div className="relative flex flex-col justify-center items-center w-full">
-              <div className="w-full max-w-[1300px] overflow-hidden rounded-2xl mb-6 bg-gray-800">
+              <div className="w-full max-w-[1300px] max-h-[500px] overflow-hidden rounded-2xl mb-6 bg-gray-800 flex items-center justify-center">
                 <img
                   src={temp?.img}
-                  className={`w-full h-auto transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+                  className="max-w-full max-h-full object-fit transition-opacity duration-300"
                   alt="Event Banner"
                   onLoad={() => setImageLoaded(true)}
                   decoding="async"
-                  style={{ objectFit: 'contain' }}
                 />
-                {!imageLoaded && (
-                  <div className="absolute inset-0 bg-gray-700 animate-pulse"></div>
-                )}
               </div>
 
               <div>
-              <div className="absolute bottom-[-220px] left-1/2 transform -translate-x-1/2 md:bottom-[-100px] md:left-20 md:translate-x-0 lg:bottom-[-150px] lg:left-20 lg:translate-x-0">
+                <div className="absolute bottom-[-220px] left-1/2 transform -translate-x-1/2 md:bottom-[-100px] md:left-20 md:translate-x-0 lg:bottom-[-150px] lg:left-20 lg:translate-x-0">
                   {contestant.shareable_link && (
                     <div className="relative top-16 md:-top-10 left-14 md:left-20 z-50">
-                      {/* <CloudMessage /> */}
+                      <CloudMessage />
                     </div>
                   )}
                   <ProfileCard />
@@ -419,7 +416,8 @@ export default function VotingComponent() {
 
               <div className="mt-6 text-center">
                 <h2 className="text-lg font-normal">Select Voting Options</h2>
-                {selectedCountry?.cc === "in" || selectedCountry?.cc === "np" ? (
+                {selectedCountry?.cc === "in" ||
+                selectedCountry?.cc === "np" ? (
                   <LocalVotingComponent
                     formData={formData}
                     setFormData={setFormData}

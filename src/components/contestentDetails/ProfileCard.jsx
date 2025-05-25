@@ -96,7 +96,7 @@ function ProfileCard({ handleQrClick }) {
 
   return (
     <div className="relative">
-      <CloudMessage />
+      {/* <CloudMessage /> */}
       {loading ? (
         <div className="md:w-[270px] w-[240px] h-[280px] md:h-[342px] bg-gray-300 rounded-[16px] mx-auto animate-pulse"></div>
       ) : (
