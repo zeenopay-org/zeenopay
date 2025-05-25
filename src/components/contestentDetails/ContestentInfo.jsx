@@ -98,16 +98,25 @@ export default function VotingComponent() {
     getPaymentPartner();
   }, []);
 
-  useEffect(() => {
-    const savedEvent = localStorage.getItem("event");
-    if (savedEvent) {
+useEffect(() => {
+  const savedEvent = localStorage.getItem("event");
+  if (savedEvent) {
+    try {
       const parsedEvent = JSON.parse(savedEvent);
       setTemp(parsedEvent);
-      setFinalDate(parsedEvent.finaldate);
-    } else {
-      getEvent(passingId);
+      if (parsedEvent.finaldate) {
+        setFinalDate(parsedEvent.finaldate);
+      } else {
+        console.warn("finaldate missing in saved event");
+      }
+    } catch (e) {
+      console.error("Invalid JSON in localStorage 'event'", e);
     }
-  }, [passingId, getEvent]);
+  } else {
+    getEvent(passingId);
+  }
+}, [passingId, getEvent]);
+
 
   useEffect(() => {
     const savedCurrency = localStorage.getItem("paymentCurrency");
@@ -372,7 +381,7 @@ export default function VotingComponent() {
               <div>
                 <div className="absolute bottom-[-150px] left-1/2 transform -translate-x-1/2 md:bottom-[-100px] md:left-20 md:translate-x-0 lg:bottom-[-150px] lg:left-20 lg:translate-x-0">
                   {contestant.shareable_link && (
-                    <div className="relative top-16 md:-top-10 left-14 md:left-20 z-50">
+                    <div className="relative -top-8 -left-3 md:-top-10   md:left-10 z-50">
                       <CloudMessage />
                     </div>
                   )}
