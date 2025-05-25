@@ -359,7 +359,7 @@ export default function VotingComponent() {
         ) : (
           <>
             <div className="relative flex flex-col justify-center items-center w-full">
-              <div className="w-full max-w-[1300px] max-h-[500px] overflow-hidden rounded-2xl mb-6 bg-gray-800 flex items-center justify-center">
+              <div className="w-full max-w-[1250px] max-h-[500px] overflow-hidden rounded-2xl mb-6 bg-gray-800 flex items-center justify-center">
                 <img
                   src={temp?.img}
                   className="max-w-full max-h-full object-fit transition-opacity duration-300"
@@ -370,7 +370,7 @@ export default function VotingComponent() {
               </div>
 
               <div>
-                <div className="absolute bottom-[-220px] left-1/2 transform -translate-x-1/2 md:bottom-[-100px] md:left-20 md:translate-x-0 lg:bottom-[-150px] lg:left-20 lg:translate-x-0">
+                <div className="absolute bottom-[-150px] left-1/2 transform -translate-x-1/2 md:bottom-[-100px] md:left-20 md:translate-x-0 lg:bottom-[-150px] lg:left-20 lg:translate-x-0">
                   {contestant.shareable_link && (
                     <div className="relative top-16 md:-top-10 left-14 md:left-20 z-50">
                       <CloudMessage />
