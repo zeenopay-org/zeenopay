@@ -22,7 +22,7 @@ function FeatureEvents() {
     window.addEventListener("resize", checkIfMobile);
     return () => window.removeEventListener("resize", checkIfMobile);
   }, [getAllEvents]);
-  console.log("events", events);
+
   const now = new Date();
   const filteredEvents = [...events].reverse().filter((event) => {
     const finalDate = new Date(event.finaldate);
