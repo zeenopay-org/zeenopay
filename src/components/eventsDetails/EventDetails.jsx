@@ -103,6 +103,7 @@ function EventDetails() {
     scrollElement.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  
   const toggleFilter = (filterName) => {
     setActiveFilters(prev => ({
       ...prev,

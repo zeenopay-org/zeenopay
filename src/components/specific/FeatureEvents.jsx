@@ -30,8 +30,8 @@ function FeatureEvents() {
   });
 
   useEffect(() => {
-    if (events.length > 0) {
-      events.forEach((event) => {
+    if (filteredEvents.length > 0) {
+      filteredEvents.forEach((event) => {
         if (event.img) {
           const img = new Image();
           img.src = `${event.img}?format=webp&width=800`;
@@ -41,7 +41,7 @@ function FeatureEvents() {
         }
       });
     }
-  }, [events]);
+  }, [filteredEvents]);
 
   const handleCardClick = (id) => {
     navigate(`/events/${id}`);
@@ -54,23 +54,27 @@ function FeatureEvents() {
   };
 
   const shouldSlide = useCallback(() => {
-    if (isMobile) return events.length > 1;
-    return events.length > 3;
-  }, [events.length, isMobile]);
+    if (isMobile) return filteredEvents.length > 1;
+    return filteredEvents.length > 3;
+  }, [filteredEvents.length, isMobile]);
 
   const handlePrev = useCallback(() => {
     if (!shouldSlide()) return;
-    setCurrentSlide((prev) => (prev === 0 ? events.length - 1 : prev - 1));
+    setCurrentSlide((prev) =>
+      prev === 0 ? filteredEvents.length - 1 : prev - 1
+    );
     setAutoSlide(false);
     setTimeout(() => setAutoSlide(true), 2000);
-  }, [events.length, shouldSlide]);
+  }, [filteredEvents.length, shouldSlide]);
 
   const handleNext = useCallback(() => {
     if (!shouldSlide()) return;
-    setCurrentSlide((prev) => (prev >= events.length - 1 ? 0 : prev + 1));
+    setCurrentSlide((prev) =>
+      prev >= filteredEvents.length - 1 ? 0 : prev + 1
+    );
     setAutoSlide(false);
     setTimeout(() => setAutoSlide(true), 2000);
-  }, [events.length, shouldSlide]);
+  }, [filteredEvents.length, shouldSlide]);
 
   const handleTouchStart = (e) => {
     if (!shouldSlide()) return;
@@ -157,7 +161,7 @@ function FeatureEvents() {
                   </div>
                 </div>
               ))
-            : filteredEvents.map((event, index) => (
+            : filteredEvents.map((event) => (
                 <motion.div
                   key={event.id}
                   initial={{ opacity: 0, y: 30 }}
@@ -168,7 +172,7 @@ function FeatureEvents() {
                 >
                   <div
                     onClick={() => handleCardClick(event.id)}
-                    className="bg-customDarkBlue text-white rounded-3xl  shadow-lg overflow-hidden cursor-pointer flex flex-col h-full"
+                    className="bg-customDarkBlue text-white rounded-3xl shadow-lg overflow-hidden cursor-pointer flex flex-col h-full"
                   >
                     <div className="w-full p-2">
                       <div
@@ -235,13 +239,13 @@ function FeatureEvents() {
                 </motion.div>
               ))}
         </div>
+
         {shouldSlide() && (
           <>
             <button
               onClick={handlePrev}
               aria-label="Previous Slide"
-              className="hidden lg:flex absolute left-4 top-1/2 transform -translate-y-1/2 z-10 p-2 bg-[#003A75] text-white rounded-full hover:bg-[#005190] disabled:opacity-50"
-              disabled={currentSlide === 0}
+              className="hidden lg:flex absolute left-4 top-1/2 transform -translate-y-1/2 z-10 p-2 bg-[#003A75] text-white rounded-full hover:bg-[#005190]"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -262,12 +266,7 @@ function FeatureEvents() {
             <button
               onClick={handleNext}
               aria-label="Next Slide"
-              className="hidden lg:flex absolute right-4 top-1/2 transform -translate-y-1/2 z-10 p-2 bg-[#003A75] text-white rounded-full hover:bg-[#005190] disabled:opacity-50"
-              disabled={
-                isMobile
-                  ? currentSlide === events.length - 1
-                  : currentSlide === Math.floor(events.length / 3)
-              }
+              className="hidden lg:flex absolute right-4 top-1/2 transform -translate-y-1/2 z-10 p-2 bg-[#003A75] text-white rounded-full hover:bg-[#005190]"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
