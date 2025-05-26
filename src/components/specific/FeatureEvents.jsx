@@ -163,12 +163,12 @@ function FeatureEvents() {
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, ease: "easeOut" }}
-                  className={`flex-shrink-0 ${isMobile ? "w-full" : "w-1/3"} px-4`}
+                  className={`flex-shrink-0 ${isMobile ? "w-full" : "w-1/3"} px-2`}
                   style={{ width: getSlideWidth() }}
                 >
                   <div
                     onClick={() => handleCardClick(event.id)}
-                    className="bg-customDarkBlue text-white rounded-3xl shadow-lg overflow-hidden cursor-pointer flex flex-col h-full"
+                    className="bg-customDarkBlue text-white rounded-3xl  shadow-lg overflow-hidden cursor-pointer flex flex-col h-full"
                   >
                     <div className="w-full p-2">
                       <div
