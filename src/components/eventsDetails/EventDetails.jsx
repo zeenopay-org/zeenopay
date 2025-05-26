@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { EventContext } from "../../EventProvider";
 import QrCard from "../contestentDetails/QrCard.jsx";
 import CountdownTimer from "../contestentDetails/CountdownTimer.jsx";
-import { FiFilter, FiChevronDown, FiX } from "react-icons/fi";
+import { FiFilter, FiChevronDown} from "react-icons/fi";
 
 function EventDetails() {
   const { id } = useParams();
@@ -191,18 +191,18 @@ function EventDetails() {
           <div className="relative">
             <button
               onClick={() => setShowSortDropdown(!showSortDropdown)}
-              className="flex items-center gap-2 px-4 py-2 bg-white text-black rounded-full font-medium border border-blue-600 transition duration-200"
+              className="flex items-center gap-2 px-4 py-2 bg-yellow-600 border-none text-customDarkBlue rounded-full font-medium border border-blue-600 transition duration-200"
             >
-              <FiFilter className="text-lg" />
+              Sort By:<FiFilter className="text-lg" />
               
               <FiChevronDown className={`transition-transform duration-200 ${showSortDropdown ? 'rotate-180' : ''}`} />
             </button>
             
             {showSortDropdown && (
-              <div className="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10">
+              <div className="absolute left-0 mt-2  text-white  w-48 bg-customDarkBlue border-2 border-yellow-600 rounded-md shadow-lg z-10">
                
                 <div 
-                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center justify-between"
+                  className="px-4 py-2 hover:bg-yellow-700 cursor-pointer flex items-center justify-between"
                   onClick={() => {
                     setSortOption("misc_kv");
                     setShowSortDropdown(false);
@@ -212,7 +212,7 @@ function EventDetails() {
                   {sortOption === "misc_kv" && <span className="text-blue-500">✓</span>}
                 </div>
                 <div 
-                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center justify-between"
+                  className="px-4 py-2 hover:bg-yellow-700 cursor-pointer flex items-center justify-between"
                   onClick={() => {
                     setSortOption("name");
                     setShowSortDropdown(false);
