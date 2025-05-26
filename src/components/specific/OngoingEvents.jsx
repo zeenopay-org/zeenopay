@@ -15,6 +15,11 @@ function OngoingEvents() {
     navigate(`/events/${id}`);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
+  const now = new Date();
+  const filteredEvents = [...events].reverse().filter((event) => {
+    const finalDate = new Date(event.finaldate);
+    return finalDate > now || now - finalDate <= 24 * 60 * 60 * 1000;
+  });
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -51,7 +56,8 @@ function OngoingEvents() {
                 </div>
               </div>
             ))
-          : [...events].reverse().map((event, index) => (
+          :filteredEvents.map((event, index) => (
+
               <motion.div
                 key={event.id}
                 className="bg-customDarkBlue text-white rounded-3xl shadow-md overflow-hidden flex flex-col cursor-pointer"

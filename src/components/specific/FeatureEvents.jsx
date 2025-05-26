@@ -19,18 +19,24 @@ function FeatureEvents() {
       setIsMobile(window.innerWidth < 768);
     };
     checkIfMobile();
-    window.addEventListener('resize', checkIfMobile);
-    return () => window.removeEventListener('resize', checkIfMobile);
+    window.addEventListener("resize", checkIfMobile);
+    return () => window.removeEventListener("resize", checkIfMobile);
   }, [getAllEvents]);
+  console.log("events", events);
+  const now = new Date();
+  const filteredEvents = [...events].reverse().filter((event) => {
+    const finalDate = new Date(event.finaldate);
+    return finalDate > now || now - finalDate <= 24 * 60 * 60 * 1000;
+  });
 
   useEffect(() => {
     if (events.length > 0) {
-      events.forEach(event => {
+      events.forEach((event) => {
         if (event.img) {
           const img = new Image();
           img.src = `${event.img}?format=webp&width=800`;
           img.onload = () => {
-            setLoadedImages(prev => ({ ...prev, [event.id]: true }));
+            setLoadedImages((prev) => ({ ...prev, [event.id]: true }));
           };
         }
       });
@@ -96,15 +102,15 @@ function FeatureEvents() {
   }, [autoSlide, handleNext, shouldSlide]);
 
   const getImageWidth = () => {
-    if (typeof window === 'undefined') return 400;
+    if (typeof window === "undefined") return 400;
     if (window.innerWidth < 640) return 300;
     if (window.innerWidth < 768) return 350;
     return 400;
   };
 
   const getSlideWidth = () => {
-    if (isMobile) return '100%';
-    return '33.33%';
+    if (isMobile) return "100%";
+    return "33.33%";
   };
 
   return (
@@ -122,7 +128,7 @@ function FeatureEvents() {
           className="flex transition-transform duration-500 ease-in-out ml-0 mr-16 mt-8 mb-10"
           style={{
             transform: `translateX(-${currentSlide * (isMobile ? 100 : 33.33)}%)`,
-            marginLeft: (shouldSlide() && currentSlide === 0) ? "0" : "16px",
+            marginLeft: shouldSlide() && currentSlide === 0 ? "0" : "16px",
           }}
         >
           {loading
@@ -136,8 +142,8 @@ function FeatureEvents() {
                     <div
                       className="w-full bg-gray-700 rounded-3xl"
                       style={{
-                        paddingTop: "56.25%", 
-                        position: "relative"
+                        paddingTop: "56.25%",
+                        position: "relative",
                       }}
                     ></div>
                     <div className="p-4 flex flex-col flex-grow">
@@ -151,13 +157,13 @@ function FeatureEvents() {
                   </div>
                 </div>
               ))
-            : [...events].reverse().map((event, index) => (
+            : filteredEvents.map((event, index) => (
                 <motion.div
                   key={event.id}
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, ease: "easeOut" }}
-                  className={`flex-shrink-0 ${isMobile ? 'w-full' : 'w-1/3'} px-4`}
+                  className={`flex-shrink-0 ${isMobile ? "w-full" : "w-1/3"} px-4`}
                   style={{ width: getSlideWidth() }}
                 >
                   <div
@@ -165,7 +171,10 @@ function FeatureEvents() {
                     className="bg-customDarkBlue text-white rounded-3xl shadow-lg overflow-hidden cursor-pointer flex flex-col h-full"
                   >
                     <div className="w-full p-2">
-                      <div className="w-full rounded-2xl overflow-hidden bg-gradient-to-b from-blue-900 to-black" style={{ paddingTop: "56.25%", position: "relative" }}>
+                      <div
+                        className="w-full rounded-2xl overflow-hidden bg-gradient-to-b from-blue-900 to-black"
+                        style={{ paddingTop: "56.25%", position: "relative" }}
+                      >
                         {loadedImages[event.id] ? (
                           <>
                             <img
@@ -177,8 +186,8 @@ function FeatureEvents() {
                               alt={event.title}
                               className="absolute top-0 left-0 w-full h-full rounded-2xl"
                               style={{
-                                objectFit: 'cover',
-                                objectPosition: 'center'
+                                objectFit: "cover",
+                                objectPosition: "center",
                               }}
                               onError={(e) => {
                                 e.target.onerror = null;
@@ -188,9 +197,7 @@ function FeatureEvents() {
                             <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-black/30 to-transparent pointer-events-none" />
                           </>
                         ) : (
-                          <div 
-                            className="absolute top-0 left-0 w-full h-full rounded-2xl bg-gray-700 animate-pulse"
-                          />
+                          <div className="absolute top-0 left-0 w-full h-full rounded-2xl bg-gray-700 animate-pulse" />
                         )}
                       </div>
                     </div>
@@ -256,7 +263,11 @@ function FeatureEvents() {
               onClick={handleNext}
               aria-label="Next Slide"
               className="hidden lg:flex absolute right-4 top-1/2 transform -translate-y-1/2 z-10 p-2 bg-[#003A75] text-white rounded-full hover:bg-[#005190] disabled:opacity-50"
-              disabled={isMobile ? currentSlide === events.length - 1 : currentSlide === Math.floor(events.length / 3)}
+              disabled={
+                isMobile
+                  ? currentSlide === events.length - 1
+                  : currentSlide === Math.floor(events.length / 3)
+              }
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
