@@ -14,7 +14,7 @@ function EventDetails() {
   const [finalDate, setFinalDate] = useState("");
   const [temp, setTemp] = useState(null);
   const [skeletonDelay, setSkeletonDelay] = useState(true);
-  const [sortOption, setSortOption] = useState("number");
+  const [sortOption, setSortOption] = useState("misc_kv");
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const [activeFilters, setActiveFilters] = useState({
@@ -75,6 +75,7 @@ function EventDetails() {
     }
   }, [passingId, getEvent]);
 
+  console.log("getAllContestants", contestants);
   const eventFinalDate = new Date(event.finaldate);
   const currentDate = new Date();
 
