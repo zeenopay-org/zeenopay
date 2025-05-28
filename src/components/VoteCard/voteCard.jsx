@@ -135,363 +135,6 @@ const VotingCard = ({ contestant, event, onClose }) => {
     loadImages();
   }, [event.misc_kv, contestant.avatar]);
 
-  const downloadCardAsCanvas = async () => {
-    if (downloading) return; 
-    
-    try {
-      setDownloading(true);
-      
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      // Perfect square format - 1440x1440
-      canvas.width = 1440;
-      canvas.height = 1440;
-      
-      ctx.imageSmoothingEnabled = true;
-      ctx.imageSmoothingQuality = 'high';
-      
-      // Handle background
-      const selectedBg = backgroundImages.find(bg => bg.id === customizations.backgroundImage);
-      if (selectedBg && selectedBg.url) {
-        try {
-          const bgImg = new Image();
-          bgImg.crossOrigin = "anonymous";
-          await new Promise((resolve, reject) => {
-            bgImg.onload = resolve;
-            bgImg.onerror = reject;
-            bgImg.src = selectedBg.url;
-          });
-          ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
-          
-          // Add dark overlay for text readability
-          ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-        } catch (error) {
-          console.error('Error loading background image, using gradient fallback');
-          const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-          gradient.addColorStop(0, customizations.gradientStart);
-          gradient.addColorStop(0.25, customizations.gradientMid1);
-          gradient.addColorStop(0.5, customizations.gradientMid2);
-          gradient.addColorStop(0.75, customizations.gradientMid3);
-          gradient.addColorStop(1, customizations.gradientEnd);
-          ctx.fillStyle = gradient;
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-        }
-      } else {
-        const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-        gradient.addColorStop(0, customizations.gradientStart);
-        gradient.addColorStop(0.25, customizations.gradientMid1);
-        gradient.addColorStop(0.5, customizations.gradientMid2);
-        gradient.addColorStop(0.75, customizations.gradientMid3);
-        gradient.addColorStop(1, customizations.gradientEnd);
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-      }
-      
-      // Add radial gradients for depth (only for gradient background)
-      if (customizations.backgroundImage === 'gradient') {
-        const radialGrad1 = ctx.createRadialGradient(canvas.width * 0.2, canvas.height * 0.2, 0, canvas.width * 0.2, canvas.height * 0.2, canvas.width * 0.5);
-        radialGrad1.addColorStop(0, 'rgba(59, 130, 246, 0.15)');
-        radialGrad1.addColorStop(1, 'transparent');
-        ctx.fillStyle = radialGrad1;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
-        const radialGrad2 = ctx.createRadialGradient(canvas.width * 0.8, canvas.height * 0.8, 0, canvas.width * 0.8, canvas.height * 0.8, canvas.width * 0.5);
-        radialGrad2.addColorStop(0, 'rgba(99, 102, 241, 0.1)');
-        radialGrad2.addColorStop(1, 'transparent');
-        ctx.fillStyle = radialGrad2;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-      }
-      
-      // Header section - Proportional to 1440x1440
-      ctx.fillStyle = '#93c5fd';
-      ctx.font = 'bold 30px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText('Multiple Votes Accepted!', canvas.width / 2, 70);
-      
-      ctx.fillStyle = '#ffffff';
-      ctx.font = '24px Arial';
-      ctx.fillText('QR code for multiple votes. Screenshot & share!', canvas.width / 2, 105);
-      
-      ctx.font = '20px Arial';
-      ctx.fillText('(Banking Apps only)', canvas.width / 2, 135);
-      
-      // Line separator
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(80, 160);
-      ctx.lineTo(canvas.width - 80, 160);
-      ctx.stroke();
-      
-      // zeenoPay logo area
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 28px Arial';
-      ctx.textAlign = 'left';
-      ctx.fillText('zeenoPay', 80, 200);
-      
-      // Event organizer
-      ctx.textAlign = 'right';
-      ctx.font = '20px Arial';
-      ctx.fillText('Organized By:', canvas.width - 80, 185);
-      ctx.fillStyle = '#93c5fd';
-      ctx.font = 'bold 24px Arial';
-      ctx.fillText(event?.org !== "N/A" && event?.org ? event.org : "ABC EVENTS", canvas.width - 80, 210);
-      
-      // Event title
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 26px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText(event?.title || "EVENT NAME", canvas.width / 2, 250);
-      
-      // Main content area
-      const leftX = 100;
-      const rightX = canvas.width / 2 + 50;
-      const topY = 290;
-      
-      // Left side - Contestant info with bigger image area
-      ctx.fillStyle = '#93c5fd';
-      ctx.font = '26px Arial';
-      ctx.textAlign = 'left';
-      ctx.fillText('Vote for:', leftX, topY);
-      
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 40px Arial';
-      ctx.fillText(contestant?.name || "Contestant Name", leftX, topY + 45);
-      
-      // Load and draw contestant image if available
-      if (contestantImageBase64) {
-        try {
-          const contestantImg = new Image();
-          contestantImg.crossOrigin = "anonymous";
-          await new Promise((resolve, reject) => {
-            contestantImg.onload = resolve;
-            contestantImg.onerror = reject;
-            contestantImg.src = contestantImageBase64;
-          });
-          
-          // Draw contestant image with custom radius
-          const imgSize = 400;
-          const imgX = leftX;
-          const imgY = topY + 75;
-          
-          ctx.save();
-          ctx.beginPath();
-          ctx.roundRect(imgX, imgY, imgSize, imgSize, customizations.contestantImageRadius);
-          ctx.clip();
-          ctx.drawImage(contestantImg, imgX, imgY, imgSize, imgSize);
-          ctx.restore();
-        } catch (error) {
-          console.error('Error loading contestant image');
-          // Fallback placeholder
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-          ctx.fillRect(leftX, topY + 75, 400, 400);
-          ctx.fillStyle = '#000000';
-          ctx.font = 'bold 24px Arial';
-          ctx.textAlign = 'center';
-          ctx.fillText('CONTESTANT', leftX + 200, topY + 250);
-          ctx.fillText('IMAGE', leftX + 200, topY + 280);
-        }
-      } else {
-        // Placeholder for contestant image - bigger size
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-        ctx.fillRect(leftX, topY + 75, 400, 400);
-        ctx.fillStyle = '#000000';
-        ctx.font = 'bold 24px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText('CONTESTANT', leftX + 200, topY + 250);
-        ctx.fillText('IMAGE', leftX + 200, topY + 280);
-      }
-      
-      // Contestant number
-      if (contestant?.misc_kv) {
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(leftX + 420, topY + 75, 80, 60);
-        ctx.fillStyle = '#000000';
-        ctx.font = 'bold 30px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText(contestant.misc_kv, leftX + 460, topY + 115);
-      }
-      
-      // voting procedure 
-      ctx.fillStyle = '#93c5fd';
-      ctx.font = 'bold 20px Arial';
-      ctx.textAlign = 'left';
-      ctx.fillText('HOW TO VOTE ?', leftX, topY + 500);
-      
-      // Procedure steps 
-      const procedures = [
-        `1. Go to zeenopay.com`,
-        `2. Find MR & MS GRACE SEE NEPAL 2025`,
-        `3. Click Get Started.`,
-        `4. Select Vote Now.`,
-        `5. Choose your contestant's voting number.`,
-        `6. Enter your details.`,
-        `7. Select your preferred payment method.`,
-        `8. Log in and authenticate via OTP.`,
-        `9. Wait for the Vote Success page.`,
-        `10. Voting Can be done From Nepal, India & Abroad!`
-      ];
-      
-      ctx.font = '16px Arial';
-      procedures.forEach((step, index) => {
-        if (index === 0) {
-          ctx.fillStyle = '#39b6ff';
-        } else if (index === 2 || index === 3) {
-          ctx.fillStyle = '#4ade80';
-        } else if (index === 9) {
-          ctx.fillStyle = '#fbbf24';
-        } else {
-          ctx.fillStyle = '#cccccc';
-        }
-        ctx.fillText(step, leftX, topY + 535 + (index * 22)); 
-      });
-      
-      // Right side - QR Code area
-      ctx.fillStyle = '#93c5fd';
-      ctx.font = 'bold 20px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText('SCAN QR CODE', rightX + 150, topY + 25);
-      
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 24px Arial';
-      ctx.fillText('BANK APP TO VOTE', rightX + 150, topY + 55);
-      
-      // Draw QR Code if available
-      if (qrString) {
-        try {
-          // Create a temporary QR code for canvas
-          const tempDiv = document.createElement('div');
-          document.body.appendChild(tempDiv);
-          
-          const qrCode = new QRCodeStyling({
-            width: 340, 
-            height: 340,
-            type: "canvas",
-            data: qrString,
-            image: "https://zeenorides.com/zeenopay_logo.svg",
-            dotsOptions: { 
-              color: "#39b6ff", 
-              type: "extra-rounded" 
-            },
-            backgroundOptions: { 
-              color: "#fff" 
-            },
-            imageOptions: {
-              crossOrigin: "anonymous",
-              imageSize: 0.5,
-              margin: 0,
-              hideBackgroundDots: false,
-            },
-          });
-          
-          await new Promise((resolve) => {
-            qrCode.append(tempDiv);
-            setTimeout(() => {
-              const qrCanvas = tempDiv.querySelector('canvas');
-              if (qrCanvas) {
-                ctx.drawImage(qrCanvas, rightX + 30, topY + 85, 240, 240);
-              }
-              document.body.removeChild(tempDiv);
-              resolve();
-            }, 100);
-          });
-        } catch (error) {
-          console.error('Error drawing QR code:', error);
-          // QR Code placeholder
-          ctx.fillStyle = '#ffffff';
-          ctx.fillRect(rightX + 30, topY + 85, 240, 240);
-          ctx.fillStyle = '#000';
-          ctx.fillRect(rightX + 40, topY + 95, 220, 220);
-          ctx.fillStyle = '#39b6ff';
-          ctx.font = 'bold 20px Arial';
-          ctx.fillText('QR CODE', rightX + 150, topY + 215);
-        }
-      } else {
-        // QR Code placeholder
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(rightX + 30, topY + 85, 240, 240);
-        ctx.fillStyle = '#000';
-        ctx.fillRect(rightX + 40, topY + 95, 220, 220);
-        ctx.fillStyle = '#39b6ff';
-        ctx.font = 'bold 20px Arial';
-        ctx.fillText('QR CODE', rightX + 150, topY + 215);
-      }
-      
-      // Voting notes
-      const notesY = topY + 350;
-      ctx.fillStyle = '#f87171';
-      ctx.font = 'bold 16px Arial';
-      ctx.fillText('Note: Min 1, no limits', rightX + 150, notesY);
-      
-      ctx.fillStyle = '#cccccc';
-      ctx.font = '14px Arial';
-      ctx.fillText('Multiple votes allowed', rightX + 150, notesY + 25);
-      
-      ctx.fillStyle = '#fbbf24';
-      ctx.font = 'bold 16px Arial';
-      ctx.fillText('1 Vote = 10 Rs.', rightX + 150, notesY + 50);
-      
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 14px Arial';
-      ctx.fillText('Divisible by 10', rightX + 150, notesY + 75);
-      
-      ctx.font = '12px Arial';
-      ctx.fillText('T&C apply', rightX + 150, notesY + 100);
-      
-      // Event logo in bottom section
-      if (eventImageBase64) {
-        try {
-          const eventImg = new Image();
-          eventImg.crossOrigin = "anonymous";
-          await new Promise((resolve, reject) => {
-            eventImg.onload = resolve;
-            eventImg.onerror = reject;
-            eventImg.src = eventImageBase64;
-          });
-          
-          // Draw event logo at bottom
-          const logoSize = 100;
-          const logoX = canvas.width / 2 - logoSize / 2;
-          const logoY = canvas.height - 150; 
-          
-          ctx.save();
-          ctx.beginPath();
-          ctx.arc(logoX + logoSize/2, logoY + logoSize/2, logoSize/2, 0, Math.PI * 2);
-          ctx.clip();
-          ctx.drawImage(eventImg, logoX, logoY, logoSize, logoSize);
-          ctx.restore();
-        } catch (error) {
-          console.error('Error loading event image');
-        }
-      }
-      
-      // Convert to blob and download
-      canvas.toBlob((blob) => {
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.download = `${contestant?.name || 'contestant'}-${event?.title || 'event'}-vote-card-HD.jpg`.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
-        link.href = url;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-        
-        // Success feedback
-        console.log('Canvas download completed successfully');
-      }, 'image/jpeg', 0.95);
-      
-    } catch (error) {
-      console.error('Canvas download failed:', error);
-      alert('Download failed. Please try again.');
-    } finally {
-      // Always reset downloading state
-      setTimeout(() => {
-        setDownloading(false);
-      }, 1000);
-    }
-  };
-
   const downloadCardAsJpg = async () => {
     if (!cardRef.current || downloading) return;
     
@@ -512,31 +155,60 @@ const VotingCard = ({ contestant, event, onClose }) => {
       
       await new Promise(resolve => setTimeout(resolve, 200));
       
-      // Force desktop layout for download - Square format
-      const originalStyle = cardRef.current.style.cssText;
-      cardRef.current.style.width = '600px';
-      cardRef.current.style.maxWidth = '600px';
-      cardRef.current.style.minWidth = '600px';
-      cardRef.current.style.height = '600px'; // Square format
+      // Check if it's mobile
+      const isMobile = window.innerWidth <= 640;
       
-      // Force grid to be 2 columns like desktop
+      // Store original styles
+      const originalStyle = cardRef.current.style.cssText;
       const gridElement = cardRef.current.querySelector('.main-grid');
       const originalGridClass = gridElement?.className;
-      if (gridElement) {
-        gridElement.classList.add('desktop-grid');
-      }
-      
-      // Make contestant image bigger in downloaded version
       const contestantImage = cardRef.current.querySelector('.contestant-image, .contestant-image-placeholder');
-      if (contestantImage) {
-        contestantImage.style.width = '200px';
-        contestantImage.style.height = '200px';
-      }
-      
-      // Adjust procedure list position
       const procedureList = cardRef.current.querySelector('.procedure-list');
-      if (procedureList) {
-        procedureList.style.marginTop = '10px';
+      const originalContestantImageStyle = contestantImage?.style.cssText;
+      const originalProcedureListStyle = procedureList?.style.cssText;
+      
+      if (isMobile) {
+        // Mobile-specific adjustments
+        cardRef.current.style.width = '500px';
+        cardRef.current.style.maxWidth = '500px';
+        cardRef.current.style.minWidth = '500px';
+        cardRef.current.style.height = '500px'; 
+        
+        if (contestantImage) {
+          contestantImage.style.width = '300px';
+          contestantImage.style.height = '300px';
+          contestantImage.style.borderRadius = `${customizations.contestantImageRadius}px`;
+        }
+        
+        // Adjust procedure list to take less space
+        if (procedureList) {
+          procedureList.style.marginTop = '5px';
+          procedureList.style.fontSize = '10px';
+        }
+        
+        // Force grid to be 2 columns like desktop
+        if (gridElement) {
+          gridElement.classList.add('desktop-grid');
+        }
+      } else {
+        // Desktop adjustments
+        cardRef.current.style.width = '600px';
+        cardRef.current.style.maxWidth = '600px';
+        cardRef.current.style.minWidth = '600px';
+        cardRef.current.style.height = '600px';
+        
+        if (contestantImage) {
+          contestantImage.style.width = '200px';
+          contestantImage.style.height = '200px';
+        }
+        
+        if (procedureList) {
+          procedureList.style.marginTop = '10px';
+        }
+        
+        if (gridElement) {
+          gridElement.classList.add('desktop-grid');
+        }
       }
       
       await new Promise(resolve => setTimeout(resolve, 100));
@@ -544,9 +216,9 @@ const VotingCard = ({ contestant, event, onClose }) => {
       const dataUrl = await toJpeg(cardRef.current, {
         quality: 1.0,
         backgroundColor: customizations.gradientStart || '#000B44',
-        pixelRatio: 2.4,
-        width: 600,
-        height: 600, // Square format
+        pixelRatio: isMobile ? 2.8 : 2.4, 
+        width: isMobile ? 500 : 600,
+        height: isMobile ? 500 : 600,
         style: {
           transform: 'scale(1)',
           transformOrigin: 'top left',
@@ -583,22 +255,23 @@ const VotingCard = ({ contestant, event, onClose }) => {
         gridElement.className = originalGridClass;
       }
       
-      // Restore contestant image size
-      if (contestantImage) {
-        contestantImage.style.width = '90px';
-        contestantImage.style.height = '90px';
+      // Restore contestant image and procedure list styles
+      if (contestantImage && originalContestantImageStyle) {
+        contestantImage.style.cssText = originalContestantImageStyle;
+      } else if (contestantImage) {
+        contestantImage.style.width = '';
+        contestantImage.style.height = '';
       }
       
-      // Restore procedure list position
-      if (procedureList) {
+      if (procedureList && originalProcedureListStyle) {
+        procedureList.style.cssText = originalProcedureListStyle;
+      } else if (procedureList) {
         procedureList.style.marginTop = '';
+        procedureList.style.fontSize = '';
       }
-      
-      console.log('HTML-to-image download completed successfully');
       
     } catch (error) {
-      console.error('HTML-to-image failed, using enhanced canvas method:', error);
-      await downloadCardAsCanvas();
+      console.error('Error downloading image:', error);
     } finally {
       // Always restore buttons and reset state
       setTimeout(() => {
@@ -610,15 +283,10 @@ const VotingCard = ({ contestant, event, onClose }) => {
           button.style.pointerEvents = 'auto';
         });
         
-        if (wasCustomizerVisible) {
-          setShowCustomizer(true);
-        }
-        
         setDownloading(false);
       }, 1000);
     }
   };
-
   const updateCustomization = (key, value) => {
     setCustomizations(prev => ({
       ...prev,
@@ -783,14 +451,7 @@ const VotingCard = ({ contestant, event, onClose }) => {
                     disabled={downloading}
                     className="download-btn hq-btn"
                   >
-                    {downloading ? 'Downloading...' : 'Download HQ'}
-                  </button>
-                  <button
-                    onClick={downloadCardAsCanvas}
-                    disabled={downloading}
-                    className="download-btn hd-btn"
-                  >
-                    {downloading ? 'Processing...' : 'Download HD'}
+                    {downloading ? 'Downloading...' : 'Download Poster'}
                   </button>
                 </div>
               </div>
