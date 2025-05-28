@@ -2,7 +2,7 @@ import React, { useState, useContext, useRef, useEffect } from "react";
 import { EventContext } from "../../EventProvider";
 import QRCodeStyling from "qr-code-styling";
 import { toJpeg } from 'html-to-image';
-import '../../assets/css/VotingCard.css'; // Import the CSS file
+import '../../assets/css/VotingCard.css';
 
 const VotingCard = ({ contestant, event, onClose }) => {
   const { generateStaticQr } = useContext(EventContext);
@@ -38,7 +38,7 @@ const VotingCard = ({ contestant, event, onClose }) => {
     gradientMid2: "#002d88",
     gradientMid3: "#001966",
     gradientEnd: "#000822",
-    backgroundImage: 'gradient' // Default to gradient
+    backgroundImage: 'gradient'
   });
 
   const defaultCustomizations = {
@@ -136,7 +136,7 @@ const VotingCard = ({ contestant, event, onClose }) => {
   }, [event.misc_kv, contestant.avatar]);
 
   const downloadCardAsCanvas = async () => {
-    if (downloading) return; // Prevent multiple simultaneous downloads
+    if (downloading) return; 
     
     try {
       setDownloading(true);
@@ -244,10 +244,10 @@ const VotingCard = ({ contestant, event, onClose }) => {
       ctx.textAlign = 'center';
       ctx.fillText(event?.title || "EVENT NAME", canvas.width / 2, 250);
       
-      // Main content area - Adjusted for perfect square format (1440x1440)
+      // Main content area
       const leftX = 100;
       const rightX = canvas.width / 2 + 50;
-      const topY = 290; // Moved up slightly
+      const topY = 290;
       
       // Left side - Contestant info with bigger image area
       ctx.fillStyle = '#93c5fd';
@@ -259,7 +259,7 @@ const VotingCard = ({ contestant, event, onClose }) => {
       ctx.font = 'bold 40px Arial';
       ctx.fillText(contestant?.name || "Contestant Name", leftX, topY + 45);
       
-      // Load and draw contestant image if available - made bigger (400px)
+      // Load and draw contestant image if available
       if (contestantImageBase64) {
         try {
           const contestantImg = new Image();
@@ -270,7 +270,7 @@ const VotingCard = ({ contestant, event, onClose }) => {
             contestantImg.src = contestantImageBase64;
           });
           
-          // Draw contestant image with custom radius - increased size to 400px
+          // Draw contestant image with custom radius
           const imgSize = 400;
           const imgX = leftX;
           const imgY = topY + 75;
@@ -313,13 +313,13 @@ const VotingCard = ({ contestant, event, onClose }) => {
         ctx.fillText(contestant.misc_kv, leftX + 460, topY + 115);
       }
       
-      // Updated voting procedure - moved closer and reduced font sizes
+      // voting procedure 
       ctx.fillStyle = '#93c5fd';
       ctx.font = 'bold 20px Arial';
       ctx.textAlign = 'left';
-      ctx.fillText('HOW TO VOTE ?', leftX, topY + 500); // Adjusted position
+      ctx.fillText('HOW TO VOTE ?', leftX, topY + 500);
       
-      // Updated procedure steps with smaller font
+      // Procedure steps 
       const procedures = [
         `1. Go to zeenopay.com`,
         `2. Find MR & MS GRACE SEE NEPAL 2025`,
@@ -344,7 +344,7 @@ const VotingCard = ({ contestant, event, onClose }) => {
         } else {
           ctx.fillStyle = '#cccccc';
         }
-        ctx.fillText(step, leftX, topY + 535 + (index * 22)); // Adjusted position
+        ctx.fillText(step, leftX, topY + 535 + (index * 22)); 
       });
       
       // Right side - QR Code area
@@ -418,7 +418,7 @@ const VotingCard = ({ contestant, event, onClose }) => {
         ctx.fillText('QR CODE', rightX + 150, topY + 215);
       }
       
-      // Voting notes - moved closer to QR code with smaller fonts
+      // Voting notes
       const notesY = topY + 350;
       ctx.fillStyle = '#f87171';
       ctx.font = 'bold 16px Arial';
@@ -439,7 +439,7 @@ const VotingCard = ({ contestant, event, onClose }) => {
       ctx.font = '12px Arial';
       ctx.fillText('T&C apply', rightX + 150, notesY + 100);
       
-      // Event logo in bottom section if available - moved higher to reduce gap
+      // Event logo in bottom section
       if (eventImageBase64) {
         try {
           const eventImg = new Image();
@@ -450,10 +450,10 @@ const VotingCard = ({ contestant, event, onClose }) => {
             eventImg.src = eventImageBase64;
           });
           
-          // Draw event logo at bottom - moved higher
+          // Draw event logo at bottom
           const logoSize = 100;
           const logoX = canvas.width / 2 - logoSize / 2;
-          const logoY = canvas.height - 150; // Reduced from 200 to 150 to reduce bottom gap
+          const logoY = canvas.height - 150; 
           
           ctx.save();
           ctx.beginPath();
@@ -679,7 +679,7 @@ const VotingCard = ({ contestant, event, onClose }) => {
       {/* Main Card Container with Customizer at Top */}
       <div className="card-container">
         
-        {/* Professional Customizer Panel - Attached to Top of Modal */}
+        {/* Professional Customizer Panel */}
         {showCustomizer && (
           <div className="customizer-panel">
             <div className="customizer-content">
@@ -743,7 +743,7 @@ const VotingCard = ({ contestant, event, onClose }) => {
                 </div>
               </div>
               
-              {/* Gradient Colors (only show if gradient background is selected) */}
+              {/* Gradient Colors  */}
               {customizations.backgroundImage === 'gradient' && (
                 <div className="customizer-section">
                   <label className="section-label">Gradient Colors</label>
