@@ -26,6 +26,7 @@
     "class-variance-authority": "^0.7.1",
     "dotenv": "^16.4.7",
     "framer-motion": "^12.4.1",
+    "html-to-image": "^1.11.13",
     "html2canvas": "^1.4.1",
     "jspdf": "^3.0.1",
     "libphonenumber-js": "^1.11.20",
