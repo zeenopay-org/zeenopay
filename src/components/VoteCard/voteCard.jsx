@@ -95,8 +95,45 @@ const VotingCard = ({ contestant, event, onClose }) => {
 
   useEffect(() => renderQRCode(qrString, qrRef), [qrString]);
 
+  // ONLY CHANGE: Enhanced image conversion for iOS compatibility
   const convertImageToBase64 = async (imgUrl, setBase64) => {
     try {
+      // Try iOS-compatible fetch first
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      
+      if (isIOS) {
+        try {
+          const response = await fetch(imgUrl, {
+            method: 'GET',
+            mode: "cors",
+            cache: "no-cache",
+            headers: {
+              'Accept': 'image/*',
+            }
+          });
+          if (response.ok) {
+            const blob = await response.blob();
+            return new Promise((resolve) => {
+              const reader = new FileReader();
+              reader.onloadend = () => {
+                setBase64(reader.result);
+                resolve(reader.result);
+              };
+              reader.onerror = () => {
+                setBase64(imgUrl);
+                resolve(imgUrl);
+              };
+              reader.readAsDataURL(blob);
+            });
+          }
+        } catch (iosError) {
+          // iOS fallback: use original URL
+          setBase64(imgUrl);
+          return imgUrl;
+        }
+      }
+      
+      // Original code for non-iOS
       const response = await fetch(imgUrl, {
         mode: "cors",
         cache: "no-cache",
@@ -129,6 +166,7 @@ const VotingCard = ({ contestant, event, onClose }) => {
         setAssetsLoaded(true);
       } catch (error) {
         console.error("Error loading images:", error);
+        setAssetsLoaded(true); // Prevent blocking on iOS
       }
     };
     
@@ -153,7 +191,9 @@ const VotingCard = ({ contestant, event, onClose }) => {
         button.style.pointerEvents = 'none';
       });
       
-      await new Promise(resolve => setTimeout(resolve, 200));
+      // ONLY CHANGE: Enhanced timing for iOS
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      await new Promise(resolve => setTimeout(resolve, isIOS ? 400 : 200));
       
       // Check if it's mobile
       const isMobile = window.innerWidth <= 640;
@@ -178,6 +218,11 @@ const VotingCard = ({ contestant, event, onClose }) => {
           contestantImage.style.width = '300px';
           contestantImage.style.height = '300px';
           contestantImage.style.borderRadius = `${customizations.contestantImageRadius}px`;
+          // ONLY CHANGE: iOS-specific image styling
+          if (isIOS) {
+            contestantImage.style.webkitTransform = 'translateZ(0)';
+            contestantImage.style.backfaceVisibility = 'hidden';
+          }
         }
         
         // Adjust procedure list to take less space
@@ -211,9 +256,11 @@ const VotingCard = ({ contestant, event, onClose }) => {
         }
       }
       
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // ONLY CHANGE: Enhanced wait time for iOS
+      await new Promise(resolve => setTimeout(resolve, isIOS ? 300 : 100));
       
-      const dataUrl = await toJpeg(cardRef.current, {
+      // ONLY CHANGE: iOS-enhanced toJpeg options
+      const toJpegOptions = {
         quality: 1.0,
         backgroundColor: customizations.gradientStart || '#000B44',
         pixelRatio: isMobile ? 2.8 : 2.4, 
@@ -240,11 +287,25 @@ const VotingCard = ({ contestant, event, onClose }) => {
           return true;
         },
         includeQueryParams: true
-      });
+      };
+      
+      // Add iOS-specific options
+      if (isIOS) {
+        toJpegOptions.useCORS = true;
+        toJpegOptions.allowTaint = false;
+      }
+      
+      const dataUrl = await toJpeg(cardRef.current, toJpegOptions);
       
       const link = document.createElement('a');
       link.download = `${contestant?.name || 'contestant'}-${event?.title || 'event'}-vote-card-HQ.jpg`.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
       link.href = dataUrl;
+      
+      // ONLY CHANGE: iOS download handling
+      if (isIOS) {
+        link.target = '_blank';
+      }
+      
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -273,7 +334,8 @@ const VotingCard = ({ contestant, event, onClose }) => {
     } catch (error) {
       console.error('Error downloading image:', error);
     } finally {
-      // Always restore buttons and reset state
+      // ONLY CHANGE: Enhanced timing for iOS
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
       setTimeout(() => {
         const buttons = cardRef.current?.querySelectorAll('button');
         buttons?.forEach(button => {
@@ -284,9 +346,10 @@ const VotingCard = ({ contestant, event, onClose }) => {
         });
         
         setDownloading(false);
-      }, 1000);
+      }, isIOS ? 1500 : 1000);
     }
   };
+
   const updateCustomization = (key, value) => {
     setCustomizations(prev => ({
       ...prev,
