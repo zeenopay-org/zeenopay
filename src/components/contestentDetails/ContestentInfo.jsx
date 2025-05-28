@@ -174,13 +174,12 @@ useEffect(() => {
         intent,
         currency
       );
-      if (method == "stripe") {
-        console.log("Redirecting to stripe...");
-        redirectToFoneAndPrabhuPay(paymentUrl);
-      } else {
-        redirectToPaymentPage(paymentUrl);
-        console.log("Redirecting to ...");
+      if (!paymentUrl) {
+        console.error("Payment URL is not available");
+        return;
       }
+        redirectToFoneAndPrabhuPay(paymentUrl);
+      
     } catch (error) {
       console.error("Payment initiation failed:", error);
     } finally {
@@ -333,7 +332,8 @@ useEffect(() => {
         if (
           selectedPartner === "fonepay" ||
           selectedPartner === "prabhupay" ||
-          selectedPartner === "esewa"
+          selectedPartner === "esewa" ||
+          selectedPartner === "khalti"
         ) {
           console.log("Redirecting to Fonepay or PrabhuPay...");
           redirectToFoneAndPrabhuPay(paymentUrl);

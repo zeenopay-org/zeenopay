@@ -39,6 +39,12 @@ function EventList() {
       </div>
     </div>
   );
+  const now = new Date();
+const filteredEvents = [...events].reverse().filter(event => {
+  const finalDate = new Date(event.finaldate);
+  return finalDate > now || (now - finalDate <= 24 * 60 * 60 * 1000);
+});
+
 
   return (
     <div className="bg-customBlue px-4 min-h-screen sm:px-8 md:px-16 lg:px-32 py-8 md:py-12 lg:py-16">
@@ -53,7 +59,7 @@ function EventList() {
             .map((_, index) => <div key={index}>{renderSkeletonLoader()}</div>)
         ) : (
           // Render actual event data if not loading
-          [...events].reverse().map((event, index) => (
+          filteredEvents.map((event, index) => (
             <div
               key={index}
               onClick={() => handleCardClick(event.id)}
