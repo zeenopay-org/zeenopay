@@ -1,0 +1,1042 @@
+/* VotingCard.css */
+
+/* Main overlay */
+.voting-card-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index: 50;
+    padding: 8px;
+  }
+  
+  /* Card container - Fixed size for all devices */
+  .card-container {
+    position: relative;
+    width: 100%;
+    max-width: 420px; /* Reduced from 480px for better mobile fit */
+    margin: 0 auto;
+  }
+  
+  /* Customizer Panel - More Compact Design */
+  .customizer-panel {
+    position: absolute;
+    top: -4px;
+    left: 0;
+    right: 0;
+    background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+    border-radius: 8px 8px 0 0;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e2e8f0;
+    border-bottom: 2px solid #cbd5e1;
+    z-index: 60;
+    backdrop-filter: blur(10px);
+  }
+  
+  .customizer-content {
+    padding: 6px 10px; /* More compact padding */
+  }
+  
+  .customizer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px; /* Reduced */
+    padding-bottom: 3px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  
+  .customizer-header h3 {
+    font-size: 11px; /* Smaller font */
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+  }
+  
+  .customizer-header h3:before {
+    content: "🎨";
+    font-size: 9px;
+  }
+  
+  .customizer-header .close-btn {
+    color: #64748b;
+    font-size: 12px; /* Smaller */
+    font-weight: bold;
+    background: rgba(148, 163, 184, 0.1);
+    border: none;
+    cursor: pointer;
+    padding: 1px;
+    width: 18px; /* Smaller */
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 3px;
+    transition: all 0.2s;
+  }
+  
+  .customizer-header .close-btn:hover {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+  }
+  
+  .customizer-section {
+    margin-bottom: 6px; /* Reduced */
+  }
+  
+  .section-label {
+    display: block;
+    font-size: 9px; /* Smaller */
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+  }
+  
+  /* Background Selection Grid - More Compact */
+  .background-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 3px; /* Smaller gap */
+  }
+  
+  @media (max-width: 640px) {
+    .background-grid {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2px; /* Even smaller on mobile */
+    }
+  }
+  
+  .bg-option {
+    position: relative;
+    height: 28px; /* Smaller height */
+    border-radius: 5px;
+    border: 1.5px solid #cbd5e1;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  
+  .bg-option:hover {
+    border-color: #64748b;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .bg-option.active {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2), 0 2px 8px rgba(59, 130, 246, 0.15);
+    transform: translateY(-1px);
+  }
+  
+  .gradient-text {
+    font-size: 7px; /* Smaller text */
+    color: white;
+    font-weight: bold;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  }
+  
+  .active-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, rgba(59, 130, 246, 0.2), rgba(59, 130, 246, 0.3));
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .checkmark {
+    color: white;
+    font-size: 10px; /* Smaller */
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  }
+  
+  /* Radius Controls - More Compact */
+  .radius-control {
+    background: rgba(248, 250, 252, 0.8);
+    border-radius: 5px;
+    padding: 4px; /* Smaller padding */
+    border: 1px solid #e2e8f0;
+  }
+  
+  .control-label {
+    font-size: 8px; /* Smaller */
+    color: #64748b;
+    margin-bottom: 2px;
+    display: block;
+    font-weight: 500;
+  }
+  
+  .range-slider {
+    width: 100%;
+    height: 3px; /* Thinner */
+    background: linear-gradient(to right, #e2e8f0, #cbd5e1);
+    border-radius: 2px;
+    appearance: none;
+    cursor: pointer;
+    outline: none;
+  }
+  
+  .range-slider::-webkit-slider-thumb {
+    appearance: none;
+    width: 12px; /* Smaller */
+    height: 12px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #3b82f6, #2563eb);
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+    border: 2px solid white;
+  }
+  
+  .range-slider::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #3b82f6, #2563eb);
+    cursor: pointer;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+  }
+  
+  .helper-text {
+    font-size: 7px; /* Smaller */
+    color: #94a3b8;
+    margin-top: 1px;
+    margin-bottom: 0;
+    font-style: italic;
+  }
+  
+  /* Gradient Colors - More Compact */
+  .gradient-colors {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 3px; /* Smaller gap */
+    background: rgba(248, 250, 252, 0.8);
+    border-radius: 5px;
+    padding: 4px; /* Smaller padding */
+    border: 1px solid #e2e8f0;
+  }
+  
+  .color-input {
+    text-align: center;
+  }
+  
+  .color-label {
+    font-size: 7px; /* Smaller */
+    color: #64748b;
+    margin-bottom: 1px;
+    display: block;
+    font-weight: 500;
+  }
+  
+  .color-picker {
+    width: 100%;
+    height: 20px; /* Smaller */
+    border-radius: 3px;
+    border: 1.5px solid #cbd5e1;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .color-picker:hover {
+    border-color: #3b82f6;
+    transform: scale(1.05);
+  }
+  
+  /* Customizer Actions - More Compact */
+  .customizer-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 4px; /* Smaller */
+    border-top: 1px solid #e2e8f0;
+    gap: 4px; /* Smaller gap */
+  }
+  
+  .reset-btn {
+    padding: 3px 6px; /* Smaller */
+    background: linear-gradient(145deg, #64748b, #475569);
+    color: white;
+    border-radius: 3px;
+    font-size: 8px; /* Smaller */
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+  }
+  
+  .reset-btn:hover {
+    background: linear-gradient(145deg, #475569, #334155);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .download-buttons {
+    display: flex;
+    gap: 3px; /* Smaller gap */
+  }
+  
+  .download-btn {
+    padding: 3px 6px; /* Smaller */
+    border-radius: 3px;
+    font-size: 8px; /* Smaller */
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+  }
+  
+  .download-btn:disabled {
+    background: #94a3b8 !important;
+    cursor: not-allowed;
+    transform: none !important;
+  }
+  
+  .hq-btn {
+    background: linear-gradient(145deg, #3b82f6, #2563eb);
+    color: white;
+  }
+  
+  .hq-btn:hover:not(:disabled) {
+    background: linear-gradient(145deg, #2563eb, #1d4ed8);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+  }
+  
+  .hd-btn {
+    background: linear-gradient(145deg, #059669, #047857);
+    color: white;
+  }
+  
+  .hd-btn:hover:not(:disabled) {
+    background: linear-gradient(145deg, #047857, #065f46);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(5, 150, 105, 0.3);
+  }
+  
+  /* Main Card */
+  .voting-card {
+    color: white;
+    border-radius: 8px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+    max-width: 420px; /* Reduced from 480px */
+    transition: margin-top 0.3s ease;
+  }
+  
+  /* Card Actions */
+  .card-actions {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    display: flex;
+    gap: 2px;
+    z-index: 50;
+  }
+  
+  .action-btn {
+    color: white;
+    font-size: 14px;
+    background-color: rgba(0, 0, 0, 0.5);
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  
+  .action-btn:hover {
+    background-color: rgba(0, 0, 0, 0.7);
+  }
+  
+  .customize-btn:hover {
+    color: #60a5fa;
+  }
+  
+  .action-btn.close-btn:hover {
+    color: #f87171;
+  }
+  
+  /* Header - Smaller fonts */
+  .card-header {
+    padding: 5px 10px 3px; /* Reduced padding */
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  .header-title {
+    font-size: 11px; /* Reduced from 12px */
+    font-weight: bold;
+    margin-bottom: 1px;
+    color: #93c5fd;
+    margin: 0;
+  }
+  
+  .header-subtitle {
+    font-size: 10px; /* Reduced from 12px */
+    opacity: 0.9;
+    margin-bottom: 1px;
+    margin: 0;
+  }
+  
+  .header-note {
+    font-size: 9px; /* Reduced from 12px */
+    opacity: 0.8;
+    padding: 1px 3px;
+    border-radius: 10px;
+    display: inline-block;
+    background-color: rgba(59, 130, 246, 0.3);
+    margin: 0;
+  }
+  
+  /* Card Content - Further reduced bottom padding */
+  .card-content {
+    padding: 5px 10px 1px; /* Further reduced bottom padding and side padding */
+  }
+  
+  /* Top Section - Smaller elements */
+  .top-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2px;
+  }
+  
+  .logo-section {
+    display: flex;
+    align-items: center;
+  }
+  
+  .zeeno-logo {
+    width: 65px;
+    height: 25px; 
+  }
+  
+  .organizer-section {
+    text-align: right;
+  }
+  
+  .organizer-label {
+    font-size: 10px; /* Reduced from 12px */
+    opacity: 0.9;
+    margin: 0;
+  }
+  
+  .organizer-name {
+    font-size: 10px; /* Reduced from 12px */
+    font-weight: bold;
+    color: #93c5fd;
+    margin: 0;
+  }
+  
+  /* Event Section - Smaller elements */
+  .event-section {
+    text-align: center;
+    margin-bottom: 3px;
+  }
+  
+  .event-logo-wrapper {
+    display: inline-block;
+    background: white;
+    border-radius: 50%;
+    padding: 2px;
+    margin-bottom: 2px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+  
+  .event-logo {
+    object-fit: cover;
+  }
+  
+  .event-logo-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: black;
+    font-weight: bold;
+    font-size: 10px; /* Reduced from 12px */
+  }
+  
+  .event-title {
+    font-size: 11px; /* Reduced from 12px */
+    font-weight: bold;
+    text-transform: uppercase;
+    color: white;
+    margin: 0;
+  }
+  
+  /* Main Grid - Always 2 columns for both desktop and mobile */
+  .main-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3px; /* Smaller gap */
+  }
+  
+  /* Desktop grid layout */
+  .main-grid.desktop-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  /* Left Section */
+  .left-section {
+    display: flex;
+    flex-direction: column;
+    gap: 3px; /* Smaller gap */
+  }
+  
+  /* Contestant Card */
+  .contestant-card {
+    background-color: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(4px);
+    border-radius: 5px; /* Slightly smaller radius */
+    padding: 15px; /* Reduced padding */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+  
+  .contestant-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px; /* Smaller gap */
+    text-align: center;
+  }
+  
+  .contestant-image-wrapper {
+    position: relative;
+    flex-shrink: 0;
+  }
+  
+  .contestant-image {
+    object-fit: cover;
+    border: 2px solid rgba(59, 130, 246, 0.6);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  .contestant-image-placeholder {
+    background-color: #d1d5db;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6b7280;
+    font-size: 12px; /* Smaller */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  .contestant-number {
+    position: absolute;
+    bottom: -3px; /* Adjusted position */
+    right: -3px;
+    background: white;
+    color: black;
+    padding: 3px 6px; /* Smaller padding */
+    border-radius: 12px; /* Smaller radius */
+    font-size: 12px; /* Smaller font */
+    font-weight: bold;
+    border: 2px solid #e5e7eb;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+  
+  .contestant-details {
+    flex: 1;
+    min-width: 0;
+    width: 100%;
+  }
+  
+  .vote-label {
+    font-size: 11px; /* Reduced from 13px */
+    color: #93c5fd;
+    margin: 0;
+    font-weight: 600;
+  }
+  
+  .contestant-name {
+    font-size: 14px; /* Reduced from 16px */
+    font-weight: bold;
+    color: white;
+    line-height: 1.2; /* Tighter line height */
+    margin: 1px 0;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  .name-underline {
+    height: 2px; /* Thinner */
+    width: 35px; /* Shorter */
+    border-radius: 1px;
+    background: linear-gradient(to right, #60a5fa, #93c5fd);
+    margin: 0 auto;
+  }
+  
+  /* Procedure Card - Much more compact */
+  .procedure-card {
+    background-color: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(4px);
+    border-radius: 4px;
+    padding: 3px; /* Reduced padding */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .procedure-title {
+    font-weight: bold;
+    text-align: center;
+    font-size: 10px; /* Reduced from 12px */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding-bottom: 1px;
+    margin-bottom: 2px;
+    color: #93c5fd;
+    margin-top: 0;
+  }
+  
+  .procedure-list {
+    font-size: 8px; /* Much smaller font to fit all content */
+    line-height: 1.1; /* Very tight line spacing */
+    color: #e5e7eb;
+    margin: 0;
+    padding-left: 10px; /* Reduced padding */
+  }
+  
+  .procedure-list li {
+    margin-bottom: 0.5px; /* Extremely tight spacing between items */
+  }
+  
+  .highlight-blue {
+    font-weight: 600;
+    color: #60a5fa;
+  }
+  
+  .highlight-green {
+    font-weight: 600;
+    color: #4ade80;
+  }
+  
+  .highlight-yellow {
+    font-weight: 600;
+    color: #facc15;
+  }
+  
+  /* Right Section */
+  .right-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(4px);
+    border-radius: 4px;
+    padding: 3px; /* Reduced padding */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  /* QR Section */
+  .qr-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+  
+  .qr-wrapper {
+    margin-bottom: 4px; /* Reduced margin */
+  }
+  
+  .qr-container {
+    display: flex;
+    justify-content: center;
+    background: white;
+    border-radius: 5px;
+    padding: 3px; /* Smaller padding so QR code itself is bigger */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  .qr-loading {
+    width: 120px; /* Slightly smaller to fit better */
+    height: 120px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .qr-loading span {
+    color: #6b7280;
+    font-size: 12px; /* Smaller */
+  }
+  
+  .qr-info {
+    text-align: center;
+    width: 100%;
+  }
+  
+  .qr-title {
+    font-size: 12px; /* Reduced from 14px */
+    font-weight: bold;
+    margin-bottom: 2px;
+    color: #93c5fd;
+    margin-top: 0;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  }
+  
+  .qr-subtitle {
+    font-size: 12px; /* Reduced from 14px */
+    font-weight: bold;
+    margin-bottom: 4px;
+    color: white;
+    margin-top: 0;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  }
+  
+  /* Voting Notes - Much smaller text to reduce space */
+  .voting-notes {
+    font-size: 8px; /* Reduced from 10px */
+    background-color: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    border-radius: 3px;
+    padding: 3px; /* Reduced padding */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .voting-notes p {
+    margin: 0.5px 0; /* Very tight margins */
+  }
+  
+  .note-label {
+    font-weight: bold;
+    color: #f87171;
+  }
+  
+  .note-text {
+    color: #e5e7eb;
+  }
+  
+  .vote-price {
+    font-weight: bold;
+    font-size: 9px; /* Slightly bigger than other notes */
+    color: #facc15;
+    margin: 0.5px 0;
+  }
+  
+  .divisible-note {
+    font-weight: bold;
+    color: white;
+    font-size: 8px;
+    margin: 0.5px 0;
+  }
+  
+  .terms-note {
+    color: white;
+    font-size: 7px; /* Very small */
+    opacity: 0.8;
+    margin: 0.5px 0;
+  }
+  
+  /* Mobile Responsive - Even more compact customizer */
+  @media (max-width: 640px) {
+    .voting-card-overlay {
+      padding: 6px; /* Further reduced padding */
+    }
+    
+    .card-container {
+      max-width: 380px; /* Smaller on mobile */
+      width: 100%;
+    }
+    
+    /* Maintain 2-column grid on mobile */
+    .main-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 2px; /* Very small gap for mobile */
+    }
+    
+    .customizer-panel {
+      left: 0;
+      right: 0;
+      top: -2px;
+    }
+    
+    .customizer-content {
+      padding: 3px 6px; /* Much more compact on mobile */
+    }
+    
+    .customizer-header {
+      margin-bottom: 3px;
+    }
+    
+    .customizer-header h3 {
+      font-size: 9px; /* Tiny title */
+    }
+    
+    .customizer-header .close-btn {
+      width: 14px;
+      height: 14px;
+      font-size: 10px;
+    }
+    
+    .customizer-section {
+      margin-bottom: 3px;
+    }
+    
+    .section-label {
+      font-size: 7px; /* Tiny labels */
+      margin-bottom: 1px;
+    }
+    
+    .background-grid {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px; /* Minimal gap */
+    }
+    
+    .bg-option {
+      height: 20px; /* Much smaller on mobile */
+    }
+    
+    .gradient-text {
+      font-size: 5px; /* Microscopic text */
+    }
+    
+    .checkmark {
+      font-size: 8px;
+    }
+    
+    .radius-control {
+      padding: 2px;
+    }
+    
+    .range-slider {
+      height: 2px; /* Very thin slider */
+    }
+    
+    .range-slider::-webkit-slider-thumb {
+      width: 10px;
+      height: 10px;
+    }
+    
+    .range-slider::-moz-range-thumb {
+      width: 10px;
+      height: 10px;
+    }
+    
+    .gradient-colors {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      padding: 2px;
+    }
+    
+    .color-picker {
+      height: 14px; /* Much smaller on mobile */
+    }
+    
+    .color-label {
+      font-size: 6px; /* Microscopic labels */
+    }
+    
+    .customizer-actions {
+      flex-direction: row;
+      gap: 2px;
+      align-items: center;
+      padding-top: 3px;
+    }
+    
+    .download-buttons {
+      gap: 1px;
+    }
+    
+    .download-btn,
+    .reset-btn {
+      padding: 2px 3px; /* Ultra compact buttons */
+      font-size: 6px; /* Microscopic text */
+    }
+    
+    .helper-text {
+      font-size: 5px; /* Microscopic helper text */
+    }
+    
+    /* Voting card adjustments for mobile */
+    .voting-card {
+      margin-top: 35px; /* Smaller margin for ultra compact customizer */
+    }
+    
+    /* Further reduce sizes for mobile while keeping them readable */
+    .card-header {
+      padding: 3px 8px 2px;
+    }
+    
+    .header-title {
+      font-size: 9px; /* Smaller on mobile */
+    }
+    
+    .header-subtitle {
+      font-size: 8px;
+    }
+    
+    .header-note {
+      font-size: 7px;
+    }
+    
+    .card-content {
+      padding: 4px 8px 1px; /* More compact on mobile */
+    }
+    
+    .zeeno-logo {
+      width: 55px;
+      height: 24px;
+    }
+    
+    .organizer-label,
+    .organizer-name {
+      font-size: 8px;
+    }
+    
+    .event-title {
+      font-size: 9px;
+    }
+    
+    .contestant-name {
+      font-size: 12px; /* Slightly smaller for mobile */
+    }
+    
+    .vote-label {
+      font-size: 9px;
+    }
+    
+    .procedure-title {
+      font-size: 8px;
+    }
+    
+    .procedure-list {
+      font-size: 12px; /* Very small on mobile to fit all content */
+    }
+    
+    .qr-title,
+    .qr-subtitle {
+      font-size: 10px; /* Smaller on mobile */
+    }
+    
+    .voting-notes {
+      font-size: 7px; /* Very small on mobile */
+    }
+    
+    .vote-price {
+      font-size: 8px;
+    }
+    
+    .divisible-note {
+      font-size: 7px;
+    }
+    
+    .terms-note {
+      font-size: 6px;
+    }
+    
+    /* Keep contestant image big on mobile */
+    .contestant-image,
+    .contestant-image-placeholder {
+      width: 100px !important; /* Big on mobile but not too big */
+      height: 100px !important;
+    }
+    
+    .contestant-number {
+      font-size: 10px;
+      padding: 2px 5px;
+    }
+    
+    /* Keep QR code reasonably sized on mobile */
+    .qr-loading {
+      width: 110px;
+      height: 110px;
+    }
+  }
+  
+  /* Very small screens - Ultra compact */
+  @media (max-width: 380px) {
+    .voting-card-overlay {
+      padding: 4px;
+    }
+    
+    .card-container {
+      max-width: 320px;
+      min-width: 280px;
+    }
+    
+    .voting-card {
+      margin-top: 25px; /* Even smaller margin */
+    }
+    
+    /* Make everything ultra compact */
+    .card-header {
+      padding: 2px 6px 1px;
+    }
+    
+    .card-content {
+      padding: 3px 6px 1px;
+    }
+    
+    .main-grid {
+      gap: 1px; /* Minimal gap */
+    }
+    
+    .contestant-card,
+    .procedure-card,
+    .right-section {
+      padding: 2px;
+    }
+    
+    .contestant-image,
+    .contestant-image-placeholder {
+      width: 70px !important; /* Smaller for very small screens */
+      height: 70px !important;
+    }
+    
+    .qr-loading {
+      width: 90px;
+      height: 90px;
+    }
+    
+    .procedure-list {
+      font-size: 8px; /* Microscopic to fit everything */
+      padding-left: 8px;
+    }
+    
+    .voting-notes {
+      font-size: 6px;
+      padding: 2px;
+    }
+  }
+  
+  /* Ensure consistent sizing across all screen sizes */
+  @media (min-width: 641px) {
+    .card-container {
+      max-width: 420px; /* Fixed size for desktop */
+    }
+    
+    .voting-card {
+      margin-top: 120px; /* Proper margin for desktop customizer */
+    }
+  }

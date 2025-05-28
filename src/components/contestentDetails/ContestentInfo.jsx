@@ -395,7 +395,7 @@ useEffect(() => {
                         Generate QR to Vote
                       </button>
                       <button
-                        // onClick={handleVoteCard}
+                        onClick={handleVoteCard}
                         className="w-28 md:w-32 py-3 bg-white text-[#0A1128] text-[10px] rounded-lg hover:bg-gray-200 transition duration-300"
                       >
                         Voter Card
