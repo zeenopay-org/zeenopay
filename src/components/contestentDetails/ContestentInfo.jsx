@@ -354,7 +354,7 @@ useEffect(() => {
     }
   };
 
-  const eventFinalDate = new Date(event.finaldate);
+  const eventFinalDate = new Date(event?.finaldate);
   const currentDate = new Date();
 
   return (
@@ -421,7 +421,7 @@ useEffect(() => {
                 ) : (
                   <>
                     <div className="relative z-0">
-                      <CountdownTimer endTime={finalDate} />
+                      <CountdownTimer endTime={eventFinalDate} />
                     </div>
                     <h1 className="relative z-10">Voting Open</h1>
                   </>
