@@ -46,7 +46,7 @@ const EventProvider = ({ children }) => {
   // const [pollingActive, setPollingActive] = useState(false);
 
   // const BACKEND_URL = "https://api.zeenopay.com";
-  const BACKEND_URL2 = "https://auth.zeenopay.com";
+  const BACKEND_URL2 = "https://auth.zeenopay.com"; // Update this to your backend URL
 
   const generateDynamicQr = useCallback(
     async (intentId, amount, eventID, intent, actionID) => {
@@ -419,6 +419,7 @@ const EventProvider = ({ children }) => {
           action_id: actionId || "null",
         };
 
+        console.log("Request Body:", requestBody);
         const response = await axios.post(
           `${BACKEND_URL2}/payments/${partner}/pay/`,
           requestBody,

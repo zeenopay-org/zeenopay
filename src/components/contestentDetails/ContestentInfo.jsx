@@ -68,6 +68,7 @@ export default function VotingComponent() {
     contestant,
   } = useContext(EventContext);
 
+
   const [inputFocused, setInputFocused] = useState(false);
   const [pop, setpop] = useState(false);
   const [generateQR, setGenerateQr] = useState(false);
@@ -75,15 +76,32 @@ export default function VotingComponent() {
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [selectedPartner, setSelectedPartner] = useState("");
   const [showConfirm, setShowConfirm] = useState(false);
-  const location = useLocation();
-  const { passingId } = location.state || {};
-  const [temp, setTemp] = useState(null);
+  // const location = useLocation();
+  // const { passingId } = location.state || {};
+  // const [temp, setTemp] = useState(null);
   const [finalDate, setFinalDate] = useState("");
   const [showCard, setShowCard] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
 
-  useEffect(() => {}, [formData]);
 
+  const fetchEventData = async (eventId) => {
+    try {
+      const response = await getEvent(eventId);
+      if (response?.finaldate) {
+        setFinalDate(response.finaldate);
+      }
+    } catch (error) {
+      console.error("Error fetching event data:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (contestant?.event) {
+      fetchEventData(contestant.event);
+    }
+  }, [contestant]);
+
+  useEffect(() => {}, [formData]);
   useEffect(() => {
     setTimeout(() => {
       try {
@@ -99,34 +117,20 @@ export default function VotingComponent() {
   }, []);
 
 useEffect(() => {
-  const savedEvent = localStorage.getItem("event");
-  if (savedEvent) {
+  const fetchCurrency = async () => {
     try {
-      const parsedEvent = JSON.parse(savedEvent);
-      setTemp(parsedEvent);
-      if (parsedEvent.finaldate) {
-        setFinalDate(parsedEvent.finaldate);
-      } else {
-        console.warn("finaldate missing in saved event");
-      }
-    } catch (e) {
-      console.error("Invalid JSON in localStorage 'event'", e);
+      const currencyData = await getPaymentCurrency();
+      setSelectedCountry(currencyData);
+    } catch (error) {
+      console.error("Error fetching payment currency:", error);
+      // Optionally set a default country if the fetch fails
+      setSelectedCountry({ cc: 'us', symbol: '$', name: 'US Dollar' });
     }
-  } else {
-    getEvent(passingId);
-  }
-}, [passingId, getEvent]);
+  };
 
+  fetchCurrency();
+}, [getPaymentCurrency]);
 
-  useEffect(() => {
-    const savedCurrency = localStorage.getItem("paymentCurrency");
-    if (savedCurrency) {
-      const parsedCurrency = JSON.parse(savedCurrency);
-      setSelectedCountry(parsedCurrency);
-    } else {
-      getPaymentCurrency();
-    }
-  }, [getPaymentCurrency]);
 
   useEffect(() => {
     const fetchContestant = async () => {
@@ -143,6 +147,7 @@ useEffect(() => {
     }));
   };
 
+  // handle international payment
   const handleProceedToPay = async (e) => {
     window.scrollTo({
       top: 0,
@@ -178,8 +183,7 @@ useEffect(() => {
         console.error("Payment URL is not available");
         return;
       }
-        redirectToFoneAndPrabhuPay(paymentUrl);
-      
+      redirectToFoneAndPrabhuPay(paymentUrl);
     } catch (error) {
       console.error("Payment initiation failed:", error);
     } finally {
@@ -256,6 +260,8 @@ useEffect(() => {
     return Object.keys(newErrors).length === 0;
   };
 
+
+// handle payment for India
   const handlePayment = async (e) => {
     e.preventDefault();
     const eventId = contestant.event;
@@ -294,6 +300,7 @@ useEffect(() => {
     }
   };
 
+  // handle payment for Nepal
   const handleNepalPayment = async (e) => {
     e.preventDefault();
     if (!selectedPartner) {
@@ -327,8 +334,6 @@ useEffect(() => {
       );
 
       if (paymentUrl) {
-        console.log("selected Partner ", selectedPartner);
-
         if (
           selectedPartner === "fonepay" ||
           selectedPartner === "prabhupay" ||
@@ -370,7 +375,7 @@ useEffect(() => {
             <div className="relative flex flex-col justify-center items-center w-full">
               <div className="w-full max-w-[1250px] max-h-[500px] overflow-hidden rounded-2xl mb-6 bg-gray-800 flex items-center justify-center">
                 <img
-                  src={temp?.img}
+                  src={event?.img}
                   className="max-w-full max-h-full object-fit transition-opacity duration-300"
                   alt="Event Banner"
                   onLoad={() => setImageLoaded(true)}
@@ -425,8 +430,8 @@ useEffect(() => {
 
               <div className="mt-6 text-center">
                 <h2 className="text-lg font-normal">Select Voting Options</h2>
-                {selectedCountry?.cc === "in" ||
-                selectedCountry?.cc === "np" ? (
+                {paymentParnter?.cc === "in" ||
+                paymentParnter?.cc === "np" ? (
                   <LocalVotingComponent
                     formData={formData}
                     setFormData={setFormData}
