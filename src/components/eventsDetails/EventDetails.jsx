@@ -75,7 +75,7 @@ function EventDetails() {
     }
   }, [passingId, getEvent]);
 
-  console.log("getAllContestants", contestants);
+
   const eventFinalDate = new Date(event.finaldate);
   const currentDate = new Date();
 
