@@ -20,6 +20,7 @@ import QRPaymentSuccess from "./components/success/QRPaymentSuccess.jsx";
 import RegistrationSuccess from "./components/success/RegistrationSuccess.jsx";
 import FailurePage from "./components/failure/failure.jsx";
 import VotingCard from "./components/VoteCard/voteCard.jsx";
+import PrivacyPolicy from "./pages/PrivacyPolicy.jsx";
 
 const router = createBrowserRouter([
   {
@@ -89,6 +90,10 @@ const router = createBrowserRouter([
       {
         path: "qr-success",
         element: <QRPaymentSuccess/>
+      },
+      {
+        path: "merchant/privacy-policy",
+        element: <PrivacyPolicy/>
       },
     ],
   },
