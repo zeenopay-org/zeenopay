@@ -70,7 +70,7 @@ function HeroSlider() {
 
   return (
     <div
-      className="slider-container bg-customBlue h-[300px] md:h-[500px] flex justify-center items-center px-4 relative"
+      className="slider-container bg-customBlue h-[240px] sm:h-[300px] md:h-[420px] lg:h-[500px] flex justify-center items-center px-2 sm:px-4 relative pt-2 sm:pt-4 md:pt-6"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
@@ -99,13 +99,13 @@ function HeroSlider() {
             return (
               <div
                 key={slide.id}
-                className={`absolute w-full h-[200px] max-w-[800px] md:h-[360px] transition-all duration-500 ease-in-out flex justify-center items-center ${transform} ${opacity} ${zIndex}`}
+                className={`absolute w-full h-[160px] sm:h-[200px] max-w-[800px] md:h-[320px] lg:h-[360px] transition-all duration-500 ease-in-out flex justify-center items-center ${transform} ${opacity} ${zIndex}`}
                 style={{
                   height: dimensions.height,
                   width: dimensions.width,
                 }}
               >
-                <div className="w-full h-full flex justify-center items-center overflow-hidden rounded-xl shadow-lg">
+                <div className="w-full h-full flex justify-center items-center overflow-hidden rounded-lg sm:rounded-xl shadow-lg">
                   {loadedImages[slide.id] ? (
                     <img
                       src={slide.icon}
@@ -116,7 +116,7 @@ function HeroSlider() {
                       
                     />
                   ) : (
-                    <div className="w-full h-full bg-gray-700 animate-pulse rounded-xl"></div>
+                    <div className="w-full h-full bg-gray-700 animate-pulse rounded-lg sm:rounded-xl"></div>
                   )}
                 </div>
               </div>
@@ -125,14 +125,14 @@ function HeroSlider() {
         </div>
 
         {/* Dots */}
-        <div className="absolute bottom-2 md:bottom-6 w-full flex justify-center gap-2 md:gap-3 items-center z-10">
+        <div className="absolute bottom-3 sm:bottom-4 md:bottom-6 w-full flex justify-center gap-1.5 sm:gap-2 md:gap-3 items-center z-10">
           {slides.map((_, index) => (
             <button
               key={index}
               onClick={() => goToSlide(index)}
-              className={`w-2 h-2 md:w-3 md:h-3 transition-all duration-300 ease-in-out border border-gray-700 ${
+              className={`w-1.5 h-1.5 sm:w-2 sm:h-2 md:w-3 md:h-3 transition-all duration-300 ease-in-out border border-gray-700 ${
                 currentSlide === index
-                  ? "bg-white scale-150 w-10 rounded-xl shadow-lg"
+                  ? "bg-white scale-150 w-6 sm:w-8 md:w-8 rounded-xl shadow-lg"
                   : "bg-gray-500 rounded-full"
               }`}
             />
