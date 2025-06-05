@@ -8,7 +8,12 @@ const CountdownTimer = ({ endTime }) => {
   const calculateTimeLeft = () => {
     if (!endTime) return null;
     
-    const difference = new Date(endTime) - new Date();
+    // Parse the endTime as UTC and get current UTC time
+    const endTimeUTC = new Date(endTime).getTime();
+    const currentTimeUTC = new Date().getTime();
+    
+    const difference = endTimeUTC - currentTimeUTC;
+    
     if (difference > 0) {
       return {
         days: Math.floor(difference / (1000 * 60 * 60 * 24)),
