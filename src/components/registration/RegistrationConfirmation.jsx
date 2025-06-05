@@ -86,6 +86,14 @@ function RegistrationConfirmation() {
     };
   }, [isCountdownActive, showQRModal, payment.method]);
 
+  const handleDoneClick = () => {
+    window.location.href = "/registration";
+    wwindow.location.href = "/registration";
+    setTimeout(() => {
+      window.location.reload();
+    }, 50);
+  };
+
   // Handle redirect when countdown reaches 0
   useEffect(() => {
     if (
@@ -675,19 +683,28 @@ function RegistrationConfirmation() {
                       )}
                     </div>
                     <p className="text-[10px] text-red-500">
-                      Note: Please do not close this screen untill the registration is
-                      success.
+                      Note: Please do not close this screen untill the
+                      registration is success.
                     </p>
                   </>
                 )}
 
                 {payment.method === "COD" && (
-                  <p className="text-white mt-2">
-                    <span className="text-red-500"> NOTE:</span> YOUR FORM HAS
-                    BEEN SUBMITTED. You Can Pay The Registration Fee at The
-                    Auditions Venue.
-                  </p>
+                  <div className="text-center mt-2">
+                    <p className="text-white">
+                      <span className="text-red-500"> NOTE:</span> YOUR FORM HAS
+                      BEEN SUBMITTED. You Can Pay The Registration Fee at The
+                      Auditions Venue.
+                    </p>
+                    <button
+                      onClick={handleDoneClick}
+                  className="mt-2 px-5 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl hover:from-blue-700 hover:to-indigo-700 focus:ring-2 focus:ring-blue-500 transition-all duration-300 transform hover:scale-105"
+                    >
+                      Done
+                    </button>
+                  </div>
                 )}
+
                 {payment.method !== "COD" && (
                   <div className="flex items-center justify-center mt-2 space-x-2">
                     <p className="text-red-500 ml-4 font-semibold">
@@ -713,8 +730,8 @@ function RegistrationConfirmation() {
             </div>
             <p className="text-xs mt-4">
               <span className="text-red-500"> NOTE:</span> I hereby accept the
-              Terms of Services and acknowledge that payments done for registration
-              are non-refundable.
+              Terms of Services and acknowledge that payments done for
+              registration are non-refundable.
             </p>
           </div>
           {showConfirm && (
