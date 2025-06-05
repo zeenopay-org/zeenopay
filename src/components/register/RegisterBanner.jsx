@@ -29,29 +29,44 @@ function Register({ fields }) {
   const formatTime = useCallback((isoString) => {
     if (!isoString) return null;
     const date = new Date(isoString);
-    return isNaN(date.getTime())
-      ? null
-      : date.toLocaleTimeString("en-US", {
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: true,
-        });
+    if (isNaN(date.getTime())) return null;
+    
+    // Get UTC time components to avoid timezone conversion
+    const hours = date.getUTCHours();
+    const minutes = date.getUTCMinutes();
+    
+    // Convert to 12-hour format
+    const hour12 = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
+    const ampm = hours < 12 ? 'AM' : 'PM';
+    const formattedMinutes = minutes.toString().padStart(2, '0');
+    
+    return `${hour12}:${formattedMinutes} ${ampm}`;
   }, []);
 
   const formatDateTime = useCallback((isoString) => {
     if (!isoString) return null;
     const date = new Date(isoString);
-    return isNaN(date.getTime())
-      ? null
-      : date.toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        }) + ", " + date.toLocaleTimeString("en-US", {
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: true,
-        });
+    if (isNaN(date.getTime())) return null;
+    
+    // Get UTC date components to avoid timezone conversion
+    const year = date.getUTCFullYear();
+    const month = date.getUTCMonth();
+    const day = date.getUTCDate();
+    const hours = date.getUTCHours();
+    const minutes = date.getUTCMinutes();
+    
+    // Format date
+    const monthNames = ["January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"];
+    const formattedDate = `${monthNames[month]} ${day}, ${year}`;
+    
+    // Format time in 12-hour format
+    const hour12 = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
+    const ampm = hours < 12 ? 'AM' : 'PM';
+    const formattedMinutes = minutes.toString().padStart(2, '0');
+    const formattedTime = `${hour12}:${formattedMinutes} ${ampm}`;
+    
+    return `${formattedDate}, ${formattedTime}`;
   }, []);
 
   if (!form && !loading) {
