@@ -655,7 +655,7 @@ const VotingCard = ({ contestant, event, onClose }) => {
                   </h4>
                   <ol className="procedure-list">
                     <li>1. Go to <span className="highlight-blue">zeenopay.com</span></li>
-                    <li>2. Find MR & MS GRACE SEE NEPAL 2025</li>
+                    <li>2. Find {event?.title || "EVENT NAME"}</li>
                     <li><span className="highlight-green">3. Click Get Started.</span></li>
                     <li><span className="highlight-green">4. Select Vote Now.</span></li>
                     <li>5. Choose your contestant's voting number.</li>
