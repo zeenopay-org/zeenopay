@@ -5,12 +5,12 @@ const REGION = import.meta.env.VITE_AWS_REGION;
 const ACCESS_KEY = import.meta.env.VITE_AWS_ACCESS_KEY;
 const SECRET_KEY = import.meta.env.VITE_AWS_SECRET_KEY;
 
-// console.log("🔍 AWS Config:", {
-//   S3_BUCKET,
-//   REGION,
-//   ACCESS_KEY: ACCESS_KEY ? "✅ Loaded" : "❌ Missing",
-//   SECRET_KEY: SECRET_KEY ? "✅ Loaded" : "❌ Missing",
-// });
+console.log("🔍 AWS Config:", {
+  S3_BUCKET,
+  REGION,
+  ACCESS_KEY: ACCESS_KEY ? "✅ Loaded" : "❌ Missing",
+  SECRET_KEY: SECRET_KEY ? "✅ Loaded" : "❌ Missing",
+});
 
 // ✅ Initialize S3 Client
 const s3Client = new S3Client({
