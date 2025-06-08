@@ -186,10 +186,10 @@ const VotingComponent = () => {
 
     setFormData((prevData) => ({
       ...prevData,
-      votes: ["KRW", "JPY", "THB", "INR", "RBL","BDT","KGS","ILS"].includes(selectedCurrency)
+      votes: ["KRW", "JPY", "THB", "INR", "RBL","BDT","KGS"].includes(selectedCurrency)
         ? newVotes
         : amount,
-      amount: ["KRW", "JPY", "THB", "INR", "RBL","BDT","KGS","ILS"].includes(selectedCurrency)
+      amount: ["KRW", "JPY", "THB", "INR", "RBL","BDT","KGS"].includes(selectedCurrency)
         ? amount
         : newVotes,
     }));
@@ -207,7 +207,7 @@ const VotingComponent = () => {
     } else if (currencyValues[selectedCurrency]) {
         const minValue = currencyValues[selectedCurrency][0];
         const maxValue = currencyValues[selectedCurrency].slice(-1)[0];
-        userValue = ["KRW", "JPY", "THB", "RBL","BDT","KGS","ILS"].includes(selectedCurrency) ? vote : formData.amount;
+        userValue = ["KRW", "JPY", "THB", "RBL","BDT","KGS"].includes(selectedCurrency) ? vote : formData.amount;
         userValue = Math.max(minValue, Math.min(maxValue, userValue)); // Clamp within range
     }
 
@@ -232,7 +232,7 @@ const VotingComponent = () => {
                   onClick={() => handleVoteChange(option)}
                   className="bg-customSky hover:bg-[#0081C6] text-white px-6 py-3 rounded-lg flex items-center justify-center gap-2 w-full sm:w-auto"
                 >
-                  {["KRW", "JPY", "THB", "INR", "RBL","BDT","KGS","ILS"].includes(selectedCurrency) ? (
+                  {["KRW", "JPY", "THB", "INR", "RBL","BDT","KGS"].includes(selectedCurrency) ? (
                     <>
                       <img
                         className="h-6 w-10 sm:h-8 sm:w-14"
@@ -291,7 +291,7 @@ const VotingComponent = () => {
                   : currencyValues[selectedCurrency][0]
                 : ""}{" "}
               {selectedCurrency &&
-              ["KRW", "JPY", "THB", "INR", "RBL","BDT","KGS","ILS"].includes(selectedCurrency)
+              ["KRW", "JPY", "THB", "INR", "RBL","BDT","KGS"].includes(selectedCurrency)
                 ? "votes"
                 : selectedCurrency}{" "}
               & Max{" "}
@@ -301,12 +301,12 @@ const VotingComponent = () => {
                   : currencyValues[selectedCurrency].slice(-1)[0]
                 : 15000}{" "}
               {selectedCurrency &&
-              ["KRW", "JPY", "THB", "INR", "RBL","BDT","KGS","ILS"].includes(selectedCurrency)
+              ["KRW", "JPY", "THB", "INR", "RBL","BDT","KGS"].includes(selectedCurrency)
                 ? "votes"
                 : selectedCurrency}
               .
               {selectedCurrency &&
-              ["KRW", "JPY", "THB", "INR", "RBL","BDT","KGS","ILS"].includes(selectedCurrency)
+              ["KRW", "JPY", "THB", "INR", "RBL","BDT","KGS"].includes(selectedCurrency)
                 ? ` One vote = ${selectedCurrency} ${votesPerCurrency[selectedCurrency]}`
                 : selectedCurrency
                   ? ` One ${selectedCurrency} = ${votesPerCurrency[selectedCurrency]} Vote`
@@ -344,7 +344,7 @@ const VotingComponent = () => {
               value={
                 selectedCurrency === "INR"
         ? Math.max(10, Math.min(15000, vote)) // Ensure within range
-        : ["KRW", "JPY", "THB", "RBL","BDT","KGS","ILS"].includes(selectedCurrency)
+        : ["KRW", "JPY", "THB", "RBL","BDT","KGS"].includes(selectedCurrency)
         ? vote
         : formData.amount
               }
@@ -356,7 +356,7 @@ const VotingComponent = () => {
                   if (selectedCurrency === "INR") {
                     clampedValue = Math.max(0, Math.min(15000, inputValue));
                     setVote(clampedValue);
-                  } else if (["KRW", "JPY", "THB", "RBL","BDT","KGS","ILS"].includes(selectedCurrency)) {
+                  } else if (["KRW", "JPY", "THB", "RBL","BDT","KGS"].includes(selectedCurrency)) {
                     setVote(inputValue);
                   } else {
                     setFormData((prev) => ({ ...prev, amount: inputValue }));
@@ -379,7 +379,7 @@ const VotingComponent = () => {
         </div>
 
         <p className="mt-4 text-normal text-gray-400">
-          {["KRW", "JPY", "THB", "INR", "RBL","BDT","KGS","ILS"].includes(selectedCurrency) ? (
+          {["KRW", "JPY", "THB", "INR", "RBL","BDT","KGS"].includes(selectedCurrency) ? (
             <div>
               Total amount:{" "}
               <span className="text-blue-400 font-semibold">{price}</span>
