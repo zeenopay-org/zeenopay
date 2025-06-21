@@ -354,8 +354,9 @@ useEffect(() => {
     }
   };
 
-  const eventFinalDate = new Date(event?.finaldate);
-  const currentDate = new Date();
+  // FIXED: Get eventFinalDate as UTC timestamp to avoid timezone conversion
+  const eventFinalDate = event?.finaldate ? new Date(event.finaldate).getTime() : null;
+  const currentDate = new Date().getTime();
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-customBlue text-white p-4 pt-[30px] pb-[66px]">
@@ -416,12 +417,12 @@ useEffect(() => {
               <p className="text-white mt- text-center text-sm md:text-lg">
                 {loading ? (
                   <div className="h-4 w-1/4 bg-gray-300 animate-pulse"></div>
-                ) : currentDate > eventFinalDate ? (
+                ) : eventFinalDate && currentDate > eventFinalDate ? (
                   "Voting Close!"
                 ) : (
                   <>
                     <div className="relative z-0">
-                      <CountdownTimer endTime={eventFinalDate} />
+                      <CountdownTimer endTime={event?.finaldate} />
                     </div>
                     <h1 className="relative z-10">Voting Open</h1>
                   </>

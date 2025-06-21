@@ -78,6 +78,7 @@ function EventDetails() {
 
   const eventFinalDate = new Date(event.finaldate);
   const currentDate = new Date();
+  const isVotingClosed = currentDate > eventFinalDate;
 
   if (!contestants) {
     return <p className="text-center text-red-500">Event not found!</p>;
@@ -176,7 +177,7 @@ function EventDetails() {
               <div className="h-5 w-3/4 max-w-xs mx-auto bg-gray-300/50 rounded animate-pulse"></div>
               <div className="h-4 w-1/3 max-w-xs mx-auto bg-gray-300/50 rounded animate-pulse"></div>
             </div>
-          ) : currentDate > eventFinalDate ? (
+          ) : isVotingClosed ? (
             <p className="py-2">Voting Closed!</p>
           ) : (
             <div className="space-y-1">
@@ -284,28 +285,32 @@ function EventDetails() {
                     <h2 className="text-base md:text-lg text-white font-semibold mb-4">
                       {contestant.name}
                     </h2>
-                    {["np"].includes(paymentCurrency?.cc?.toLowerCase()) ? (
-                      <div className="flex justify-between w-full gap-6">
-                        <button
-                          className="bg-[#003A75] w-[55%] text-white px-4 py-2 rounded-3xl font-medium hover:bg-gray-600"
-                          onClick={() => handleQR(contestant.id)}
-                        >
-                          QR Vote
-                        </button>
-                        <button
-                          className="bg-[#003A75] hover:bg-[#00255C] w-[55%] text-white px-4 py-2 rounded-3xl font-medium hover:bg-gray-600"
-                          onClick={() => handleClick(contestant.id)}
-                        >
-                          Vote Now
-                        </button>
-                      </div>
-                    ) : (
-                      <button
-                        className="bg-[#003A75] hover:bg-[#00255C] w-[90%] text-white px-6 py-2 rounded-3xl font-medium hover:bg-gray-600"
-                        onClick={() => handleClick(contestant.id, passingId)}
-                      >
-                        Vote Now
-                      </button>
+                    {!isVotingClosed && (
+                      <>
+                        {["np"].includes(paymentCurrency?.cc?.toLowerCase()) ? (
+                          <div className="flex justify-between w-full gap-6">
+                            <button
+                              className="bg-[#003A75] w-[55%] text-white px-4 py-2 rounded-3xl font-medium hover:bg-gray-600"
+                              onClick={() => handleQR(contestant.id)}
+                            >
+                              QR Vote
+                            </button>
+                            <button
+                              className="bg-[#003A75] hover:bg-[#00255C] w-[55%] text-white px-4 py-2 rounded-3xl font-medium hover:bg-gray-600"
+                              onClick={() => handleClick(contestant.id)}
+                            >
+                              Vote Now
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            className="bg-[#003A75] hover:bg-[#00255C] w-[90%] text-white px-6 py-2 rounded-3xl font-medium hover:bg-gray-600"
+                            onClick={() => handleClick(contestant.id, passingId)}
+                          >
+                            Vote Now
+                          </button>
+                        )}
+                      </>
                     )}
                   </div>
                 ))}
