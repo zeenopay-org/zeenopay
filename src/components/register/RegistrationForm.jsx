@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from "react";
-import { Pencil } from "lucide-react";
+import { Pencil, X, Info, Shield } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import countryCodes from "../contestentDetails/countryCodes.jsx";
@@ -9,6 +9,82 @@ import { uploadToS3 } from "../middleware/AwsUploader.jsx";
 import { EventContext } from "../../EventProvider.jsx";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+
+// Permission Info Modal Component
+const PermissionInfoModal = ({ isOpen, onClose }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg max-w-md w-full p-6 relative animate-in fade-in duration-200">
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition-colors"
+        >
+          <X size={20} />
+        </button>
+
+        {/* Header */}
+        <div className="flex items-center mb-4">
+          <div className="bg-blue-100 p-2 rounded-full mr-3">
+            <Info className="text-blue-600" size={24} />
+          </div>
+          <h2 className="text-xl font-semibold text-gray-800">
+            Camera & Photo Access
+          </h2>
+        </div>
+
+        {/* Content */}
+        <div className="space-y-4">
+          <div className="bg-blue-50 rounded-lg p-4">
+            <p className="text-gray-700 text-sm font-medium mb-2">
+              Permission Required:
+            </p>
+            <p className="text-gray-600 text-sm">
+              Allow access to your camera or library to upload your photo for the form submission purpose.
+            </p>
+          </div>
+
+          <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+            <h3 className="font-medium text-gray-800 flex items-center">
+              <Shield className="text-green-500 mr-2" size={16} />
+              Photo Requirements:
+            </h3>
+            <ul className="space-y-2 text-sm text-gray-600">
+              <li className="flex items-start">
+                <span className="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                Upload a close-up photo where your face is clearly visible
+              </li>
+              <li className="flex items-start">
+                <span className="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                Ensure good lighting and clear image quality
+              </li>
+              <li className="flex items-start">
+                <span className="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                Photo will be used for event registration verification
+              </li>
+            </ul>
+          </div>
+
+          <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded">
+            <strong>Privacy:</strong> Your photo is securely stored and used only for registration purposes. You can revoke camera access anytime in your device settings.
+          </div>
+        </div>
+
+        {/* Action button */}
+        <div className="flex justify-center mt-6">
+          <button
+            onClick={onClose}
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Got it
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default function EventRegistrationForm({ fields = {}, formId }) {
   useEffect(() => {
@@ -27,6 +103,7 @@ export default function EventRegistrationForm({ fields = {}, formId }) {
   const [inputFocused, setInputFocused] = useState({});
   const [imageUrl, setImageUrl] = useState("");
   const [progress, setProgress] = useState(0);
+  const [showPermissionModal, setShowPermissionModal] = useState(false);
   const { submitRegistrationForm, isSubmitting } = useContext(EventContext);
   const [formData, setFormData] = useState({
     image: "",
@@ -111,6 +188,15 @@ export default function EventRegistrationForm({ fields = {}, formId }) {
     if (file) {
       setFormData((prev) => ({ ...prev, video: file }));
     }
+  };
+
+  // Permission modal handlers
+  const handlePermissionModalClose = () => {
+    setShowPermissionModal(false);
+  };
+
+  const handleNoteClick = () => {
+    setShowPermissionModal(true);
   };
 
   // Safely get questions with defaults
@@ -283,13 +369,19 @@ export default function EventRegistrationForm({ fields = {}, formId }) {
                           accept="image/*"
                           className="hidden"
                           onChange={handleImageChange}
+                          title="Allow access to your camera or library to upload your photo for the form submission purpose."
                         />
                       </label>
                       <label className="absolute bottom-0 right-0 bg-blue-900 p-2 rounded-full cursor-pointer transition-transform duration-300 hover:scale-110">
                         <Pencil size={16} color="white" />
                       </label>
                     </div>
-                    <p className="text-white text-xs">Note: Upload Close Up Photo <br /> (Face should be clearly visible)</p>
+                    <p 
+                      className="text-white text-xs cursor-pointer hover:text-blue-300 transition-colors underline"
+                      onClick={handleNoteClick}
+                    >
+                      Note: Upload Close Up Photo <br /> (Face should be clearly visible)
+                    </p>
                   </div>
                 )}
               </div>
@@ -524,7 +616,7 @@ export default function EventRegistrationForm({ fields = {}, formId }) {
                       onFocus={() => handleFocus("schoolName")}
                       onBlur={() => handleBlur("schoolName")}
                       className="mt-1 p-3 w-full bg-customDarkBlue border border-gray-600 rounded-md text-white placeholder-transparent focus:outline-none focus:border-blue-500 peer"
-                      placeholder="Temporary Address"
+                      placeholder="School Name"
                     />
                     <label
                       htmlFor="schoolName"
@@ -706,6 +798,12 @@ export default function EventRegistrationForm({ fields = {}, formId }) {
           )}
         </div>
       </div>
+
+      {/* Permission Info Modal */}
+      <PermissionInfoModal 
+        isOpen={showPermissionModal} 
+        onClose={handlePermissionModalClose} 
+      />
     </div>
   );
 }
